@@ -1,5 +1,5 @@
 #pragma once
-#include "EntManager.h"
+#include "EntityManager.h"
 #include <string>
 
 class MainMenu : public Scene
