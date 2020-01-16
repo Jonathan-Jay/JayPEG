@@ -2,6 +2,7 @@
 #define __GAME_H__
 
 #include "BackEnd.h"
+#include "MainMenu.h"
 
 //Our main class for running our game
 class Game
