@@ -1,7 +1,8 @@
 #pragma once
 #include "Scene.h"
+#include "BackEnd.h"
 
-class EntityManager
+class EntityStorage
 {
 public:
 	void StoreEntity(unsigned int entity, unsigned int number);

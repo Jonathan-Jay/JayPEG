@@ -1,6 +1,6 @@
 #include "EntityManager.h"
 
-void EntityManager::StoreEntity(unsigned int entity, unsigned int number)
+void EntityStorage::StoreEntity(unsigned int entity, unsigned int number)
 {
 	if (number > storage.size())
 	{
@@ -13,13 +13,9 @@ void EntityManager::StoreEntity(unsigned int entity, unsigned int number)
 	storage[number] = entity;
 }
 
-int EntityManager::GetEntity(unsigned int number)
+int EntityStorage::GetEntity(unsigned int number)
 {
 	if (number > storage.size())
-	{
-		return 0;
-	}
-	if (storage[number] == -1)
 	{
 		return 0;
 	}
