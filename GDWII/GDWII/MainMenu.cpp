@@ -78,9 +78,9 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		ECS::AttachComponent<Transform>(entity);
 		ECS::AttachComponent<PhysicsBody>(entity);
 
-		std::string filename = ".png";
+		std::string filename = "box.png";
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 300, 10);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 204, 204);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
 
@@ -97,7 +97,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		tempBody->SetFixedRotation(true);
 
 		std::vector<float> x = { -100, 100, 100, -100, -100 };
-		std::vector<float> y = { -75, -50, 75, 50, -75 };
+		std::vector<float> y = { -100, -100, 100, 100, -100 };
 
 		tempPhsBody = PhysicsBody(tempBody, x, y);
 
