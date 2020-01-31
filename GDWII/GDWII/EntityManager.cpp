@@ -1,8 +1,10 @@
 #include "EntityManager.h"
 
+std::vector<int> EntityStorage::storage = {};
+
 void EntityStorage::StoreEntity(unsigned int entity, unsigned int number)
 {
-	if (number > storage.size())
+	if (number + 1 > storage.size())
 	{
 		for (int x = storage.size(); x <= number + 1; x++)
 		{
