@@ -20,20 +20,20 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 
 		ECS::AttachComponent<Camera>(entity);
 
-		ECS::AttachComponent<HorizontalScroll>(entity);
+		/*ECS::AttachComponent<HorizontalScroll>(entity);
 		ECS::AttachComponent<VerticalScroll>(entity);
 
 		ECS::GetComponent<HorizontalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<HorizontalScroll>(entity).SetOffset(15.f);
 
 		ECS::GetComponent<VerticalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
-		ECS::GetComponent<VerticalScroll>(entity).SetOffset(15.f);
+		ECS::GetComponent<VerticalScroll>(entity).SetOffset(15.f);*/
 
 		vec4 temp = ECS::GetComponent<Camera>(entity).GetOrthoSize();
 		ECS::GetComponent<Camera>(entity).SetWindowSize(vec2(float(windowWidth), float(windowHeight)));
 		ECS::GetComponent<Camera>(entity).Orthographic(aspectRatio, temp.x, temp.y, temp.z, temp.w, -100.f, 100.f);
 
-		unsigned int bitHolder = EntityIdentifier::CameraBit() | EntityIdentifier::HoriScrollCameraBit() | EntityIdentifier::VertScrollCameraBit();
+		unsigned int bitHolder = EntityIdentifier::CameraBit() /*| EntityIdentifier::HoriScrollCameraBit() | EntityIdentifier::VertScrollCameraBit()*/;
 		ECS::SetUpIdentifier(entity, bitHolder, "Scrolling Camera");
 		ECS::SetIsMainCamera(entity, true);
 	}
@@ -133,29 +133,67 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		tempPhsBody = PhysicsBody(tempBody, 10.f, 10.f, vec2(0, 0), true);
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "box");
+		ECS::SetUpIdentifier(entity, bitHolder, "player");
 		ECS::SetIsMainPlayer(entity, true);
+		//ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
+		//ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	}
 
-	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
-	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
-}
 
+}
+bool temp = true;
 void MainMenu::GamepadStick(XInputController* con)
 {
 	Stick sticks[2];
 	con->GetSticks(sticks);
 	if (sticks[0].x > 0.1f)
 	{
-		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).ApplyForce(vec3(10000.f, 0.f, 0.f));
+		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).ApplyForce(vec3(1000.f, 0.f, 0.f));
 	}
 	else if (sticks[0].x < -0.1f)
 	{
-		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).ApplyForce(vec3(-10000.f, 0.f, 0.f));
+		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).ApplyForce(vec3(-1000.f, 0.f, 0.f));
 	}
 	if (con->IsButtonPressed(Buttons::A))
 	{
 		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).ApplyForce(vec3(0.f, 10000.f, 0.f));
+	}
+	if (con->IsButtonPressed(Buttons::X))
+	{
+		if(temp)
+		{
+			//temp = false;
+			auto entity = ECS::CreateEntity();
+
+			ECS::AttachComponent<Sprite>(entity);
+			ECS::AttachComponent<Transform>(entity);
+			ECS::AttachComponent<PhysicsBody>(entity);
+
+			std::string filename = ".png";
+
+			ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 10, 10);
+
+			ECS::GetComponent<Transform>(entity).SetPosition(vec3(0,0,0));
+
+			auto& tempSpr = ECS::GetComponent<Sprite>(entity);
+			auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
+
+			b2Body* tempBody;
+			b2BodyDef tempDef;
+			tempDef.type = b2_dynamicBody;
+			b2Vec2 pos = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetPosition();
+			tempDef.position.Set(pos.x + 15, pos.y);
+
+			tempBody = m_physicsWorld->CreateBody(&tempDef);
+			//tempBody->SetGravityScale(0);
+			tempBody->SetFixedRotation(true);
+
+			tempPhsBody = PhysicsBody(tempBody, 10.f, 10.f, vec2(0, 0), true);
+
+			unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
+			ECS::SetUpIdentifier(entity, bitHolder, "box");
+			tempPhsBody.ApplyForce(vec3(1000000.f, 0.f, 0.f));
+		}
 	}
 }
 
