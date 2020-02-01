@@ -13,10 +13,9 @@ public:
 
 private:
 	bool grounded();
-	bool shooting = false;
 	bool controllerInput = false;
-	bool movingRight = true;
 	bool gunActive = false;
+	bool movingRight = true;
 	float gunDelay = 0;
 	float cooldown = 0.25f;
 };

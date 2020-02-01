@@ -136,16 +136,16 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		animController.AddAnimation(Animation());
 		animController.AddAnimation(Animation());
 
-		{
+		{	//animation 0 is walking right
 			auto& anim = animController.GetAnimation(0);
-			anim.AddFrame(vec2(0, 0), vec2(5, 5));
+			anim.AddFrame(vec2(0, 5), vec2(5, 0));
 			anim.SetRepeating(false);
 			anim.SetSecPerFrame(1.f);
 		}
 
-		{
+		{	//aniamtion 1 is walking left
 			auto& anim = animController.GetAnimation(1);
-			anim.AddFrame(vec2(5, 5), vec2(10, 0));
+			anim.AddFrame(vec2(5, 5), vec2(0, 0));
 			anim.SetRepeating(false);
 			anim.SetSecPerFrame(1.f);
 		}
@@ -165,14 +165,13 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		tempDef.position.Set(float32(0), float32(0));
 
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
-		//tempBody->SetGravityScale(0);
 		tempBody->SetFixedRotation(true);
 
 		tempPhsBody = PhysicsBody(tempBody, 20.f, 20.f, vec2(0, 0), true);
 
 		unsigned int bitHolder = EntityIdentifier::AnimationBit() | EntityIdentifier::SpriteBit()
 			| EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "boxo");
+		ECS::SetUpIdentifier(entity, bitHolder, "player");
 		ECS::SetIsMainPlayer(entity, true);
 	}
 
@@ -217,6 +216,12 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 void MainMenu::GamepadStick(XInputController* con)
 {
 	controllerInput = false;
+	if (con->IsButtonPressed(Buttons::X))
+	{
+		gunActive = true;
+		controllerInput = true;
+	}
+
 	Stick sticks[2];
 	con->GetSticks(sticks);
 	b2Vec2 temp = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
@@ -224,14 +229,14 @@ void MainMenu::GamepadStick(XInputController* con)
 	if (sticks[0].x > 0.1f)
 	{
 		temp.x += 50;
-		if (!shooting)
+		if (!gunActive)
 			movingRight = true;
 		controllerInput = true;
 	}
 	else if (sticks[0].x < -0.1f)
 	{
 		temp.x -= 50;
-		if (!shooting)
+		if (!gunActive)
 			movingRight = false;
 		controllerInput = true;
 	}
@@ -243,26 +248,25 @@ void MainMenu::GamepadStick(XInputController* con)
 		controllerInput = true;
 	}
 	m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
-	if (con->IsButtonPressed(Buttons::X))
-	{
-		gunActive = true;
-		controllerInput = true;
-	}
 }
 
 void MainMenu::KeyboardDown()
 {
 	if (!controllerInput) {
+		if (Input::GetKey(Key::Z)) {
+			gunActive = true;
+		}
+
 		b2Vec2 temp = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
 		temp.x = 0;
-		if (Input::GetKey(Key::D)) {
+		if (Input::GetKey(Key::RightArrow)) {
 			temp.x += 50;
-			if (!shooting)
+			if (!gunActive)
 				movingRight = true;
 		}
-		if (Input::GetKey(Key::A)) {
+		if (Input::GetKey(Key::LeftArrow)) {
 			temp.x -= 50;
-			if (!shooting)
+			if (!gunActive)
 				movingRight = false;
 		}
 		if (Input::GetKey(Key::Space)) {
@@ -270,27 +274,24 @@ void MainMenu::KeyboardDown()
 				temp.y = 50.f;
 		}
 		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
-		if (Input::GetKey(Key::P)) {
-			gunActive = true;
-		}
 	}
 }
 
 void MainMenu::Update()
 {
-	shooting = false;
+	//if delay is below 1 (used once), it starts decreasing timer
 	if (gunDelay < 1.f) {
 		gunDelay -= Timer::deltaTime;
 	}
+	//if delay is below 0, set to 1 (ready to use)
 	if (gunDelay <= 0) {
 		gunDelay = 1.f;
 	}
 	if (gunActive) {
-		if (gunDelay >= 0.5f) {
+		//bullets only spawn when delay is 1 (ready to use)
+		if (gunDelay == 1.f) {
 			{
 				auto entity = ECS::CreateEntity();
-				int temp = EntityIdentifier::MainPlayer();
-				temp = 0;
 
 				ECS::AttachComponent<Sprite>(entity);
 				ECS::AttachComponent<Transform>(entity);
@@ -300,12 +301,12 @@ void MainMenu::Update()
 
 				ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 10, 10);
 
+				//position is player position plus a bit (x changes based on direction player is facing
 				float x = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX() + (movingRight ? 16.f : -16.f);
 				float y = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionY();
 
 				ECS::GetComponent<Transform>(entity).SetPosition(vec3(x, y, 0.f));
 
-				auto& tempSpr = ECS::GetComponent<Sprite>(entity);
 				auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
 				b2Body* tempBody;
@@ -321,21 +322,33 @@ void MainMenu::Update()
 
 				unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 				ECS::SetUpIdentifier(entity, bitHolder, "bullet");
-				EntityStorage::StoreEntity(entity, 0);
 				Bullets::isBullet(entity);
 
+				//depending on the direction player is facing, give acceleration
 				m_sceneReg->get<PhysicsBody>(entity).ApplyForce(vec3((movingRight ? 500000 : -500000), 0, 0));
 			}
+			//fix camera focus (focus breaks when entities are spawned)
 			ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 			ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
+			//reset delay
 			gunDelay = cooldown;
 		}
-		shooting = true;
+		//reset gunActive bool (is button held?)
 		gunActive = false;
 	}
 
+	//update bullet logic
 	Bullets::updateAllBullets(m_sceneReg);
 
+	/*
+	
+	
+	have a function in enemy bit that returns the vector of all enemy numbers
+	
+	
+	*/
+
+	//change animation
 	if (movingRight) {
 		m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0);
 	}
@@ -346,10 +359,11 @@ void MainMenu::Update()
 
 bool MainMenu::grounded()
 {
+	//check contact list to check if bottom edge is touching something, 0 to 2 are side normals
 	if (b2ContactEdge* edge = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetContactList()) {
 		for (int x(0); edge; edge = edge->next) {
 			if (edge->contact->IsTouching()) {
-				if ((x == 0 || x == 2) &&
+				if ((x >= 0 && x <= 2) &&
 					edge->contact->GetManifold()->points->normalImpulse > 133 &&
 					edge->contact->GetManifold()->points->normalImpulse < 134
 					)
