@@ -35,6 +35,22 @@ void PhysicsSystem::Draw(entt::registry * reg)
 		for (auto entity : view)
 		{
 			auto& physBody = view.get<PhysicsBody>(entity);
+			
+			std::string fileName = "Masks/";
+
+			if (physBody.GetBodyType() == BodyType::BOX)
+			{
+				fileName += "SquareMask.png";
+			}
+			else if (physBody.GetBodyType() == BodyType::CIRCLE)
+			{
+				fileName += "CircleMask.png";
+			}
+			else
+			{
+				continue;
+			}
+
 			auto& trans = view.get<Transform>(entity);
 
 			//Temporary transform so we can actually draw the bodies
@@ -48,16 +64,6 @@ void PhysicsSystem::Draw(entt::registry * reg)
 			//Updates the transform to create model matrix
 			temp.Update();
 
-			std::string fileName = "Masks/";
-
-			if (physBody.GetBodyType() == BodyType::BOX)
-			{
-				fileName += "SquareMask.png";
-			}
-			else if (physBody.GetBodyType() == BodyType::CIRCLE)
-			{
-				fileName += "CircleMask.png";
-			}
 
 			Texture* mask = TextureManager::FindTexture(fileName);
 

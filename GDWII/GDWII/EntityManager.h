@@ -1,12 +1,13 @@
 #pragma once
 #include "Scene.h"
+#include "BackEnd.h"
 
-class EntityManager
+class EntityStorage
 {
 public:
-	void StoreEntity(unsigned int entity, unsigned int number);
-	int GetEntity(unsigned int number);
+	static void StoreEntity(unsigned int entity, unsigned int number);
+	static int GetEntity(unsigned int number);
 
 private:
-	std::vector<int> storage;
+	static std::vector<int> storage;
 };

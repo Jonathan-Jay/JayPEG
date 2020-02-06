@@ -13,6 +13,7 @@ enum class BodyType
 {
 	BOX,
 	CIRCLE,
+	CHAINSHAPE,
 
 	NUM_TYPES
 };
@@ -40,6 +41,8 @@ public:
 	PhysicsBody(b2Body* body, float radius, vec2 centerOffset, bool isDynamic);
 	//Constructs a box collider
 	PhysicsBody(b2Body* body, float width, float height, vec2 centerOffset, bool isDynamic);
+
+	PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vector<float> yCoordinates);
 
 	void DeleteBody();
 

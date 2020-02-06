@@ -69,7 +69,7 @@ PhysicsBody::PhysicsBody(b2Body * body, float width, float height, vec2 centerOf
 	b2PolygonShape tempShape;
 	tempShape.SetAsBox(float32(width / 2.f), float32(height / 2.f),
 		b2Vec2(float32(centerOffset.x), float32(centerOffset.y)), float32(0.f));
-
+	
 	//Creates the actual fixture (aka, shape, mass, etc);
 	b2FixtureDef tempFixture;
 	tempFixture.shape = &tempShape;
@@ -94,6 +94,30 @@ PhysicsBody::PhysicsBody(b2Body * body, float width, float height, vec2 centerOf
 	m_dynamic = isDynamic;
 
 	InitBody();
+}
+
+PhysicsBody::PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vector<float> yCoordinates)
+{
+	b2ChainShape tempShape;
+	b2Vec2* tempVec2 = new b2Vec2[xCoordinates.size()];
+	for (int x = 0; x < xCoordinates.size(); x++)
+	{
+		tempVec2[x].Set(xCoordinates[x], yCoordinates[x]);
+	}
+	tempShape.CreateChain(tempVec2, xCoordinates.size());
+
+	b2FixtureDef tempFixture;
+	tempFixture.shape = &tempShape;
+	tempFixture.density = 1.f;
+	tempFixture.friction = 0.f;
+
+	m_body = body;
+	m_body->CreateFixture(&tempFixture);
+
+	m_body = body;
+	m_bodyType = BodyType::CHAINSHAPE;
+
+	m_dynamic = false;
 }
 
 void PhysicsBody::DeleteBody()
