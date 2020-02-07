@@ -57,8 +57,6 @@ bool Game::Run()
 	{
 		//Clear window with activescene clearColor
 		m_window->Clear(m_activeScene->GetClearColor());
-		//Updates the game
-		Update();
 		//Draws the game
 		BackEnd::Draw(m_register);
 
@@ -72,6 +70,9 @@ bool Game::Run()
 		//Polls events and then checks them
 		BackEnd::PollEvents(m_register, &m_close, &m_motion, &m_click, &m_wheel);
 		CheckEvents();
+
+		//Updates the game
+		Update();
 
 		//does the window have keyboard focus?
 		if (Input::m_windowFocus)

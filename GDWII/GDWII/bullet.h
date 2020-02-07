@@ -35,11 +35,13 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 {
 	//checks if bullet should die
 	float playerPosX = m_register->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
-	std::vector<unsigned int> toDelete = {};
+	bool contacted = false;
 	for (int x(0); x < bullets.size(); x++) {
 		//player range check
 		if (abs(m_register->get<Transform>(bullets[x]).GetPositionX() - playerPosX) > 200.f) {
-			toDelete.push_back(bullets[x]);
+			ECS::DestroyEntity(bullets[x]);
+			bullets.erase(bullets.begin() + x, bullets.begin() + x + 1);
+			break;
 		}
 
 		//contact check (touching any physics body)
@@ -47,17 +49,17 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 			; contact; contact = contact->next
 			) {
 			if (contact->contact->IsTouching()) {
-				toDelete.push_back(bullets[x]);
 
 				//tests it does when it hits something
 
+				ECS::DestroyEntity(bullets[x]);
+				bullets.erase(bullets.begin() + x, bullets.begin() + x + 1);
+				contacted = true;
+				break;
 			}
 		}
-	}
-
-	//storing bullets that need to die in case multiple hit at the same time (efficiency thing)
-	for (int x(toDelete.size() - 1); x >= 0; x--) {
-		ECS::DestroyEntity(bullets[x]);
-		bullets.erase(bullets.begin() + x, bullets.begin() + x + 1);
+		if (contacted) {
+			break;
+		}
 	}
 }

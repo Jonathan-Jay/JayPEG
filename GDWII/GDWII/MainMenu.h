@@ -16,6 +16,11 @@ private:
 	bool controllerInput = false;
 	bool gunActive = false;
 	bool movingRight = true;
+	bool facingDown = false;
+	bool facingUp = false;
 	float gunDelay = 0;
 	float cooldown = 0.25f;
+	float jumpheight = 75.f;
+	float playerHeight = 40.f;
+	float playerWidth = 20.f;
 };
