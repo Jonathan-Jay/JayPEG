@@ -11,7 +11,7 @@
 #include "PhysicsBody.h"
 #include "VerticalScroll.h"
 #include "HorizontalScroll.h"
-
+#include "enemy.h"
 
 class ECS abstract
 {

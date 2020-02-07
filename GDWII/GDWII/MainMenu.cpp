@@ -200,8 +200,8 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		//tempBody->SetGravityScale(0);
 		tempBody->SetFixedRotation(true);
 
-		std::vector<float> x = { -300, 300, 300, -300, -300 };
-		std::vector<float> y = { -100, -100, 100, 100, -100 };
+		std::vector<float> x = { -300, 0, 0, 1, 1, 300, 300, -300, -300 };
+		std::vector<float> y = { -100, -100, -80,-80, -100, -100, 100, 100, -100 };
 
 		tempPhsBody = PhysicsBody(tempBody, x, y);
 
