@@ -52,6 +52,10 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 
 				//tests it does when it hits something
 
+				if (contact->contact->GetFixtureA()->GetBody() != m_register->get<PhysicsBody>(EntityStorage::GetEntity(0)).GetBody()) {
+					printf("test\n");
+				}
+
 				ECS::DestroyEntity(bullets[x]);
 				bullets.erase(bullets.begin() + x, bullets.begin() + x + 1);
 				contacted = true;

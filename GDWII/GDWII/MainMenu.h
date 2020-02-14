@@ -13,6 +13,8 @@ public:
 
 private:
 	bool grounded();
+	bool crouching = false;
+	bool onGround = false;
 	bool controllerInput = false;
 	bool gunActive = false;
 	bool movingRight = true;
@@ -20,6 +22,9 @@ private:
 	bool facingUp = false;
 	float gunDelay = 0;
 	float cooldown = 0.25f;
+
+
+	//initializing variables
 	float jumpheight = 75.f;
 	float playerHeight = 40.f;
 	float playerWidth = 20.f;

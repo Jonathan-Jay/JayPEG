@@ -214,6 +214,10 @@ void Game::KeyboardDown()
 	//Active scene now captures this input and can use it
 	//Look at base Scene class for more info.
 	m_activeScene->KeyboardDown();
+
+	if (Input::GetKeyDown(Key::P)) {
+		PhysicsBody::SetDraw(!PhysicsBody::GetDraw());
+	}
 }
 
 void Game::KeyboardUp()
@@ -252,11 +256,46 @@ void Game::MouseMotion(SDL_MouseMotionEvent evnt)
 	m_motion = false;
 }
 
+std::vector<float> xPos = {};
+std::vector<float> yPos = {};
+
 void Game::MouseClick(SDL_MouseButtonEvent evnt)
 {
 	//Active scene now captures this input and can use it
 	//Look at base Scene class for more info.
 	m_activeScene->MouseClick(evnt);
+
+	if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)) {
+		int windowHeight = BackEnd::GetWindowHeight();
+		int windowWidth = BackEnd::GetWindowWidth();
+		int maincamera = EntityIdentifier::MainCamera();
+		vec4 ortho = m_register->get<Camera>(maincamera).GetOrthoSize();
+		vec2 pos = vec2(
+			((evnt.x / static_cast<float>(windowHeight) * 2.f * ortho.w) - (ortho.w * static_cast<float>(windowWidth) / static_cast<float>(windowHeight))),
+			((-evnt.y / static_cast<float>(windowHeight) * 2.f * ortho.w) + ortho.w)
+		);
+		pos = pos + vec2(m_register->get<Camera>(maincamera).GetPositionX(),
+				m_register->get<Camera>(maincamera).GetPositionY());
+
+		printf("(%f, %f)\n", pos.x, pos.y);
+		xPos.push_back(pos.x);
+		yPos.push_back(pos.y);
+	}
+
+	if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
+		for (int x(0); x < xPos.size(); x++) {
+			if (x == xPos.size() - 1)
+				printf("%f\n", xPos[x]);
+			else
+				printf("%f, ", xPos[x]);
+		}
+		for (int x(0); x < yPos.size(); x++) {
+			if (x == yPos.size() - 1)
+				printf("%f\n", yPos[x]);
+			else
+				printf("%f, ", yPos[x]);
+		}
+	}
 
 	if (m_guiActive)
 	{
