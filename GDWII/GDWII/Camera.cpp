@@ -111,6 +111,7 @@ void Camera::Zoom(float zoom)
 	m_orthoPos.w = m_localPosition.y + m_orthoSize.w;
 
 	Orthographic(m_aspectRatio, m_orthoPos.x, m_orthoPos.y, m_orthoPos.z, m_orthoPos.w, m_near, m_far);
+	SetPosition(GetPosition());
 }
 
 float Camera::GetAspect() const

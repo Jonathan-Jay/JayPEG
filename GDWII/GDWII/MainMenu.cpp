@@ -39,7 +39,8 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		ECS::SetIsMainCamera(entity, true);
 	}
 
-	/*{
+	/*
+	{
 		auto entity = ECS::CreateEntity();
 
 		ECS::AttachComponent<Sprite>(entity);
@@ -112,26 +113,29 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		auto& animController = ECS::GetComponent<AnimationController>(entity);
 		animController.InitUVs(filename);
 
-		animController.AddAnimation(Animation());
-		animController.AddAnimation(Animation());
 
-		{
-			auto& anim = animController.GetAnimation(0);
-			anim.AddFrame(vec2(0, 0), vec2(5, 5));
-			anim.SetRepeating(false);
-			anim.SetSecPerFrame(1.f);
+		//all animations will be equally seperated in the y, their opposite direction is done by flipping corner x values
+		for (int x(0); x < 2; x++) {
+			animController.AddAnimation(Animation());
+			animController.AddAnimation(Animation());
+
+			{	//animation for right facing
+				auto& anim = animController.GetAnimation(0 + x * 2);
+				anim.AddFrame(vec2(0, 5 + x * 5), vec2(5, 0 + x * 5));
+				anim.SetRepeating(false);
+				anim.SetSecPerFrame(1.f);
+			}
+
+			{	//aniamtion for left facing
+				auto& anim = animController.GetAnimation(1 + x * 2);
+				anim.AddFrame(vec2(5, 5 + x * 5), vec2(0, 0 + x * 5));
+				anim.SetRepeating(false);
+				anim.SetSecPerFrame(1.f);
+			}
 		}
-
-		{
-			auto& anim = animController.GetAnimation(1);
-			anim.AddFrame(vec2(5, 5), vec2(10, 0));
-			anim.SetRepeating(false);
-			anim.SetSecPerFrame(1.f);
-		}
-
 		animController.SetActiveAnim(0);
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 20, 20, true, &animController);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, playerWidth, playerHeight, true, &animController);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
 
@@ -144,15 +148,16 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		tempDef.position.Set(float32(0), float32(0));
 
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
-		//tempBody->SetGravityScale(0);
 		tempBody->SetFixedRotation(true);
 		tempPhsBody.SetFriction(0);
 
-		tempPhsBody = PhysicsBody(tempBody, 20.f, 20.f, vec2(0, 0), true);
+		tempPhsBody = PhysicsBody(tempBody, playerWidth, playerHeight, vec2(0, 0), true);
+
+		tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
 
 		unsigned int bitHolder = EntityIdentifier::AnimationBit() | EntityIdentifier::SpriteBit()
 			| EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "boxo");
+		ECS::SetUpIdentifier(entity, bitHolder, "player");
 		ECS::SetIsMainPlayer(entity, true);
 	}
 
@@ -179,16 +184,47 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		//tempBody->SetGravityScale(0);
-		tempBody->SetFixedRotation(true);
 
-		std::vector<float> x = { -300, 300, 300, -300, -300 };
-		std::vector<float> y = { -100, -100, 100, 100, -100 };
-
+		std::vector<float> x = { -300,   -1,  -1,   1,    1,  300, 300, -300, -300 };
+		std::vector<float> y = { -100, -100, -80, -80, -100, -100, 100,  100, -100 };
 		tempPhsBody = PhysicsBody(tempBody, x, y);
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "floor");
+		EntityStorage::StoreEntity(entity, 0);
 	}
+
+	{
+		auto entity = ECS::CreateEntity();
+
+		ECS::AttachComponent<Sprite>(entity);
+		ECS::AttachComponent<Transform>(entity);
+		ECS::AttachComponent<PhysicsBody>(entity);
+
+		std::string filename = ".png";
+
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 100, 1);
+
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
+
+		auto& tempSpr = ECS::GetComponent<Sprite>(entity);
+		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
+
+		b2Body* tempBody;
+		b2BodyDef tempDef;
+		tempDef.type = b2_dynamicBody;
+		tempDef.position.Set(float32(0), float32(50));
+
+		tempBody = m_physicsWorld->CreateBody(&tempDef);
+		//tempBody->SetGravityScale(0);
+		tempBody->SetFixedRotation(true);
+
+		tempPhsBody = PhysicsBody(tempBody, 100, 1, vec2(0.f, 0.f), true);
+
+		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
+		ECS::SetUpIdentifier(entity, bitHolder, "");
+	}
+
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 
@@ -198,80 +234,224 @@ bool temp = true;
 void MainMenu::GamepadStick(XInputController* con)
 {
 	controllerInput = false;
-	Stick sticks[2];
-	con->GetSticks(sticks);
-	b2Vec2 temp = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
-	temp.x = 0;
-	if (sticks[0].x > 0.5f)
-	{
-		temp.x += 50;
-		if (!shooting)
-			movingRight = true;
-		controllerInput = true;
-	}
-	else if (sticks[0].x < -0.5f)
-	{
-		temp.x -= 50;
-		if (!shooting)
-			movingRight = false;
-		controllerInput = true;
-	}
-	if (con->IsButtonPressed(Buttons::A))
-	{
-		if (grounded()) {
-			temp.y = 500.f;
-		}
-		controllerInput = true;
-	}
-	m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
 	if (con->IsButtonPressed(Buttons::X))
 	{
 		gunActive = true;
 		controllerInput = true;
 	}
+
+
+	Stick sticks[2];
+	con->GetSticks(sticks);
+	b2Vec2 temp = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
+	temp.x = 0;
+	if (sticks[0].x > 0.25f)
+	{
+		if (!crouching)
+			temp.x += 50;
+		movingRight = true;
+		controllerInput = true;
+	}
+	else if (sticks[0].x < -0.25f)
+	{
+		if (!crouching)
+			temp.x -= 50;
+		movingRight = false;
+		controllerInput = true;
+	}
+	if (sticks[0].y > 0.7f || con->IsButtonPressed(Buttons::DPAD_UP)) {
+		facingUp = true;
+		controllerInput = true;
+	}
+	else {
+		facingUp = false;
+	}
+	if (!facingUp) {
+		if (sticks[0].y < -0.7f || con->IsButtonPressed(Buttons::DPAD_DOWN)) {
+			facingDown = true;
+			controllerInput = true;
+		}
+		else {
+			facingDown = false;
+		}
+	}
+
+	if (temp.x == 0) {
+		if (con->IsButtonPressed(Buttons::DPAD_RIGHT)) {
+			if (!crouching)
+				temp.x += 50;
+			movingRight = true;
+			controllerInput = true;
+		}
+		if (con->IsButtonPressed(Buttons::DPAD_LEFT)) {
+			if (!crouching)
+				temp.x -= 50;
+			movingRight = false;
+			controllerInput = true;
+		}
+	}
+
+	if (con->IsButtonPressed(Buttons::A))
+	{
+		if (onGround) {
+			temp.y = jumpheight;
+		}
+		controllerInput = true;
+	}
+	m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
 }
 
 void MainMenu::KeyboardDown()
 {
 	if (!controllerInput) {
+		if (Input::GetKey(Key::Z)) {
+			gunActive = true;
+		}
+
 		b2Vec2 temp = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
 		temp.x = 0;
-		if (Input::GetKey(Key::D)) {
-			temp.x += 50;
-			if (!shooting)
-				movingRight = true;
+		if (Input::GetKey(Key::RightArrow)) {
+			if (!crouching)
+				temp.x += 50;
+			movingRight = true;
 		}
-		if (Input::GetKey(Key::A)) {
-			temp.x -= 50;
-			if (!shooting)
-				movingRight = false;
+		if (Input::GetKey(Key::LeftArrow)) {
+			if (!crouching)
+				temp.x -= 50;
+			movingRight = false;
+		}
+		if (Input::GetKey(Key::UpArrow)) {
+			facingUp = true;
+		}
+		else {
+			facingUp = false;
+		}
+		if (!facingUp) {
+			if (Input::GetKey(Key::DownArrow)) {
+				facingDown = true;
+			}
+			else {
+				facingDown = false;
+			}
 		}
 		if (Input::GetKey(Key::Space)) {
-			if (grounded())
-				temp.y = 500.f;
+			if (onGround) {
+				temp.y = jumpheight;
+			}
 		}
 		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
-		if (Input::GetKey(Key::P)) {
-			gunActive = true;
+
+
+		//zoom code, delete later
+		if (Input::GetKey(Key::One)) {
+			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(1);
+		}
+		if (Input::GetKey(Key::Two)) {
+			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-1);
+		}
+
+		//zoom stuff
+		if (Input::GetKeyDown(Key::Three)) {
+			orthozoom = !orthozoom;
+		}
+
+		if (orthozoom) {
+			float yOrtho = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize().y;
+			float xPos = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
+			if (xPos > 100 && xPos < 200) {
+				if (yOrtho < 500) {
+					m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-1);
+				}
+			}
+			else {
+				if (yOrtho > 100) {
+					m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(1);
+				}
+			}
 		}
 	}
 }
 
 void MainMenu::Update()
 {
-	shooting = false;
+	//if delay is below 1 (used once), it starts decreasing timer
 	if (gunDelay < 1.f) {
 		gunDelay -= Timer::deltaTime;
 	}
+	//if delay is below 0, set to 1 (ready to use)
 	if (gunDelay <= 0) {
 		gunDelay = 1.f;
 	}
+
+	if (grounded()) {
+		onGround = true;
+		if (facingDown) {
+			//set collision to crouch height (half player height) once (first will be if starting off not crouching
+			if (!crouching) {
+				b2PolygonShape tempBox;
+				tempBox.SetAsBox(playerWidth / 2.f, playerHeight / 4.f, b2Vec2(0, -playerHeight / 4.f), 0);
+				
+				b2FixtureDef crouchingBox;
+				crouchingBox.shape = &tempBox;
+				crouchingBox.density = 1.f;
+				crouchingBox.friction = 0.f;
+
+				b2Fixture *fixtureA = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetFixtureList();
+				m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->DestroyFixture(fixtureA);
+				m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->CreateFixture(&crouchingBox);
+			}
+			crouching = true;
+			
+		}
+		else {
+			//if just exited crouch
+			if (crouching) {
+				b2PolygonShape tempBox;
+				tempBox.SetAsBox(playerWidth / 2.f, playerHeight / 2.f);
+
+				b2FixtureDef standingBox;
+				standingBox.shape = &tempBox;
+				standingBox.density = 1.f;
+				standingBox.friction = 0.f;
+
+				b2Fixture* fixtureA = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetFixtureList();
+				m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->DestroyFixture(fixtureA);
+				m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->CreateFixture(&standingBox);
+			}
+			crouching = false;
+			m_sceneReg->get<Sprite>(EntityIdentifier::MainPlayer()).SetHeight(playerHeight);
+		}
+	}
+	else {
+		//if just exited crouch
+		if (crouching) {
+			b2PolygonShape tempBox;
+			tempBox.SetAsBox(playerWidth / 2.f, playerHeight / 2.f);
+
+			b2FixtureDef standingBox;
+			standingBox.shape = &tempBox;
+			standingBox.density = 1.f;
+			standingBox.friction = 0.f;
+
+			b2Fixture* fixtureA = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetFixtureList();
+			m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->DestroyFixture(fixtureA);
+			m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->CreateFixture(&standingBox);
+		}
+		crouching = false;
+
+		onGround = false;
+	}
+
 	if (gunActive) {
-		if (gunDelay >= 0.5f) {
+		//bullets only spawn when delay is 1 (ready to use)
+		if (gunDelay == 1.f) {
+			if (crouching) {
+				//remove tag to make force horizontal
+				facingDown = false;
+			}
+			
 			{
 				auto entity = ECS::CreateEntity();
-				int temp = EntityIdentifier::MainPlayer();
-				temp = 0;
 
 				ECS::AttachComponent<Sprite>(entity);
 				ECS::AttachComponent<Transform>(entity);
@@ -281,12 +461,20 @@ void MainMenu::Update()
 
 				ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 10, 10);
 
-				float x = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX() + (movingRight ? 16.f : -16.f);
-				float y = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionY();
+				//position is player position plus a bit (x changes based on direction player is facing
+				float x = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX() + (movingRight ? (playerWidth / 2.f + 6.f) : -(playerWidth / 2.f + 6.f));
+				float y = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionY() + (crouching ? -(playerHeight / 4.f) : (playerHeight / 4.f));
+				if (facingUp) {
+					y += 16.f;
+					x -= (movingRight ? (playerWidth / 2.f + 6.f) : -(playerWidth / 2.f + 6.f));
+				}
+				else if (facingDown) {
+					y -= 36.f;
+					x -= (movingRight ? (playerWidth / 2.f + 6.f) : -(playerWidth / 2.f + 6.f));
+				}
 
 				ECS::GetComponent<Transform>(entity).SetPosition(vec3(x, y, 0.f));
 
-				auto& tempSpr = ECS::GetComponent<Sprite>(entity);
 				auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
 				b2Body* tempBody;
@@ -302,40 +490,87 @@ void MainMenu::Update()
 
 				unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 				ECS::SetUpIdentifier(entity, bitHolder, "bullet");
-				EntityStorage::StoreEntity(entity, 0);
 				Bullets::isBullet(entity);
 
-				m_sceneReg->get<PhysicsBody>(entity).ApplyForce(vec3((movingRight ? 500000 : -500000), 0, 0));
+				//depending on the direction player is facing, give acceleration
+				if (!facingDown && !facingUp) {	m_sceneReg->get<PhysicsBody>(entity).ApplyForce(vec3((movingRight ? 500000 : -500000), 0, 0));	}
+				else {							m_sceneReg->get<PhysicsBody>(entity).ApplyForce(vec3(0, (facingUp ? 500000 : -500000), 0));		}
 			}
+
+			//fix camera focus (focus breaks when entities are spawned)
 			ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 			ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
+			//reset delay
 			gunDelay = cooldown;
 		}
-		shooting = true;
+		//reset gunActive bool (is button held?)
 		gunActive = false;
 	}
 
+	//update bullet logic
 	Bullets::updateAllBullets(m_sceneReg);
 
-	if (movingRight) {
-		m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0);
+
+	/*Animations:
+	0: right
+	1: left
+	2: crouching right
+	3: crouching left
+	first check if grounded				*/
+	if (onGround) {	//ground animation
+		//check if moving
+		if (m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity().x != 0) {
+			if (facingUp) {
+				if (movingRight) { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0); }
+				else { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1); }
+			}
+			else {		//walking
+				if (movingRight) { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0); }
+				else { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1); }
+			}
+		}
+		else {
+			if (facingUp) {
+				if (movingRight) { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0); }
+				else { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1); }
+			}
+			else if (crouching) {
+				if (movingRight) { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(2); }
+				else { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(3); }
+			}
+			else {		//idle
+				if (movingRight) { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0); }
+				else { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1); }
+			}
+		}
 	}
-	else {
-		m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1);
+	else {			//air animation
+		if (facingUp) {
+			if (movingRight) {	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0);	}
+			else {				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1);	}
+		}
+		else if (facingDown) {
+			if (movingRight) {	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0);	}
+			else {				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1);	}
+		}
+		else {			//in air
+			if (movingRight) {	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0);	}
+			else {				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1);	}
+		}
 	}
 }
 
 bool MainMenu::grounded()
 {
+	//check contact list to check if bottom edge is touching something, 0 to 2 are side normals
 	if (b2ContactEdge* edge = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetContactList()) {
 		for (int x(0); edge; edge = edge->next) {
 			if (edge->contact->IsTouching()) {
-				printf("%i: %f\n", x, edge->contact->GetManifold()->points->normalImpulse);
-				if ((x >=0 && x <= 2) &&
-					edge->contact->GetManifold()->points->normalImpulse > 1 &&
-					edge->contact->GetManifold()->points->normalImpulse < 1000
-					)
+				if (edge->contact->GetManifold()->points->normalImpulse > 100 &&
+					edge->contact->GetManifold()->points->normalImpulse < 750) {
+				//if (edge->contact->GetManifold()->points->normalImpulse > 0) {
 					return true;
+				}
 			}
 			x++;
 		}
