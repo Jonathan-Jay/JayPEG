@@ -20,3 +20,4 @@ private:
 	float gunDelay = 0;
 	float cooldown = 0.25f;
 };
+

@@ -47,6 +47,8 @@ void Game::InitGame()
 
 	BackEnd::SetWindowName(m_activeScene->GetName());
 
+	CreatePlatform::StoreScene(m_activeScene);
+
 	PhysicsSystem::Init();
 }
 
@@ -103,13 +105,12 @@ void Game::GUI()
 	UI::Start(BackEnd::GetWindowWidth(), BackEnd::GetWindowHeight());
 
 	ImGui::Text("Place your different tabs below.");
+		if (ImGui::BeginTabBar(""))
+		{
+			BackEnd::GUI(m_register, m_activeScene);
 
-	if (ImGui::BeginTabBar(""))
-	{
-		BackEnd::GUI(m_register, m_activeScene);
-
-		ImGui::EndTabBar();
-	}
+			ImGui::EndTabBar();
+		}
 
 	UI::End();
 }

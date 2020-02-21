@@ -3,6 +3,8 @@
 
 #include "BackEnd.h"
 #include "MainMenu.h"
+#include "CreatePlatform.h"
+
 
 //Our main class for running our game
 class Game

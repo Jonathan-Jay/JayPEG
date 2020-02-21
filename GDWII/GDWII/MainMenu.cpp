@@ -21,20 +21,20 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 
 		ECS::AttachComponent<Camera>(entity);
 
-		/*ECS::AttachComponent<HorizontalScroll>(entity);
+		ECS::AttachComponent<HorizontalScroll>(entity);
 		ECS::AttachComponent<VerticalScroll>(entity);
 
 		ECS::GetComponent<HorizontalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<HorizontalScroll>(entity).SetOffset(15.f);
 
 		ECS::GetComponent<VerticalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
-		ECS::GetComponent<VerticalScroll>(entity).SetOffset(15.f);*/
+		ECS::GetComponent<VerticalScroll>(entity).SetOffset(15.f);
 
 		vec4 temp = ECS::GetComponent<Camera>(entity).GetOrthoSize();
 		ECS::GetComponent<Camera>(entity).SetWindowSize(vec2(float(windowWidth), float(windowHeight)));
 		ECS::GetComponent<Camera>(entity).Orthographic(aspectRatio, temp.x, temp.y, temp.z, temp.w, -100.f, 100.f);
 
-		unsigned int bitHolder = EntityIdentifier::CameraBit() /*| EntityIdentifier::HoriScrollCameraBit() | EntityIdentifier::VertScrollCameraBit()*/;
+		unsigned int bitHolder = EntityIdentifier::CameraBit() | EntityIdentifier::HoriScrollCameraBit() | EntityIdentifier::VertScrollCameraBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "Scrolling Camera");
 		ECS::SetIsMainCamera(entity, true);
 	}
@@ -88,40 +88,19 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 			| EntityIdentifier::AnimationBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "");
 	}
-
-	{
-		auto entity = ECS::CreateEntity();
-
-		ECS::AttachComponent<Sprite>(entity);
-		ECS::AttachComponent<Transform>(entity);
-		ECS::AttachComponent<PhysicsBody>(entity);
-
-		std::string filename = ".png";
-
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, x, x);
-
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
-
-		auto& tempSpr = ECS::GetComponent<Sprite>(entity);
-		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
-
-		b2Body* tempBody;
-		b2BodyDef tempDef;
-		tempDef.type = b2_dynamicBody;
-		tempDef.position.Set(float32(x), float32(x));
-
-		tempBody = m_physicsWorld->CreateBody(&tempDef);
-		//tempBody->SetGravityScale(0);
-		tempBody->SetFixedRotation(true);
-
-		tempPhsBody = PhysicsBody(tempBody, float(x), vec2(0.f, 0.f), true);
-
-		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "");
-	}
 	*/
-
+	std::string filename =  ".png";
+	float width = 100.f;
+	float height = 10.f;
+	std::string nameOfPhysBox = "hello";
+	vec2 placement(200.f, 5.f);
+	CreateStaticBox(filename, width, height, placement, nameOfPhysBox); //creates a box
+	CreateStaticBox(filename, 50, 50, vec2(-250.f,5), "box2");
+	
+	if(true)
 	{
+
+
 		auto entity = ECS::CreateEntity();
 
 		ECS::AttachComponent<Sprite>(entity);
@@ -167,6 +146,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		//tempBody->SetGravityScale(0);
 		tempBody->SetFixedRotation(true);
+		tempPhsBody.SetFriction(0);
 
 		tempPhsBody = PhysicsBody(tempBody, 20.f, 20.f, vec2(0, 0), true);
 
@@ -209,9 +189,11 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "floor");
 	}
-
+	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
+	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 
 }
+
 bool temp = true;
 void MainMenu::GamepadStick(XInputController* con)
 {
@@ -220,14 +202,14 @@ void MainMenu::GamepadStick(XInputController* con)
 	con->GetSticks(sticks);
 	b2Vec2 temp = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
 	temp.x = 0;
-	if (sticks[0].x > 0.1f)
+	if (sticks[0].x > 0.5f)
 	{
 		temp.x += 50;
 		if (!shooting)
 			movingRight = true;
 		controllerInput = true;
 	}
-	else if (sticks[0].x < -0.1f)
+	else if (sticks[0].x < -0.5f)
 	{
 		temp.x -= 50;
 		if (!shooting)
@@ -237,7 +219,7 @@ void MainMenu::GamepadStick(XInputController* con)
 	if (con->IsButtonPressed(Buttons::A))
 	{
 		if (grounded()) {
-			temp.y = 50.f;
+			temp.y = 500.f;
 		}
 		controllerInput = true;
 	}
@@ -266,7 +248,7 @@ void MainMenu::KeyboardDown()
 		}
 		if (Input::GetKey(Key::Space)) {
 			if (grounded())
-				temp.y = 50.f;
+				temp.y = 500.f;
 		}
 		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
 		if (Input::GetKey(Key::P)) {
@@ -348,9 +330,10 @@ bool MainMenu::grounded()
 	if (b2ContactEdge* edge = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetContactList()) {
 		for (int x(0); edge; edge = edge->next) {
 			if (edge->contact->IsTouching()) {
-				if ((x == 0 || x == 2) &&
-					edge->contact->GetManifold()->points->normalImpulse > 133 &&
-					edge->contact->GetManifold()->points->normalImpulse < 134
+				printf("%i: %f\n", x, edge->contact->GetManifold()->points->normalImpulse);
+				if ((x >=0 && x <= 2) &&
+					edge->contact->GetManifold()->points->normalImpulse > 1 &&
+					edge->contact->GetManifold()->points->normalImpulse < 1000
 					)
 					return true;
 			}
@@ -359,3 +342,4 @@ bool MainMenu::grounded()
 	}
 	return false;
 }
+
