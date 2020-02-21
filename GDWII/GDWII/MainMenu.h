@@ -24,6 +24,8 @@ private:
 	float cooldown = 0.25f;
 
 
+	bool orthozoom = false;
+
 	//initializing variables
 	float jumpheight = 75.f;
 	float playerHeight = 40.f;

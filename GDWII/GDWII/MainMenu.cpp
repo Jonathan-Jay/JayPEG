@@ -205,7 +205,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		//tempBody->SetGravityScale(0);
 
-		std::vector<float> x = { -300,   -1,  -1,   1,   1,  300, 300, -300, -300 };
+		std::vector<float> x = { -300,   -1,  -1,   1,    1,  300, 300, -300, -300 };
 		std::vector<float> y = { -100, -100, -80, -80, -100, -100, 100,  100, -100 };
 		tempPhsBody = PhysicsBody(tempBody, x, y);
 
@@ -366,6 +366,26 @@ void MainMenu::KeyboardDown()
 		}
 		if (Input::GetKey(Key::Two)) {
 			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-1);
+		}
+
+		//zoom stuff
+		if (Input::GetKeyDown(Key::Three)) {
+			orthozoom = !orthozoom;
+		}
+
+		if (orthozoom) {
+			float yOrtho = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize().y;
+			float xPos = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
+			if (xPos > 100 && xPos < 200) {
+				if (yOrtho < 500) {
+					m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-1);
+				}
+			}
+			else {
+				if (yOrtho > 100) {
+					m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(1);
+				}
+			}
 		}
 	}
 }

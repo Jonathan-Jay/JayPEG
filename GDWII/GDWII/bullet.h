@@ -34,15 +34,15 @@ void Bullets::isBullet(unsigned int entity)
 void Bullets::updateAllBullets(entt::registry* m_register)
 {
 	//checks if bullet should die
-	float playerPosX = m_register->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
+	//float playerPosX = m_register->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
 	bool contacted = false;
 	for (int x(0); x < bullets.size(); x++) {
 		//player range check
-		if (abs(m_register->get<Transform>(bullets[x]).GetPositionX() - playerPosX) > 200.f) {
+		/*if (abs(m_register->get<Transform>(bullets[x]).GetPositionX() - playerPosX) > 200.f) {
 			ECS::DestroyEntity(bullets[x]);
 			bullets.erase(bullets.begin() + x, bullets.begin() + x + 1);
 			break;
-		}
+		}*/
 
 		//contact check (touching any physics body)
 		for (b2ContactEdge* contact = m_register->get<PhysicsBody>(bullets[x]).GetBody()->GetContactList()

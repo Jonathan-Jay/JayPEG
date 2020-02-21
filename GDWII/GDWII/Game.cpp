@@ -270,6 +270,7 @@ void Game::MouseClick(SDL_MouseButtonEvent evnt)
 		int windowWidth = BackEnd::GetWindowWidth();
 		int maincamera = EntityIdentifier::MainCamera();
 		vec4 ortho = m_register->get<Camera>(maincamera).GetOrthoSize();
+		//printf("%f, %f, %f, %f\n", ortho.x, ortho.y, ortho.z, ortho.w);
 		vec2 pos = vec2(
 			((evnt.x / static_cast<float>(windowHeight) * 2.f * ortho.w) - (ortho.w * static_cast<float>(windowWidth) / static_cast<float>(windowHeight))),
 			((-evnt.y / static_cast<float>(windowHeight) * 2.f * ortho.w) + ortho.w)
