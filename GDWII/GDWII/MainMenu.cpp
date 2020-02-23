@@ -181,7 +181,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		ECS::SetIsMainPlayer(entity, true);
 	}
 
-	{
+	/*{
 		auto entity = ECS::CreateEntity();
 
 		ECS::AttachComponent<Sprite>(entity);
@@ -189,6 +189,39 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		ECS::AttachComponent<PhysicsBody>(entity);
 
 		std::string filename = "box.png";
+
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 604, 204);
+
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
+
+		auto& tempSpr = ECS::GetComponent<Sprite>(entity);
+		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
+
+		b2Body* tempBody;
+		b2BodyDef tempDef;
+		tempDef.type = b2_staticBody;
+		tempDef.position.Set(float32(0), float32(0));
+
+		tempBody = m_physicsWorld->CreateBody(&tempDef);
+		//tempBody->SetGravityScale(0);
+
+		std::vector<float> x = { -300,   -1,  -1,   1,    1,  300, 300, -300, -300 };
+		std::vector<float> y = { -100, -100, -80, -80, -100, -100, 100,  100, -100 };
+		tempPhsBody = PhysicsBody(tempBody, x, y);
+
+		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
+		ECS::SetUpIdentifier(entity, bitHolder, "floor");
+		EntityStorage::StoreEntity(entity, 0);
+	}*/
+
+	{
+		auto entity = ECS::CreateEntity();
+
+		ECS::AttachComponent<Sprite>(entity);
+		ECS::AttachComponent<Transform>(entity);
+		ECS::AttachComponent<PhysicsBody>(entity);
+
+		std::string filename = "tempmap.png";
 
 		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 604, 204);
 
