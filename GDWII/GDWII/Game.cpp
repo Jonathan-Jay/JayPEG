@@ -1,5 +1,5 @@
 #include "Game.h"
-
+#include <iomanip>
 #include <random>
 
 
@@ -286,15 +286,15 @@ void Game::MouseClick(SDL_MouseButtonEvent evnt)
 	if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
 		for (int x(0); x < xPos.size(); x++) {
 			if (x == xPos.size() - 1)
-				printf("%f\n", xPos[x]);
+				std::cout << std::fixed << std::setprecision(2) << xPos[x] << '\n';
 			else
-				printf("%f, ", xPos[x]);
+				std::cout << std::fixed << std::setprecision(2) << xPos[x] << ", ";
 		}
 		for (int x(0); x < yPos.size(); x++) {
 			if (x == yPos.size() - 1)
-				printf("%f\n", yPos[x]);
+				std::cout << std::fixed << std::setprecision(2) << yPos[x] << '\n';
 			else
-				printf("%f, ", yPos[x]);
+				std::cout << std::fixed << std::setprecision(2) << yPos[x] << ", ";
 		}
 	}
 

@@ -158,7 +158,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 
 		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, playerWidth, playerHeight, true, &animController);
 
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(-1990.f, 70.f, 0.f));
 
 		auto& tempSpr = ECS::GetComponent<Sprite>(entity);
 		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
@@ -166,7 +166,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		b2Body* tempBody;
 		b2BodyDef tempDef;
 		tempDef.type = b2_dynamicBody;
-		tempDef.position.Set(float32(0), float32(0));
+		tempDef.position.Set(float32(-1990), float32(70));
 
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		tempBody->SetFixedRotation(true);
@@ -223,7 +223,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 
 		std::string filename = "tempmap.png";
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 604, 204);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 4329, 1926);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
 
@@ -238,44 +238,58 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		//tempBody->SetGravityScale(0);
 
-		std::vector<float> x = { -300,   -1,  -1,   1,    1,  300, 300, -300, -300 };
-		std::vector<float> y = { -100, -100, -80, -80, -100, -100, 100,  100, -100 };
+		std::vector<float> x = {
+			-2061, -1347, -1347, -697, -697, -643, -643, -586, -586, -547, -547, -358,
+			-358, -286, -286, -215, -215, 419, 419, 480, 480, 750, 750, 970, 970,
+			1130, 1130, 66, 66, -1263, -1263, -710, -710, -265, -265, 474, 474, 1190, 1190, 890, 890, 1190, 1190, 590,
+			590, 538, 538, 162, 162, 132, 132, 2009,
+			2009, 1617, 1617, 1604, 1604, 785, 785, 575, 575, 675, 675, 543, 543, 500, 500, 467, 467, -11, -11, -325, -325,
+			-716, -716, -760, -760, -800, -800, -1190, -1190, -2061, -2061
+		};
+		std::vector<float> y = {
+			55, 55, -144, -144, -104, -104, -66.5, -66.5, -34, -34, 0, 0,
+			-38, -38, -91, -91, -147, -147, -189, -189, -230, -230, -312, -312, -172,
+			-172, -553, -553, -346, -346, -600, -600, -475, -475, -704, -704, -811, -811, -722, -722, -694, -694, -69, -69,
+			-17, -17, 48, 48, -25, -25, 90, 90,
+			209, 209, 165, 165, 650, 650, 750, 750, 610, 610, 593, 593, 605, 605, 580, 580, 550, 550, 347, 347, 190,
+			190, 149, 149, 99, 99, 54, 54, 214, 214, 55
+		};
 		tempPhsBody = PhysicsBody(tempBody, x, y);
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "floor");
+		ECS::SetUpIdentifier(entity, bitHolder, "map");
 		EntityStorage::StoreEntity(entity, 0);
 	}
 
 	{
 		auto entity = ECS::CreateEntity();
 
-		ECS::AttachComponent<Sprite>(entity);
 		ECS::AttachComponent<Transform>(entity);
 		ECS::AttachComponent<PhysicsBody>(entity);
 
-		std::string filename = ".png";
-
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 100, 1);
+		std::string filename = "tempmap.png";
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
-
-		auto& tempSpr = ECS::GetComponent<Sprite>(entity);
 		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
 		b2Body* tempBody;
 		b2BodyDef tempDef;
-		tempDef.type = b2_dynamicBody;
-		tempDef.position.Set(float32(0), float32(50));
+		tempDef.type = b2_staticBody;
+		tempDef.position.Set(float32(0), float32(0));
 
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		//tempBody->SetGravityScale(0);
-		tempBody->SetFixedRotation(true);
 
-		tempPhsBody = PhysicsBody(tempBody, 100, 1, vec2(0.f, 0.f), true);
+		std::vector<float> x = {
+			132, 1060, 1060, 1085, 1085, 822, 822, 784, 784, 738, 738, 698, 698, 328, 328, 280, 280, 218, 218, 132, 132
+		};
+		std::vector<float> y = {
+			187, 187, 226, 226, 445, 445, 412, 412, 387, 387, 356, 356, 327, 327, 283, 283, 245, 245, 214, 214, 187
+		};
+		tempPhsBody = PhysicsBody(tempBody, x, y);
 
-		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "");
+		unsigned int bitHolder = EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
+		ECS::SetUpIdentifier(entity, bitHolder, "island");
 	}
 
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
@@ -617,9 +631,11 @@ bool MainMenu::grounded()
 	if (b2ContactEdge* edge = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetContactList()) {
 		for (int x(0); edge; edge = edge->next) {
 			if (edge->contact->IsTouching()) {
+				/*
 				if (edge->contact->GetManifold()->points->normalImpulse > 100 &&
 					edge->contact->GetManifold()->points->normalImpulse < 750) {
-				//if (edge->contact->GetManifold()->points->normalImpulse > 0) {
+				*/
+				if (edge->contact->GetManifold()->points->normalImpulse > 0) {
 					return true;
 				}
 			}
