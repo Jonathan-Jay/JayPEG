@@ -11,6 +11,11 @@ enum class EnemyTypes {
 	SHOOTER
 };
 
+enum class EnemyState {
+	Follow,
+	Wander
+};
+
 struct enemyList {
 	unsigned int enemyID{ 0 };
 	bool isActive{ false };
@@ -23,6 +28,7 @@ public:
 	~Enemy() {}
 
 	EnemyTypes type{ 0 };
+	EnemyState state{ 0 };
 	int health{ 0 };
 	int moveSpeed{ 0 };
 	int jumpHeight{ 0 };
@@ -40,7 +46,7 @@ public:
 
 private:
 	void findPlayer(entt::registry* m_reg, enemyList& enemyID);
-	b2Vec2 EnemyRaycast(b2Vec2 p1, b2Vec2 p2);
+	b2Vec2 EnemyRaycast(b2Vec2 p1, b2Vec2 p2, bool onlyStatic = false);
 };
 
 inline void to_json(nlohmann::json& j, const Enemy& enem) {

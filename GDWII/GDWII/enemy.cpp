@@ -1,13 +1,14 @@
 #include "enemy.h"
 
 std::vector<enemyList> Enemies::enemies = {};
-int Enemies::deactivationLength = 150;
-float Enemies::sightRefreshTime = 0.25f;
+int Enemies::deactivationLength = 600;
+float Enemies::sightRefreshTime = 0.5f;
 b2World* Enemies::m_phyWorld = nullptr;
 
 void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 	vec2 playerPos{ m_reg->get<Transform>(EntityIdentifier::MainPlayer()).GetPosition() };
 	vec2 enemyPos{ m_reg->get<Transform>(enemyID.enemyID).GetPosition() };
+	b2Vec2 enemyb2Pos = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetPosition();
 	AnimationController& animCon = m_reg->get<AnimationController>(enemyID.enemyID);
 
 	b2Vec2 temp = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetLinearVelocity();
@@ -23,19 +24,34 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 		findPlayer(m_reg, enemyID);
 	}
 
-	if (canSeePlayer)
+	if (canSeePlayer) {
 		targetPos = playerPos;
+		state = EnemyState::Follow;
+	}
 	
-	float tempCalc = targetPos.x - enemyPos.x;
+	float tempCalc{ 0 };
+	switch (state) {
+	case EnemyState::Follow:
+		//std::cout << "follow\n";
+
+		if (abs(targetPos.x - enemyPos.x) > 1) {
+			tempCalc = targetPos.x - enemyPos.x;
+			tempCalc = tempCalc / abs(tempCalc) * moveSpeed;
+			temp.x += tempCalc;
+		} else
+			state = EnemyState::Wander;
+		break;
+	case EnemyState::Wander:
+		//std::cout << "wander\n";
+		break;
+	default:
+		break;
+	}
+
 	switch (type) {
 	case EnemyTypes::WALKER:
-		tempCalc = tempCalc / abs(tempCalc) * moveSpeed;
-		temp.x += tempCalc;
-		//std::cout << tempCalc << "\n";
 		break;
 	case EnemyTypes::SHOOTER:
-		tempCalc /= abs(tempCalc) * moveSpeed;
-		temp.x += tempCalc;
 		break;
 	default:
 		break;
@@ -43,24 +59,18 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 
 	canJump = false;
 	//check contact list to check if bottom edge is touching something, 0 to 2 are side normals
-	if (b2ContactEdge* edge = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetContactList()) {
-		for (int x(0); edge; edge = edge->next) {
-			if (edge->contact->IsTouching()) {
-				if ((x >= 0 && x <= 2) &&
-					edge->contact->GetManifold()->points->normalImpulse > 133 &&
-					edge->contact->GetManifold()->points->normalImpulse < 134
-					)
-				canJump = true;
-				break;
+	if (temp.x != 0)
+		if (b2ContactEdge* edge = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetContactList())
+			for (; edge; edge = edge->next) {
+				if (edge->contact->GetManifold()->localNormal.y >= 0.9) {
+					canJump = true;
+					break;
+				}
 			}
-			x++;
-		}
-	}
-	//std::cout << canJump << "\n";
 
+	printf("jump: %f, ray: %f, max: %f\n", canJump, EnemyRaycast(enemyb2Pos, b2Vec2(enemyb2Pos.x + temp.x * 5, enemyb2Pos.y)).x, enemyb2Pos.x + temp.x * 5);
 	//jump by doing raycast to side and checking to see if intersection point is different then p2 for the raycast
-	b2Vec2 enemyb2Pos = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetPosition();
-	if (abs(EnemyRaycast(enemyb2Pos, b2Vec2(enemyb2Pos.x + temp.x * 5, enemyb2Pos.y)).x) < abs(enemyb2Pos.x + 5 * temp.x) && canJump) {
+	if (canJump && abs(EnemyRaycast(enemyb2Pos, b2Vec2(enemyb2Pos.x + temp.x * 5, enemyb2Pos.y)).x) < abs(enemyb2Pos.x + 5 * temp.x)) {
 		temp.y = 50.f;
 	}
 
@@ -85,20 +95,23 @@ void Enemy::Sleep(entt::registry* m_reg, enemyList& enemyID) {
 }
 
 void Enemy::findPlayer(entt::registry* m_reg, enemyList& enemyID) {
-	canSeePlayer = false;
-
 	b2Vec2 p1 = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetPosition();
 	b2Vec2 p2 = m_reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetPosition();
 	
-	vec2 p3(p2.x - p1.x, p2.y - p1.y);
-	vec2 p4(facingRight ? 1 : -1, 0);
-	p3.Normalize();
-
-	double FOVangle = acos(p3.Dot(p4) / (p3.GetMagnitude() * p4.GetMagnitude()));
-	if (FOVangle > PI / 4)
-		return;
 	
-	b2Vec2 intersectionPoint = EnemyRaycast(p1, p2);
+	//if enemy cant see player then use FOV, if can then FOV is 360 deg
+	if (!canSeePlayer) {
+		vec2 p3(p2.x - p1.x, p2.y - p1.y);
+		vec2 p4(facingRight ? 1 : -1, 0);
+
+		p3.Normalize();
+
+		double FOVangle = acos(p3.Dot(p4) / (p3.GetMagnitude() * p4.GetMagnitude()));
+		if (FOVangle > PI / 4)
+			return;
+	}
+	
+	b2Vec2 intersectionPoint = EnemyRaycast(p1, p2, true);
 
 	//check to see if intersection point is inside the player shape
 	canSeePlayer = m_reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetFixtureList()->TestPoint(intersectionPoint);
@@ -106,7 +119,7 @@ void Enemy::findPlayer(entt::registry* m_reg, enemyList& enemyID) {
 
 //https://www.iforce2d.net/b2dtut/raycasting
 //modified to support chain shapes
-b2Vec2 Enemy::EnemyRaycast(b2Vec2 p1, b2Vec2 p2) {
+b2Vec2 Enemy::EnemyRaycast(b2Vec2 p1, b2Vec2 p2, bool onlyStatic) {
 	b2RayCastInput input;
 	input.p1 = p1;
 	input.p2 = p2;
@@ -117,20 +130,21 @@ b2Vec2 Enemy::EnemyRaycast(b2Vec2 p1, b2Vec2 p2) {
 	b2Vec2 intersectionNormal(0, 0);
 	//check each body in physics world
 	for (b2Body* b = Enemies::GetPhysicsWorld()->GetBodyList(); b; b = b->GetNext())
-		//check each fixture in the body
-		for (b2Fixture* f = b->GetFixtureList(); f; f = f->GetNext())
-			//if the fixture has children (chain shape has children, lots of edges)
-			for (int32 i = 0; i < f->GetShape()->GetChildCount(); i++) {
-				b2RayCastOutput output;
-				if (!f->RayCast(&output, input, i))		//if no fixture was hit then do nothing
-					continue;
-				if (output.fraction < closestFraction) {//if the distance of the fixture was closer than previously checked ones then set distance to current min
-					closestFraction = output.fraction;
-					intersectionNormal = output.normal;
+		if (!onlyStatic || (onlyStatic && b->GetType() == b2BodyType::b2_staticBody) )
+			//check each fixture in the body
+			for (b2Fixture* f = b->GetFixtureList(); f; f = f->GetNext())
+				//if the fixture has children (chain shape has children, lots of edges)
+				for (int32 i = 0; i < f->GetShape()->GetChildCount(); i++) {
+					b2RayCastOutput output;
+					if (!f->RayCast(&output, input, i))		//if no fixture was hit then do nothing
+						continue;
+					if (output.fraction < closestFraction) {//if the distance of the fixture was closer than previously checked ones then set distance to current min
+						closestFraction = output.fraction;
+						intersectionNormal = output.normal;
+					}
 				}
-			}
 
-	//takes the closest distance found and puts it into real world cords as an interection point
+	//takes the closest local distance found and puts it into global (world) cords as an interection point
 	return p1 + closestFraction * (p2 - p1);
 }
 

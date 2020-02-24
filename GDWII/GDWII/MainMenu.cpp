@@ -157,14 +157,14 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 
 		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, playerWidth, playerHeight, true, &animController);
 
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(-1990.f, 70.f, 0.f));
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
 
 		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
 		b2Body* tempBody;
 		b2BodyDef tempDef;
 		tempDef.type = b2_dynamicBody;
-		tempDef.position.Set(float32(-1990), float32(70));
+		tempDef.position.Set(float32(370), float32(-120));
 
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		tempBody->SetFixedRotation(true);
@@ -180,7 +180,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 
 
 		//ground detcection line
-		auto entityB = ECS::CreateEntity();
+		/*auto entityB = ECS::CreateEntity();
 
 		ECS::AttachComponent<PhysicsBody>(entityB);
 		ECS::AttachComponent<Transform>(entityB);
@@ -209,7 +209,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		jointDef.bodyB = tempBody2;
 		jointDef.localAnchorB = b2Vec2(0.f, playerHeight / 2.f);
 
-		groundDetection = (b2WeldJoint*)m_physicsWorld->CreateJoint(&jointDef);
+		groundDetection = (b2WeldJoint*)m_physicsWorld->CreateJoint(&jointDef);*/
 	}
 
 	/*{
@@ -352,7 +352,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		Missiles::isBombable(entity);
 	}
 
-	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 80, -88);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 600, -130);
 	//Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, -80, -88);
 	//Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, -60, -88);
 
@@ -860,16 +860,11 @@ void MainMenu::Update()
 
 bool MainMenu::grounded()
 {
-	//check contact list to check if bottom edge is touching something, 0 to 2 are side normals
-	if (b2ContactEdge* edge = m_sceneReg->get<PhysicsBody>(EntityStorage::GetEntity(0)).GetBody()->GetContactList()) {
-		for (; edge; edge = edge->next) {
-			if (edge->contact->IsTouching()) {
-				if (edge->contact->GetFixtureA()->GetBody() == m_sceneReg->get<PhysicsBody>(EntityStorage::GetEntity(1)).GetBody() ||
-					edge->contact->GetFixtureA()->GetBody() == m_sceneReg->get<PhysicsBody>(EntityStorage::GetEntity(2)).GetBody())
-					return true;
-
-			}
+	b2ContactEdge* edge = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetContactList();
+	for (int x(0); edge; edge = edge->next, x++)
+		if (edge->contact->GetManifold()->localNormal.y >= 0.9) {
+			return true;
 		}
-	}
+
 	return false;
 }

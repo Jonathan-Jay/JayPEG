@@ -62,8 +62,7 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 				//tests it does when it hits something
 				
 				//if it's the mainplayer
-				if (contact->contact->GetFixtureA()->GetBody() == m_register->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody() ||
-					contact->contact->GetFixtureA()->GetBody() == m_register->get<PhysicsBody>(EntityStorage::GetEntity(0)).GetBody()) {
+				if (contact->contact->GetFixtureA()->GetBody() == m_register->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()) {
 					break;
 				}
 
