@@ -36,7 +36,7 @@ PhysicsBody::PhysicsBody(b2Body * body, float radius, vec2 centerOffset, bool is
 	b2FixtureDef tempFixture;
 	tempFixture.shape = &tempShape;
 	tempFixture.density = 1.f;
-	tempFixture.friction = 0.3f;
+	tempFixture.friction = 0.f;
 
 	m_body = body;
 	m_body->CreateFixture(&tempFixture);
@@ -74,7 +74,7 @@ PhysicsBody::PhysicsBody(b2Body * body, float width, float height, vec2 centerOf
 	b2FixtureDef tempFixture;
 	tempFixture.shape = &tempShape;
 	tempFixture.density = 1.f;
-	tempFixture.friction = 0.3f;
+	tempFixture.friction = 0.f;
 
 	m_body = body;
 	m_body->CreateFixture(&tempFixture);
