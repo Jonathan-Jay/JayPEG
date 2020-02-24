@@ -60,3 +60,24 @@ void Player::setCurrentEnergy(int currentEnergy)
     this->currentEnergy = currentEnergy;
 }
 
+void Player::addCurrentHealth(int addHealth)
+{
+	currentHealth += addHealth;
+}
+
+void Player::addCurrentEnergy(int addEnergy)
+{
+	currentEnergy += addEnergy;
+}
+
+
+float Player::getMissleDelay() const
+{
+    return missleDelay;
+}
+
+void Player::setMissleDelay(float missleDelay)
+{
+    this->missleDelay = missleDelay;
+}
+
