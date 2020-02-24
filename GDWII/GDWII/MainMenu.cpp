@@ -95,8 +95,8 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 	float height = 10.f;
 	std::string nameOfPhysBox = "hello";
 	vec2 placement(200.f, 5.f);
-	CreateStaticBox(filename, width, height, placement, nameOfPhysBox); //creates a box
-	CreateStaticBox(filename, 50, 50, vec2(-250.f,5), "box2");
+	//CreateStaticBox(filename, width, height, placement, nameOfPhysBox); //creates a box
+	//CreateStaticBox(filename, 50, 50, vec2(-250.f,5), "box2");
 	
 	if(true)
 	{

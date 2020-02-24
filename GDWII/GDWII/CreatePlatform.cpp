@@ -2,7 +2,7 @@
 
 Selectable CreatePlatform::m_selectable = Selectable("Create Platform");
 
-void CreatePlatform::CreateTab()
+void CreatePlatform::CreateTab(Scene* scene)
 {
 	bool temp = false;
 	if (ImGui::BeginTabItem(m_selectable.GetName().c_str(), m_selectable.GetSelected()))
@@ -12,14 +12,14 @@ void CreatePlatform::CreateTab()
 	}
 	if (temp)
 	{
-		CreateEditor();
+		CreateEditor(scene);
 	}
 }
 
 float width = 0.1f;
 float height = 0.1f;
 
-void CreatePlatform::CreateEditor()
+void CreatePlatform::CreateEditor(Scene* scene)
 {
 	if (m_selectable.GetSelected())
 	{
@@ -37,7 +37,7 @@ void CreatePlatform::CreateEditor()
 			if (ImGui::Button("Create Box"))
 			{
 				{
-					CreateStaticBox(" ", width, height, vec2(0.f, 0.f), "PlaceHolderName");
+					CreateStaticBox(" ", width, height, vec2(0.f, 0.f), "PlaceHolderName", scene);
 				}
 			}
 			ImGui::TreePop();
@@ -45,36 +45,37 @@ void CreatePlatform::CreateEditor()
 	}
 }
 //Creates a static box, easier for creating different types of boxes
-void CreateStaticBox(std::string filename, float width, float height, vec2 placement, std::string nameOfPhysBox)
+void CreateStaticBox(std::string filename, float width, float height, vec2 placement, std::string nameOfPhysBox, Scene* scene)
 {
-	{
-		auto entity = ECS::CreateEntity();
 
-		ECS::AttachComponent<Sprite>(entity);
-		ECS::AttachComponent<Transform>(entity);
-		ECS::AttachComponent<PhysicsBody>(entity);
+	//{
+	//	auto entity = ECS::CreateEntity();
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, width, height);
+	//	ECS::AttachComponent<Sprite>(entity);
+	//	ECS::AttachComponent<Transform>(entity);
+	//	ECS::AttachComponent<PhysicsBody>(entity);
 
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(placement.x, placement.y, 0.f));
+	//	ECS::GetComponent<Sprite>(entity).LoadSprite(filename, width, height);
 
-		auto& tempSpr = ECS::GetComponent<Sprite>(entity);
-		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
+	//	ECS::GetComponent<Transform>(entity).SetPosition(vec3(placement.x, placement.y, 0.f));
 
-		b2Body* tempBody;
-		b2BodyDef tempDef;
-		tempDef.type = b2_staticBody;
-		tempDef.position.Set(float32(placement.x), float32(placement.y));
+	//	auto& tempSpr = ECS::GetComponent<Sprite>(entity);
+	//	auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
-		tempBody = m_physicsWorld->CreateBody(&tempDef);
-		tempBody->SetGravityScale(false);
-		tempBody->SetFixedRotation(false);
-		tempPhsBody.SetFriction(false);
+	//	b2Body* tempBody;
+	//	b2BodyDef tempDef;
+	//	tempDef.type = b2_staticBody;
+	//	tempDef.position.Set(float32(placement.x), float32(placement.y));
 
-		tempPhsBody = PhysicsBody(tempBody, float(width), float(height), vec2(0.f, 0.f), true);
+	//	tempBody = &scene.GetPhysicsWorld()->CreateBody(&tempDef);
+	//	tempBody->SetGravityScale(false);
+	//	tempBody->SetFixedRotation(false);
+	//	tempPhsBody.SetFriction(false);
 
-		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, nameOfPhysBox);
-		EntityStorage::StoreEntity(entity, 0);
+	//	tempPhsBody = PhysicsBody(tempBody, float(width), float(height), vec2(0.f, 0.f), true);
+
+	//	unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
+	//	ECS::SetUpIdentifier(entity, bitHolder, nameOfPhysBox);
+	//	//EntityStorage::StoreEntity(entity, 0);
 	}
 }

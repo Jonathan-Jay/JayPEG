@@ -10,7 +10,7 @@
 #include "RenderingSystem.h"
 #include "AnimationSystem.h"
 #include "PhysicsSystem.h"
-#include "CreatePlatform.h"
+#include "MainMenu.h"
 
 //Mouse Motion event
 typedef SDL_MouseMotionEvent MotionEvent;

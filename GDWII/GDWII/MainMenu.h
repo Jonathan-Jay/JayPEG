@@ -1,5 +1,6 @@
 #pragma once
 #include "EntityManager.h"
+#include "CreatePlatform.h"
 #include <string>
 
 class MainMenu : public Scene

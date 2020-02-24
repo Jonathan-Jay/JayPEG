@@ -47,7 +47,8 @@ void Game::InitGame()
 
 	BackEnd::SetWindowName(m_activeScene->GetName());
 
-	CreatePlatform::StoreScene(m_activeScene);
+	//delete this
+	//CreatePlatform::StoringScene(m_activeScene);
 
 	PhysicsSystem::Init();
 }
