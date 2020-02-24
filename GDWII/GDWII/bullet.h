@@ -4,9 +4,13 @@
 
 class Bullets
 {
+friend class Missiles;
 public:
 	//create/store bullet number
 	static void isBullet(unsigned int entity);
+
+	static std::vector<unsigned int> getBullets();
+
 	//update all existing bullets
 	static void updateAllBullets(entt::registry* m_register);
 private:
@@ -31,18 +35,23 @@ void Bullets::isBullet(unsigned int entity)
 	}
 }
 
+inline std::vector<unsigned int> Bullets::getBullets()
+{
+	return bullets;
+}
+
 void Bullets::updateAllBullets(entt::registry* m_register)
 {
 	//checks if bullet should die
-	//float playerPosX = m_register->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
-	bool contacted = false;
-	for (int x(0); x < bullets.size(); x++) {
+	float playerPosX = m_register->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
+	for (int x(0); x < bullets.size();) {
+		bool contacted = false;
 		//player range check
-		/*if (abs(m_register->get<Transform>(bullets[x]).GetPositionX() - playerPosX) > 200.f) {
+		if (abs(m_register->get<Transform>(bullets[x]).GetPositionX() - playerPosX) > 800.f) {
 			ECS::DestroyEntity(bullets[x]);
 			bullets.erase(bullets.begin() + x, bullets.begin() + x + 1);
 			break;
-		}*/
+		}
 
 		//contact check (touching any physics body)
 		for (b2ContactEdge* contact = m_register->get<PhysicsBody>(bullets[x]).GetBody()->GetContactList()
@@ -51,8 +60,17 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 			if (contact->contact->IsTouching()) {
 
 				//tests it does when it hits something
+				
+				//if it's the mainplayer
+				if (contact->contact->GetFixtureA()->GetBody() == m_register->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody() ||
+					contact->contact->GetFixtureA()->GetBody() == m_register->get<PhysicsBody>(EntityStorage::GetEntity(0)).GetBody()) {
+					break;
+				}
 
-				if (contact->contact->GetFixtureA()->GetBody() != m_register->get<PhysicsBody>(EntityStorage::GetEntity(0)).GetBody()) {
+				//if not the world
+				if (contact->contact->GetFixtureA()->GetBody() != m_register->get<PhysicsBody>(EntityStorage::GetEntity(1)).GetBody() &&
+					contact->contact->GetFixtureA()->GetBody() != m_register->get<PhysicsBody>(EntityStorage::GetEntity(2)).GetBody()) {
+					
 					printf("test\n");
 				}
 
@@ -62,8 +80,8 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 				break;
 			}
 		}
-		if (contacted) {
-			break;
+		if (!contacted) {
+			x++;
 		}
 	}
 }
