@@ -20,22 +20,26 @@ void Player::setMaxEnergy(int maxEnergy)
     this->maxEnergy = maxEnergy;
 }
 
+//get the Health regen speed
 float Player::getHealthRegen() const
 {
     return healthRegen;
 }
 
+//set the health regen speed
 void Player::setHealthRegen(float healthRegen)
 {
     this->healthRegen = healthRegen;
 }
 
+//get the Energy regen speed
 float Player::getEnergyRegen() const
 {
     return energyRegen;
 }
 
-void Player::setEnergyRegen(float energyRegen)
+//set the Energy regen speed
+void Player::setEnergyRegen(float energyRegen) 
 {
     this->energyRegen = energyRegen;
 }
@@ -60,14 +64,48 @@ void Player::setCurrentEnergy(int currentEnergy)
     this->currentEnergy = currentEnergy;
 }
 
-void Player::addCurrentHealth(int addHealth)
+void Player::addCurrentHealth(unsigned int addHealth)
 {
-	currentHealth += addHealth;
+	if (currentHealth + addHealth >= maxHealth) //player cannot have more health than the maxhealth
+	{
+		currentHealth = maxHealth;
+	}
+	else //simply adds morehealth
+	{
+		currentHealth += addHealth;
+	}
 }
 
-void Player::addCurrentEnergy(int addEnergy)
+void Player::addCurrentEnergy(unsigned int addEnergy)
 {
-	currentEnergy += addEnergy;
+	if (currentEnergy + addEnergy >= maxEnergy) //cannot have more energy then max energy
+	{
+		currentEnergy = maxEnergy;
+	}
+	else //adds more energy
+	{
+		currentEnergy += addEnergy;
+	}
+}
+
+bool Player::subCurrentHealth(int subHealth)
+{
+	if (currentHealth - subHealth > 0) //You cannot have 0 health and continue to play
+	{
+		currentHealth -= subHealth;
+		return true; //continue game
+	}
+	return false; //Play death screen
+}
+
+bool Player::subCurrentEnergy(int subEnergy)
+{
+	if (currentEnergy - subEnergy >= 0) //You can have 0 energy and continue to play
+	{
+		currentEnergy -= subEnergy;
+		return true; //ok to continue with action
+	}
+	return false; //Do not continue action
 }
 
 

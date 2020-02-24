@@ -31,20 +31,34 @@ public:
 	void setMissleDelay(float missleDelay);
 
 	//adds an amount to the current health
-	void addCurrentHealth(int addHealth);
+	void addCurrentHealth(unsigned int addHealth);
 	//adds an amount to the current energy
-	void addCurrentEnergy(int addHealth);
+	void addCurrentEnergy(unsigned int addHealth);
+
+	//substracts an amount of the current Health
+	bool subCurrentHealth(int subHealth);
+
+	//Substracts an amount of the current Energy
+	bool subCurrentEnergy(int subEnergy);
 
 	
 
 private:
 	int maxHealth = 100;
 	int maxEnergy = 100;
+
 	float healthRegen = 0.f;
 	float energyRegen = 0.f;
 	float missleDelay = 0.f;
+
 	int currentHealth = 0;
 	int currentEnergy = 0;
+
+
+	bool hasEnergy = true;
+
+	bool hasMissle = false;
+
 };
 
 Player::Player()
