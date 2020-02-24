@@ -54,9 +54,6 @@ private:
 	int currentHealth = 0;
 	int currentEnergy = 0;
 
-
-	bool hasEnergy = true;
-
 	bool hasMissle = false;
 
 };
