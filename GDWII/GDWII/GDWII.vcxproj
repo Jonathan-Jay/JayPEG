@@ -216,6 +216,7 @@
     <ClCompile Include="CameraSystem.cpp" />
     <ClCompile Include="ECS.cpp" />
     <ClCompile Include="EffectManager.cpp" />
+    <ClCompile Include="enemy.cpp" />
     <ClCompile Include="EntityIdentifier.cpp" />
     <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="Framebuffer.cpp" />

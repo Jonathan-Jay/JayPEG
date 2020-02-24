@@ -118,8 +118,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "");
-	}
-	*/
+	}*/
 
 	{
 		auto entity = ECS::CreateEntity();
@@ -208,6 +207,10 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "floor");
 	}
+
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 80, -88);
+	//Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, -80, -88);
+	//Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, -60, -88);
 
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
@@ -339,6 +342,8 @@ void MainMenu::Update()
 
 	//update bullet logic
 	Bullets::updateAllBullets(m_sceneReg);
+
+	Enemies::UpdateEnemies(m_sceneReg);
 
 	/*
 	
