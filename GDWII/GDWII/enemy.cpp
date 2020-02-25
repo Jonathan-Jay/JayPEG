@@ -58,19 +58,23 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 	}
 
 	canJump = false;
-	//check contact list to check if bottom edge is touching something, 0 to 2 are side normals
+	//check contact list to check if bottom edge is touching something, 0 to 2 are side ndormals
 	if (temp.x != 0)
-		if (b2ContactEdge* edge = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetContactList())
-			for (; edge; edge = edge->next) {
-				if (edge->contact->GetManifold()->localNormal.y >= 0.9) {
-					canJump = true;
-					break;
-				}
-			}
+		for (b2ContactEdge* edge = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetContactList(); edge; edge = edge->next) {
+			//b2Vec2 contactNormal = edge->contact->GetManifold()->localNormal;
 
-	printf("jump: %f, ray: %f, max: %f\n", canJump, EnemyRaycast(enemyb2Pos, b2Vec2(enemyb2Pos.x + temp.x * 5, enemyb2Pos.y)).x, enemyb2Pos.x + temp.x * 5);
+			//if (edge->other->GetFixtureList()->GetType() == b2Shape::e_chain)
+				//contactNormal *= -1;
+
+			//printf("new: %f, %f\n", contactNormal.x, contactNormal.y);
+			if (edge->contact->GetManifold()->localNormal.y >= 0.9 && edge->contact->GetManifold()->pointCount == 2) {
+				canJump = true;
+				break;
+			}
+		}
+
 	//jump by doing raycast to side and checking to see if intersection point is different then p2 for the raycast
-	if (canJump && abs(EnemyRaycast(enemyb2Pos, b2Vec2(enemyb2Pos.x + temp.x * 5, enemyb2Pos.y)).x) < abs(enemyb2Pos.x + 5 * temp.x)) {
+	if (canJump && abs(EnemyRaycast(enemyb2Pos, b2Vec2(enemyb2Pos.x + temp.x * 5, enemyb2Pos.y), true).x) - abs(enemyb2Pos.x + 5 * temp.x) != 0) {
 		temp.y = 50.f;
 	}
 
@@ -204,10 +208,10 @@ void Enemies::CreateEnemy(b2World* m_physicsWorld, EnemyTypes m_type, float x, f
 
 	switch (m_type) {
 	case EnemyTypes::WALKER:
-		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 10, 5, 2, 3);
+		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 10, 10, 2, 3);
 		break;
 	case EnemyTypes::SHOOTER:
-		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 8, 4, 2, 2);
+		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 8, 10, 2, 2);
 		break;
 	default:
 		break;

@@ -856,15 +856,21 @@ void MainMenu::Update()
 			else {				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1);	}
 		}
 	}
-}
+} 
 
 bool MainMenu::grounded()
 {
-	b2ContactEdge* edge = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetContactList();
-	for (int x(0); edge; edge = edge->next, x++)
-		if (edge->contact->GetManifold()->localNormal.y >= 0.9) {
+	
+	for (b2ContactEdge* edge = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetContactList(); edge; edge = edge->next) {
+		b2Vec2 contactNormal = edge->contact->GetManifold()->localNormal;
+
+		if (edge->other->GetFixtureList()->GetType() == b2Shape::e_chain)
+			contactNormal *= -1;
+
+		if (contactNormal.y <= -0.9 && edge->contact->GetManifold()->pointCount == 2) {
 			return true;
-		}
+		}			
+	}
 
 	return false;
 }
