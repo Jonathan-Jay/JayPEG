@@ -2,7 +2,7 @@
 
 std::vector<enemyList> Enemies::enemies = {};
 int Enemies::deactivationLength = 600;
-float Enemies::sightRefreshTime = 0.5f;
+float Enemies::sightRefreshTime = 0.125f;
 b2World* Enemies::m_phyWorld = nullptr;
 
 void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
@@ -32,14 +32,29 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 	float tempCalc{ 0 };
 	switch (state) {
 	case EnemyState::Follow:
-		//std::cout << "follow\n";
-
 		if (abs(targetPos.x - enemyPos.x) > 1) {
 			tempCalc = targetPos.x - enemyPos.x;
 			tempCalc = tempCalc / abs(tempCalc) * moveSpeed;
 			temp.x += tempCalc;
 		} else
 			state = EnemyState::Wander;
+
+		canJump = false;
+		if (temp.x != 0)
+			for (b2ContactEdge* edge = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetContactList(); edge; edge = edge->next) {
+				//b2Vec2 contactNormal = edge->contact->GetManifold()->localNormal;
+				//if (edge->other->GetFixtureList()->GetType() == b2Shape::e_chain)
+					//contactNormal *= -1;
+				//printf("new: %f, %f\n", contactNormal.x, contactNormal.y);
+				if (edge->contact->GetManifold()->localNormal.y >= 0.9 && edge->contact->GetManifold()->pointCount == 2) {
+					canJump = true;
+					break;
+				}
+			}
+
+		//jump by doing raycast to side and checking to see if intersection point is different then p2 for the raycast
+		if (canJump && abs(EnemyRaycast(enemyb2Pos, b2Vec2(enemyb2Pos.x + temp.x * 3, enemyb2Pos.y), true).x) - abs(enemyb2Pos.x + 3 * temp.x) != 0)
+			temp.y = jumpHeight;
 		break;
 	case EnemyState::Wander:
 		//std::cout << "wander\n";
@@ -55,27 +70,6 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 		break;
 	default:
 		break;
-	}
-
-	canJump = false;
-	//check contact list to check if bottom edge is touching something, 0 to 2 are side ndormals
-	if (temp.x != 0)
-		for (b2ContactEdge* edge = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetContactList(); edge; edge = edge->next) {
-			//b2Vec2 contactNormal = edge->contact->GetManifold()->localNormal;
-
-			//if (edge->other->GetFixtureList()->GetType() == b2Shape::e_chain)
-				//contactNormal *= -1;
-
-			//printf("new: %f, %f\n", contactNormal.x, contactNormal.y);
-			if (edge->contact->GetManifold()->localNormal.y >= 0.9 && edge->contact->GetManifold()->pointCount == 2) {
-				canJump = true;
-				break;
-			}
-		}
-
-	//jump by doing raycast to side and checking to see if intersection point is different then p2 for the raycast
-	if (canJump && abs(EnemyRaycast(enemyb2Pos, b2Vec2(enemyb2Pos.x + temp.x * 5, enemyb2Pos.y), true).x) - abs(enemyb2Pos.x + 5 * temp.x) != 0) {
-		temp.y = 50.f;
 	}
 
 	if (temp.x < 0) {
@@ -205,13 +199,14 @@ void Enemies::CreateEnemy(b2World* m_physicsWorld, EnemyTypes m_type, float x, f
 	tempBody->SetFixedRotation(true);
 
 	tempPhsBody = PhysicsBody(tempBody, 20.f, 20.f, vec2(0, 0), true);
+	tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
 
 	switch (m_type) {
 	case EnemyTypes::WALKER:
-		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 10, 10, 2, 3);
+		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 10, 10, 50, 3);
 		break;
 	case EnemyTypes::SHOOTER:
-		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 8, 10, 2, 2);
+		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 8, 10, 50, 2);
 		break;
 	default:
 		break;
