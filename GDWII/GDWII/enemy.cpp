@@ -41,16 +41,11 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 
 		canJump = false;
 		if (temp.x != 0)
-			for (b2ContactEdge* edge = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetContactList(); edge; edge = edge->next) {
-				//b2Vec2 contactNormal = edge->contact->GetManifold()->localNormal;
-				//if (edge->other->GetFixtureList()->GetType() == b2Shape::e_chain)
-					//contactNormal *= -1;
-				//printf("new: %f, %f\n", contactNormal.x, contactNormal.y);
+			for (b2ContactEdge* edge = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetContactList(); edge; edge = edge->next)
 				if (edge->contact->GetManifold()->localNormal.y >= 0.9 && edge->contact->GetManifold()->pointCount == 2) {
 					canJump = true;
 					break;
 				}
-			}
 
 		//jump by doing raycast to side and checking to see if intersection point is different then p2 for the raycast
 		if (canJump && abs(EnemyRaycast(enemyb2Pos, b2Vec2(enemyb2Pos.x + temp.x * 3, enemyb2Pos.y), true).x) - abs(enemyb2Pos.x + 3 * temp.x) != 0)

@@ -40,6 +40,4 @@ private:
 	float missileRadius = 10.f;
 
 	float projectileSpeed = 100.f;
-
-	b2WeldJoint *groundDetection;
 };

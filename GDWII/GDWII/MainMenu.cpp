@@ -353,8 +353,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 	}
 
 	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 600, -130);
-	//Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, -80, -88);
-	//Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, -60, -88);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 660, -130);
 
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
@@ -544,8 +543,8 @@ void MainMenu::Update()
 		}
 	}
 
-	if (grounded()) {
-		onGround = true;
+	onGround = grounded();
+	if (onGround) {
 		if (facingDown) {
 			//set collision to crouch height (half player height) once (first will be if starting off not crouching
 			if (!crouching) {
@@ -599,8 +598,6 @@ void MainMenu::Update()
 			m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->CreateFixture(&standingBox);
 		}
 		crouching = false;
-
-		onGround = false;
 	}
 
 	//only shoot when both wweapons are ready
@@ -860,16 +857,14 @@ void MainMenu::Update()
 
 bool MainMenu::grounded()
 {
-	
 	for (b2ContactEdge* edge = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetContactList(); edge; edge = edge->next) {
 		b2Vec2 contactNormal = edge->contact->GetManifold()->localNormal;
 
 		if (edge->other->GetFixtureList()->GetType() == b2Shape::e_chain)
 			contactNormal *= -1;
 
-		if (contactNormal.y <= -0.9 && edge->contact->GetManifold()->pointCount == 2) {
+		if (contactNormal.y <= -0.9 && edge->contact->GetManifold()->pointCount == 2)
 			return true;
-		}			
 	}
 
 	return false;
