@@ -38,11 +38,11 @@ class PhysicsBody
 public:
 	PhysicsBody() { };
 	//Constructs a circle collider
-	PhysicsBody(b2Body* body, float radius, vec2 centerOffset, bool isDynamic);
+	PhysicsBody(b2Body* body, float radius, vec2 centerOffset, bool isDynamic, uint16 categoryBits = 0x001, uint16 maskBits = 0x999);
 	//Constructs a box collider
-	PhysicsBody(b2Body* body, float width, float height, vec2 centerOffset, bool isDynamic);
+	PhysicsBody(b2Body* body, float width, float height, vec2 centerOffset, bool isDynamic, uint16 categoryBits = 0x001, uint16 maskBits = 0x999);
 
-	PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vector<float> yCoordinates);
+	PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vector<float> yCoordinates, uint16 categoryBits = 0x001, uint16 maskBits = 0x999);
 
 	void DeleteBody();
 

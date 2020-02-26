@@ -164,7 +164,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		b2Body* tempBody;
 		b2BodyDef tempDef;
 		tempDef.type = b2_dynamicBody;
-		tempDef.position.Set(float32(370), float32(-120));
+		tempDef.position.Set(float32(0), float32(-120));
 
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		tempBody->SetFixedRotation(true);
@@ -352,8 +352,8 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		Missiles::isBombable(entity);
 	}
 
-	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 600, -130);
-	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 660, -130);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 850, -220);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 750, -209);
 
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));

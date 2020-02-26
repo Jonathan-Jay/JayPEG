@@ -32,27 +32,55 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 	float tempCalc{ 0 };
 	switch (state) {
 	case EnemyState::Follow:
-		if (abs(targetPos.x - enemyPos.x) > 1) {
-			tempCalc = targetPos.x - enemyPos.x;
-			tempCalc = tempCalc / abs(tempCalc) * moveSpeed;
-			temp.x += tempCalc;
-		} else
+		if (abs(targetPos.x - enemyPos.x) < 1) {
 			state = EnemyState::Wander;
+			break;
+		}
+
+		tempCalc = targetPos.x - enemyPos.x;
+		tempCalc = tempCalc / abs(tempCalc) * moveSpeed;
+		temp.x += tempCalc;
 
 		canJump = false;
-		if (temp.x != 0)
-			for (b2ContactEdge* edge = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetContactList(); edge; edge = edge->next)
-				if (edge->contact->GetManifold()->localNormal.y >= 0.9 && edge->contact->GetManifold()->pointCount == 2) {
-					canJump = true;
-					break;
-				}
+		for (b2ContactEdge* edge = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetContactList(); edge; edge = edge->next)
+			if (edge->contact->GetManifold()->localNormal.y >= 0.9 && edge->contact->GetManifold()->pointCount == 2) {
+				canJump = true;
+				break;
+			}
 
 		//jump by doing raycast to side and checking to see if intersection point is different then p2 for the raycast
-		if (canJump && abs(EnemyRaycast(enemyb2Pos, b2Vec2(enemyb2Pos.x + temp.x * 3, enemyb2Pos.y), true).x) - abs(enemyb2Pos.x + 3 * temp.x) != 0)
+		if (canJump && abs(EnemyRaycast(enemyb2Pos, b2Vec2(enemyb2Pos.x + temp.x * 3, enemyb2Pos.y), true).x) - abs(enemyb2Pos.x + 3 * temp.x) != 0) {
+			//detect if enemy has jumped multiple times in same place, if so then wander as it is stuck jumping
+			jumpInfo.x++;
+			if (jumpInfo.y == enemyPos.x || jumpInfo.z == enemyPos.y) {
+				if (jumpInfo.x >= 3) {
+					jumpInfo = vec3(0, 0, 0);
+					state = EnemyState::Wander;
+					break;
+				}
+			} else
+				jumpInfo = vec3(0, 0, 0);
+
+			jumpInfo.y = enemyPos.x;
+			jumpInfo.z = enemyPos.y;
+
 			temp.y = jumpHeight;
+		}
+
 		break;
 	case EnemyState::Wander:
-		//std::cout << "wander\n";
+		for (b2ContactEdge* edge = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetContactList(); edge; edge = edge->next) {
+			b2Manifold* man = edge->contact->GetManifold();
+
+			//find ID of collider to make sure that the next collision isnt it
+			if ( (man->localNormal.y <= -0.9 && man->pointCount == 1 || man->localNormal.x != 0) && man->localPoint != previousLocalPoint ) {
+				animCon.SetActiveAnim(!animCon.GetActiveAnim());
+				previousLocalPoint = man->localPoint;
+				break;
+			}
+		}
+
+		temp.x += (animCon.GetActiveAnim() * 2 - 1) * moveSpeed;
 		break;
 	default:
 		break;
@@ -181,7 +209,6 @@ void Enemies::CreateEnemy(b2World* m_physicsWorld, EnemyTypes m_type, float x, f
 	ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
 
 	auto& tempSpr = ECS::GetComponent<Sprite>(entity);
-
 
 	auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 

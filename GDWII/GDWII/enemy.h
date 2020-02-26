@@ -28,16 +28,18 @@ public:
 	~Enemy() {}
 
 	EnemyTypes type{ 0 };
-	EnemyState state{ 0 };
+	EnemyState state{ 1 };
 	int health{ 0 };
 	int moveSpeed{ 0 };
 	int jumpHeight{ 0 };
 	int attackDamage{ 0 };
+	float refreshSightTime = 0.f;
 	bool canSeePlayer{ false };
 	bool facingRight{ false };
 	bool canJump{ false };
-	float refreshSightTime = 0.f;
+	vec3 jumpInfo;	//times jumped, x pos at jump, y pos at jump
 	vec2 targetPos;
+	b2Vec2 previousLocalPoint;
 
 	void SetStats(EnemyTypes _type, int _health, int _moveSpeed, int _jumpHeight, int _attackDamage) { type = _type; health = _health; moveSpeed = _moveSpeed; jumpHeight = _jumpHeight; }
 	void Update(entt::registry* m_reg, enemyList& enemyID);
