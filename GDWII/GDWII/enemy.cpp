@@ -126,7 +126,7 @@ void Enemy::findPlayer(entt::registry* m_reg, enemyList& enemyID) {
 		vec2 p3(p2.x - p1.x, p2.y - p1.y);
 		vec2 p4(facingRight ? 1 : -1, 0);
 
-		p3.Normalize();
+		p3 = p3.Normalize();
 
 		//								 / ||a|| * ||b|| [which is 1]
 		double FOVangle = acos(p3.Dot(p4));
