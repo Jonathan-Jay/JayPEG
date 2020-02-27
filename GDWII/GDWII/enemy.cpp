@@ -122,12 +122,14 @@ void Enemy::findPlayer(entt::registry* m_reg, enemyList& enemyID) {
 	
 	//if enemy cant see player then use FOV, if can then FOV is 360 deg
 	if (!canSeePlayer) {
+		//get direction of where the player is compared to enemy then compare to direction of where the enemy is facing
 		vec2 p3(p2.x - p1.x, p2.y - p1.y);
 		vec2 p4(facingRight ? 1 : -1, 0);
 
 		p3.Normalize();
 
-		double FOVangle = acos(p3.Dot(p4) / (p3.GetMagnitude() * p4.GetMagnitude()));
+		//								 / ||a|| * ||b|| [which is 1]
+		double FOVangle = acos(p3.Dot(p4));
 		if (FOVangle > PI / 4)
 			return;
 	}
@@ -141,6 +143,9 @@ void Enemy::findPlayer(entt::registry* m_reg, enemyList& enemyID) {
 //https://www.iforce2d.net/b2dtut/raycasting
 //modified to support chain shapes
 b2Vec2 Enemy::EnemyRaycast(b2Vec2 p1, b2Vec2 p2, bool onlyStatic) {
+	/*b2RayCastCallback* RCC = 0;
+	Enemies::GetPhysicsWorld()->RayCast(RCC, p1, p2);*/
+
 	b2RayCastInput input;
 	input.p1 = p1;
 	input.p2 = p2;

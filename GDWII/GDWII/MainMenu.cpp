@@ -169,7 +169,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		tempBody->SetFixedRotation(true);
 
-		tempPhsBody = PhysicsBody(tempBody, playerWidth, playerHeight, vec2(0, 0), true);
+		tempPhsBody = PhysicsBody(tempBody, playerWidth, playerHeight, vec2(0, 0), true, CollisionIDs::Player(), 0x999999);
 
 		tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
 
@@ -449,7 +449,7 @@ void MainMenu::KeyboardDown()
 		}
 
 		b2Vec2 temp = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
-		if (recoilDelay == 0) 
+		if (recoilDelay == 0)
 			temp.x = 0;
 		if (Input::GetKey(Key::RightArrow)) {
 			if (!crouching && recoilDelay == 0)
@@ -544,47 +544,31 @@ void MainMenu::Update()
 	}
 
 	onGround = grounded();
-	if (onGround) {
-		if (facingDown) {
-			//set collision to crouch height (half player height) once (first will be if starting off not crouching
-			if (!crouching) {
-				b2PolygonShape tempBox;
-				tempBox.SetAsBox(playerWidth / 2.f, playerHeight / 4.f, b2Vec2(0, -playerHeight / 4.f), 0);
+	if (onGround && facingDown) {
+		//set collision to crouch height (half player height) once (first will be if starting off not crouching
+		if (!crouching) {
+			b2Body* playerBody = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody();
+
+			b2PolygonShape tempBox;
+			tempBox.SetAsBox(playerWidth / 2.f, playerHeight / 4.f, b2Vec2(0, -playerHeight / 4.f), 0);
 				
-				b2FixtureDef crouchingBox;
-				crouchingBox.shape = &tempBox;
-				crouchingBox.density = 1.f;
-				crouchingBox.friction = 0.f;
+			b2FixtureDef crouchingBox;
+			crouchingBox.shape = &tempBox;
+			crouchingBox.density = 1.f;
+			crouchingBox.friction = 0.f;
+			crouchingBox.filter.categoryBits = playerBody->GetFixtureList()->GetFilterData().categoryBits;
+			crouchingBox.filter.maskBits = playerBody->GetFixtureList()->GetFilterData().maskBits;
 
-				b2Fixture *fixtureA = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetFixtureList();
-				m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->DestroyFixture(fixtureA);
-				m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->CreateFixture(&crouchingBox);
-			}
-			crouching = true;
-			
+			b2Fixture *fixtureA = playerBody->GetFixtureList();
+			playerBody->DestroyFixture(fixtureA);
+			playerBody->CreateFixture(&crouchingBox);
 		}
-		else {
-			//if just exited crouch
-			if (crouching) {
-				b2PolygonShape tempBox;
-				tempBox.SetAsBox(playerWidth / 2.f, playerHeight / 2.f);
-
-				b2FixtureDef standingBox;
-				standingBox.shape = &tempBox;
-				standingBox.density = 1.f;
-				standingBox.friction = 0.f;
-
-				b2Fixture* fixtureA = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetFixtureList();
-				m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->DestroyFixture(fixtureA);
-				m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->CreateFixture(&standingBox);
-			}
-			crouching = false;
-			m_sceneReg->get<Sprite>(EntityIdentifier::MainPlayer()).SetHeight(playerHeight);
-		}
-	}
-	else {
+		crouching = true;
+	} else {
 		//if just exited crouch
 		if (crouching) {
+			b2Body* playerBody = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody();
+
 			b2PolygonShape tempBox;
 			tempBox.SetAsBox(playerWidth / 2.f, playerHeight / 2.f);
 
@@ -592,10 +576,12 @@ void MainMenu::Update()
 			standingBox.shape = &tempBox;
 			standingBox.density = 1.f;
 			standingBox.friction = 0.f;
+			standingBox.filter.categoryBits = playerBody->GetFixtureList()->GetFilterData().categoryBits;
+			standingBox.filter.maskBits = playerBody->GetFixtureList()->GetFilterData().maskBits;
 
-			b2Fixture* fixtureA = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetFixtureList();
-			m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->DestroyFixture(fixtureA);
-			m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->CreateFixture(&standingBox);
+			b2Fixture* fixtureA = playerBody->GetFixtureList();
+			playerBody->DestroyFixture(fixtureA);
+			playerBody->CreateFixture(&standingBox);
 		}
 		crouching = false;
 	}
@@ -610,63 +596,24 @@ void MainMenu::Update()
 			}
 
 			{
-				auto entity = ECS::CreateEntity();
-
-				ECS::AttachComponent<Sprite>(entity);
-				ECS::AttachComponent<Transform>(entity);
-				ECS::AttachComponent<PhysicsBody>(entity);
-
-				std::string filename = "Bullet.png";
-
-				ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 2.f, bulletRadius * 2.f);
-
-				//position is player position plus a bit (x changes based on direction player is facing
-				float x = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX() + (movingRight ? (playerWidth / 2.f + bulletRadius) : -(playerWidth / 2.f + bulletRadius));
+				float x = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
 				float y = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionY() + (crouching ? -(playerHeight / 4.f) : (playerHeight / 4.f));
-				Degrees rot(0);
-				if (facingUp) {
+
+				if (facingUp)
 					y += playerHeight / 4.f + bulletRadius;
-					x -= (movingRight ? (playerWidth / 2.f + bulletRadius) : -(playerWidth / 2.f + bulletRadius));
-					rot = 90;
-				}
-				else if (facingDown) {
+				else if (facingDown)
 					y -= playerHeight * 3.f / 4.f + bulletRadius;
-					x -= (movingRight ? (playerWidth / 2.f + bulletRadius) : -(playerWidth / 2.f + bulletRadius));
-					rot = -90;
-				}
-				else {
-					rot = (movingRight ? 0 : 180);
-				}
 
-				ECS::GetComponent<Transform>(entity).SetPosition(vec3(x, y, 0.f));
+				b2Vec2 vel;
 
-				auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
+				if (!facingDown && !facingUp)
+					vel = b2Vec2((movingRight ? projectileSpeed : -projectileSpeed), 0);
+				else
+					vel = b2Vec2(0, (facingUp ? projectileSpeed : -projectileSpeed));
 
-				b2Body* tempBody;
-				b2BodyDef tempDef;
-				tempDef.type = b2_dynamicBody;
-				tempDef.position.Set(x, y);
-
-				tempBody = m_physicsWorld->CreateBody(&tempDef);
-				tempBody->SetGravityScale(0);
-				tempBody->SetFixedRotation(true);
-
-				tempPhsBody = PhysicsBody(tempBody, bulletRadius, vec2(0, 0), true);
-
-				ECS::GetComponent<PhysicsBody>(entity).GetBody()->SetTransform(b2Vec2(x, y), Transform::ToRadians(rot));
-
-				unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-				ECS::SetUpIdentifier(entity, bitHolder, "bullet");
-				Bullets::isBullet(entity);
-
-				//depending on the direction player is facing, give acceleration
-				if (!facingDown && !facingUp) { m_sceneReg->get<PhysicsBody>(entity).GetBody()->SetLinearVelocity(b2Vec2((movingRight ? projectileSpeed : -projectileSpeed), 0)); }
-				else { m_sceneReg->get<PhysicsBody>(entity).GetBody()->SetLinearVelocity(b2Vec2(0, (facingUp ? projectileSpeed : -projectileSpeed))); }
+				Bullets::isBullet(m_sceneReg, m_physicsWorld, b2Vec2(x, y), vel, bulletRadius);
 			}
 
-			//fix camera focus (focus breaks when entities are spawned)
-			ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
-			ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 			//reset delay
 			gunDelay = gunCooldown;
 		}
@@ -681,107 +628,42 @@ void MainMenu::Update()
 				}
 
 				{
-					auto entity = ECS::CreateEntity();
+					float x = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
+					float y = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionY() + (crouching ? -(playerHeight / 8.f) : (playerHeight / 4.f));
 
-					ECS::AttachComponent<Sprite>(entity);
-					ECS::AttachComponent<Transform>(entity);
-					ECS::AttachComponent<PhysicsBody>(entity);
-					ECS::AttachComponent<AnimationController>(entity);
-
-					std::string filename = "Missile.png";
-
-					auto& animController = ECS::GetComponent<AnimationController>(entity);
-					animController.InitUVs(filename);
-
-					animController.AddAnimation(Animation());
-					animController.AddAnimation(Animation());
-
-					{	//animation for shot
-						auto& anim = animController.GetAnimation(0);
-						anim.AddFrame(vec2(0, 127), vec2(127, 0));
-						anim.SetRepeating(false);
-						anim.SetSecPerFrame(1.f);
-					}
-
-					{	//aniamtion for explosion
-						auto& anim = animController.GetAnimation(1);
-						anim.AddFrame(vec2(0, 255), vec2(127, 128));
-						anim.AddFrame(vec2(128, 255), vec2(255, 128));
-						anim.AddFrame(vec2(256, 255), vec2(383, 128));
-						anim.SetRepeating(false);
-						anim.SetSecPerFrame(0.1f);
-					}
-					animController.SetActiveAnim(0);
-
-					ECS::GetComponent<Sprite>(entity).LoadSprite(filename, missileRadius * 2.f, missileRadius * 2.f, true, &animController);
-
-					//position is player position plus a bit (x changes based on direction player is facing
-					float x = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX() + (movingRight ? (playerWidth / 2.f + missileRadius) : -(playerWidth / 2.f + missileRadius));
-					float y = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionY() + (crouching ? -(playerHeight / 4.f) : (playerHeight / 4.f));
-					Degrees rot(0);
-					if (facingUp) {
+					if (facingUp)
 						y += playerHeight / 4.f + missileRadius;
-						x -= (movingRight ? (playerWidth / 2.f + missileRadius) : -(playerWidth / 2.f + missileRadius));
-						rot = 90;
-					}
-					else if (facingDown) {
+					else if (facingDown)
 						y -= playerHeight * 3.f / 4.f + missileRadius;
-						x -= (movingRight ? (playerWidth / 2.f + missileRadius) : -(playerWidth / 2.f + missileRadius));
-						rot = -90;
-					}
-					else {
-						rot = (movingRight ? 0 : 180);
-					}
 
-					ECS::GetComponent<Transform>(entity).SetPosition(vec3(x, y, 0.f));
-
-					auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
-
-					b2Body* tempBody;
-					b2BodyDef tempDef;
-					tempDef.type = b2_dynamicBody;
-					tempDef.position.Set(x, y);
-
-					tempBody = m_physicsWorld->CreateBody(&tempDef);
-					tempBody->SetGravityScale(0);
-					tempBody->SetFixedRotation(true);
-
-					tempPhsBody = PhysicsBody(tempBody, missileRadius, vec2(0, 0), true);
-
-					ECS::GetComponent<PhysicsBody>(entity).GetBody()->SetTransform(b2Vec2(x, y), Transform::ToRadians(rot));
-
-					unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-					ECS::SetUpIdentifier(entity, bitHolder, "missile");
-					Missiles::isMissile(entity);
+					b2Vec2 vel = b2Vec2(0, 0);
+					b2Vec2 velo = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
 
 					//depending on the direction player is facing, give acceleration
 					if (!facingDown && !facingUp) {
-						m_sceneReg->get<PhysicsBody>(entity).GetBody()->SetLinearVelocity(b2Vec2((movingRight ? projectileSpeed : -projectileSpeed), 0));
+						vel.x = movingRight ? projectileSpeed : -projectileSpeed;
 						if (!onGround) {
-							b2Vec2 velo = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
-							m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(b2Vec2((movingRight ? -jumpStrength : jumpStrength), velo.y));
+							velo.x = movingRight ? -jumpStrength : jumpStrength;
 							recoilDelay = recoilCooldown;
 						}
 					}
 					else {
 						if (facingDown) {
-							m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(b2Vec2(0, jumpStrength));
-							m_sceneReg->get<PhysicsBody>(entity).GetBody()->SetLinearVelocity(b2Vec2(0, -projectileSpeed));
+							velo.y = jumpStrength;
+							vel.y = -projectileSpeed;
 						}
 						else {
-							b2Vec2 velo = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
-							if (velo.y > 0) {
+							if (velo.y > 0)
 								velo.y = 0;
-								m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(velo);
-							}
-							m_sceneReg->get<PhysicsBody>(entity).GetBody()->SetLinearVelocity(b2Vec2(0, projectileSpeed));
+
+							vel.y = projectileSpeed;
 						}
 					}
+
+					m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(velo);
+					Missiles::isMissile(m_sceneReg, m_physicsWorld, b2Vec2(x, y), vel, missileRadius);
 				}
 
-				//fix camera focus (focus breaks when entities are spawned)
-				ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
-				ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 				//reset delay
 				missileDelay = missileCooldown;
 			}
