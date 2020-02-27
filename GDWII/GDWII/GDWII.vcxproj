@@ -183,6 +183,7 @@
     <ClInclude Include="JSON.h" />
     <ClInclude Include="MainMenu.h" />
     <ClInclude Include="Matrix.h" />
+    <ClInclude Include="missile.h" />
     <ClInclude Include="PhysicsBody.h" />
     <ClInclude Include="PhysicsSystem.h" />
     <ClInclude Include="PixelateEffect.h" />
@@ -219,6 +220,7 @@
     <ClCompile Include="CreatePlatform.cpp" />
     <ClCompile Include="ECS.cpp" />
     <ClCompile Include="EffectManager.cpp" />
+    <ClCompile Include="enemy.cpp" />
     <ClCompile Include="EntityIdentifier.cpp" />
     <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="Framebuffer.cpp" />

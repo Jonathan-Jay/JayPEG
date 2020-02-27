@@ -1,5 +1,5 @@
 #include "Game.h"
-
+#include <iomanip>
 #include <random>
 
 
@@ -272,7 +272,7 @@ void Game::MouseClick(SDL_MouseButtonEvent evnt)
 		int windowWidth = BackEnd::GetWindowWidth();
 		int maincamera = EntityIdentifier::MainCamera();
 		vec4 ortho = m_register->get<Camera>(maincamera).GetOrthoSize();
-		//printf("%f, %f, %f, %f\n", ortho.x, ortho.y, ortho.z, ortho.w);
+		printf("%f, %f, %f, %f\n", ortho.x, ortho.y, ortho.z, ortho.w);
 		vec2 pos = vec2(
 			((evnt.x / static_cast<float>(windowHeight) * 2.f * ortho.w) - (ortho.w * static_cast<float>(windowWidth) / static_cast<float>(windowHeight))),
 			((-evnt.y / static_cast<float>(windowHeight) * 2.f * ortho.w) + ortho.w)
@@ -288,15 +288,15 @@ void Game::MouseClick(SDL_MouseButtonEvent evnt)
 	if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
 		for (int x(0); x < xPos.size(); x++) {
 			if (x == xPos.size() - 1)
-				printf("%f\n", xPos[x]);
+				std::cout << std::fixed << std::setprecision(2) << xPos[x] << '\n';
 			else
-				printf("%f, ", xPos[x]);
+				std::cout << std::fixed << std::setprecision(2) << xPos[x] << ", ";
 		}
 		for (int x(0); x < yPos.size(); x++) {
 			if (x == yPos.size() - 1)
-				printf("%f\n", yPos[x]);
+				std::cout << std::fixed << std::setprecision(2) << yPos[x] << '\n';
 			else
-				printf("%f, ", yPos[x]);
+				std::cout << std::fixed << std::setprecision(2) << yPos[x] << ", ";
 		}
 	}
 

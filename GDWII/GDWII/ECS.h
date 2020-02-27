@@ -79,6 +79,10 @@ inline T & ECS::GetComponent(unsigned entity)
 template<typename T>
 inline void ECS::RemoveComponent(unsigned entity)
 {
+	if (m_reg->has<PhysicsBody>(entity)) {
+		m_reg->get<PhysicsBody>(entity).DeleteBody();
+	}
+	
 	//Remove this component from the entity
 	m_reg->remove<T>(entity);
 }
