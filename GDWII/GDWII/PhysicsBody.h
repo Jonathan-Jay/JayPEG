@@ -22,25 +22,28 @@ struct CollisionIDs
 {
 public:
 	//Gets the different IDs
-	static unsigned int Player();
-	static unsigned int Environment();
-	static unsigned int Enemy();
+	static unsigned int Player() { return m_playerID; }
+	static unsigned int Environment() { return m_environmentID; }
+	static unsigned int Enemy() { return m_enemyID; }
+	static unsigned int Bullet() { return m_bulletID; }
+	static unsigned int Bombable() { return m_bulletID; }
 private:
 	//Holds the different IDs
-	static unsigned int m_playerID;
 	static unsigned int m_environmentID;
+	static unsigned int m_playerID;
 	static unsigned int m_enemyID;
+	static unsigned int m_bulletID;
+	static unsigned int m_bombableID;
 };
-
 
 class PhysicsBody
 {
 public:
 	PhysicsBody() { };
 	//Constructs a circle collider
-	PhysicsBody(b2Body* body, float radius, vec2 centerOffset, bool isDynamic);
+	PhysicsBody(b2Body* body, float radius, vec2 centerOffset, bool isDynamic, uint16 categoryBits = 0x1, uint16 maskBits = 0x999999);
 	//Constructs a box collider
-	PhysicsBody(b2Body* body, float width, float height, vec2 centerOffset, bool isDynamic);
+	PhysicsBody(b2Body* body, float width, float height, vec2 centerOffset, bool isDynamic, uint16 categoryBits = 0x1, uint16 maskBits = 0x999999);
 
 	PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vector<float> yCoordinates);
 	//PhysicsBody(b2Body* body, b2Vec2 tempaArray[], int size);
