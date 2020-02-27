@@ -16,15 +16,13 @@ public:
 	
 	static void changeRadius(int newRadius);
 
-	static std::vector<missileData> getMissiles();
-
 	//update all existing missiles
 	static void updateAllMissiles(entt::registry* m_register);
 private:
 	static std::vector<missileData> missiles;
 	static std::vector<unsigned int> bombable;
 	static int maxMissiles;
-	static int radius;
+	static int explosionRadius;
 	static float delay;
 	static float damage;
 };
@@ -32,8 +30,8 @@ private:
 std::vector<missileData> Missiles::missiles = {};
 std::vector<unsigned int> Missiles::bombable = {};
 int Missiles::maxMissiles = 2;
-int Missiles::radius = 40;
-float Missiles::delay = 0.3;
+int Missiles::explosionRadius = 25;
+float Missiles::delay = 0.3f;
 float Missiles::damage = 10;
 
 void Missiles::isMissile(unsigned int entity)
@@ -58,13 +56,8 @@ void Missiles::isBombable(unsigned int entity)
 void Missiles::changeRadius(int newRadius)
 {
 	if (newRadius > 1) {
-		radius = newRadius;
+		explosionRadius = newRadius;
 	}
-}
-
-inline std::vector<missileData> Missiles::getMissiles()
-{
-	return missiles;
 }
 
 void Missiles::updateAllMissiles(entt::registry* m_register)
@@ -72,12 +65,6 @@ void Missiles::updateAllMissiles(entt::registry* m_register)
 	//checks if missile should die
 	float playerPosX = m_register->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
 	for (int x(0); x < missiles.size();) {
-		//player range check
-		if (abs(m_register->get<Transform>(missiles[x].entity).GetPositionX() - playerPosX) > 800.f) {
-			ECS::DestroyEntity(missiles[x].entity);
-			missiles.erase(missiles.begin() + x, missiles.begin() + x + 1);
-			break;
-		}
 
 		//check if it's a missile that hit something already
 		if (missiles[x].hit) {
@@ -89,6 +76,17 @@ void Missiles::updateAllMissiles(entt::registry* m_register)
 			}
 		}
 		else {
+			//player range check
+			if (abs(m_register->get<Transform>(missiles[x].entity).GetPositionX() - playerPosX) > 800.f) {
+				missiles[x].hit = true;
+				ECS::RemoveComponent<PhysicsBody>(missiles[x].entity);
+				m_register->get<Sprite>(missiles[x].entity).SetWidth(explosionRadius * 2);
+				m_register->get<Sprite>(missiles[x].entity).SetHeight(explosionRadius * 2);
+				m_register->get<AnimationController>(missiles[x].entity).SetActiveAnim(1);
+				x++;
+				continue;
+			}
+
 			//contact check (touching any physics body)
 			for (b2ContactEdge* contact = m_register->get<PhysicsBody>(missiles[x].entity).GetBody()->GetContactList()
 				; contact; contact = contact->next
@@ -98,8 +96,7 @@ void Missiles::updateAllMissiles(entt::registry* m_register)
 					//tests it does when it hits something
 
 					//if it's the mainplayer
-					if (contact->contact->GetFixtureA()->GetBody() == m_register->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody() ||
-						contact->contact->GetFixtureA()->GetBody() == m_register->get<PhysicsBody>(EntityStorage::GetEntity(0)).GetBody()) {
+					if (contact->contact->GetFixtureA()->GetBody() == m_register->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()) {
 						break;
 					}
 
@@ -110,11 +107,11 @@ void Missiles::updateAllMissiles(entt::registry* m_register)
 						vec3 pos2 = m_register->get<Transform>(bombable[y]).GetPosition();
 						float width2 = m_register->get<PhysicsBody>(bombable[y]).GetWidth() / 2.f;
 						float height2 = m_register->get<PhysicsBody>(bombable[y]).GetHeight() / 2.f;
-						if ((pos.x < (pos2.x + radius + width2)) && (pos.x > (pos2.x - radius - width2)) &&
-							(pos.y < (pos2.y + radius + height2)) && (pos.y > (pos2.y - radius - height2))) {
+						if ((pos.x < (pos2.x + explosionRadius + width2)) && (pos.x > (pos2.x - explosionRadius - width2)) &&
+							(pos.y < (pos2.y + explosionRadius + height2)) && (pos.y > (pos2.y - explosionRadius - height2))) {
 							vec2 temp = vec2(pos.x - pos2.x, pos.y - pos2.y);
 							vec2 temp2 = m_register->get<PhysicsBody>(bombable[y]).GetBottomLeft();
-							if (temp.GetMagnitude() <= radius + temp2.GetMagnitude()) {
+							if (temp.GetMagnitude() <= explosionRadius + temp2.GetMagnitude()) {
 								ECS::DestroyEntity(bombable[y]);
 								bombable.erase(bombable.begin() + y, bombable.begin() + y + 1);
 								continue;
@@ -127,10 +124,10 @@ void Missiles::updateAllMissiles(entt::registry* m_register)
 					for (int y(0); y < Bullets::bullets.size();) {
 						vec3 pos2 = m_register->get<Transform>(Bullets::bullets[y]).GetPosition();
 						float radius2 = m_register->get<PhysicsBody>(Bullets::bullets[y]).GetRadius();
-						if ((pos.x < (pos2.x + radius + radius2)) && (pos.x > (pos2.x - radius - radius2)) &&
-							(pos.y < (pos2.y + radius + radius2)) && (pos.y > (pos2.y - radius - radius2))) {
+						if ((pos.x < (pos2.x + explosionRadius + radius2)) && (pos.x > (pos2.x - explosionRadius - radius2)) &&
+							(pos.y < (pos2.y + explosionRadius + radius2)) && (pos.y > (pos2.y - explosionRadius - radius2))) {
 							vec2 temp = vec2(pos.x - pos2.x, pos.y - pos2.y);
-							if (temp.GetMagnitude() <= radius + radius2) {
+							if (temp.GetMagnitude() <= explosionRadius + radius2) {
 								printf("bullet dead\n");
 								ECS::DestroyEntity(Bullets::bullets[y]);
 								Bullets::bullets.erase(Bullets::bullets.begin() + y, Bullets::bullets.begin() + y + 1);
@@ -158,8 +155,8 @@ void Missiles::updateAllMissiles(entt::registry* m_register)
 
 					missiles[x].hit = true;
 					ECS::RemoveComponent<PhysicsBody>(missiles[x].entity);
-					m_register->get<Sprite>(missiles[x].entity).SetWidth(radius * 2);
-					m_register->get<Sprite>(missiles[x].entity).SetHeight(radius * 2);
+					m_register->get<Sprite>(missiles[x].entity).SetWidth(explosionRadius * 2);
+					m_register->get<Sprite>(missiles[x].entity).SetHeight(explosionRadius * 2);
 					m_register->get<AnimationController>(missiles[x].entity).SetActiveAnim(1);
 					break;
 				}

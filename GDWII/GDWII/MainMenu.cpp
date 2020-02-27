@@ -34,6 +34,8 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		ECS::GetComponent<Camera>(entity).SetWindowSize(vec2(float(windowWidth), float(windowHeight)));
 		ECS::GetComponent<Camera>(entity).Orthographic(aspectRatio, temp.x, temp.y, temp.z, temp.w, -100.f, 100.f);
 
+		ECS::GetComponent<Camera>(entity).SetOrthoSize(temp * 1.9f);
+
 		unsigned int bitHolder = EntityIdentifier::CameraBit() | EntityIdentifier::HoriScrollCameraBit() | EntityIdentifier::VertScrollCameraBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "Scrolling Camera");
 		ECS::SetIsMainCamera(entity, true);
@@ -178,39 +180,6 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 			| EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "player");
 		ECS::SetIsMainPlayer(entity, true);
-
-
-		//ground detcection line
-		auto entityB = ECS::CreateEntity();
-
-		ECS::AttachComponent<PhysicsBody>(entityB);
-		ECS::AttachComponent<Transform>(entityB);
-
-		auto& tempPhsBody2 = ECS::GetComponent<PhysicsBody>(entityB);
-
-		b2Body* tempBody2;
-		b2BodyDef tempDef2;
-		tempDef2.type = b2_dynamicBody;
-		tempDef2.position.Set(float32(-1990 - playerHeight / 2.f), float32(70));
-		ECS::GetComponent<Transform>(entityB).SetPosition(vec3(-1990 - playerHeight / 2.f, 70, 0));
-
-		tempBody2 = m_physicsWorld->CreateBody(&tempDef2);
-		tempBody2->SetFixedRotation(true);
-		tempBody2->SetGravityScale(0);
-
-		tempPhsBody2 = PhysicsBody(tempBody2, (playerWidth / 2.f), 0.1f, vec2(0,0), true);
-
-		unsigned int bitHolder2 = EntityIdentifier::PhysicsBit() | EntityIdentifier::TransformBit();
-		ECS::SetUpIdentifier(entityB, bitHolder2, "ground detector");
-		EntityStorage::StoreEntity(entityB, 0);
-
-		b2WeldJointDef jointDef;
-		jointDef.collideConnected = false;
-		jointDef.bodyA = tempBody;
-		jointDef.bodyB = tempBody2;
-		jointDef.localAnchorB = b2Vec2(0.f, playerHeight / 2.f);
-
-		groundDetection = (b2WeldJoint*)m_physicsWorld->CreateJoint(&jointDef);
 	}
 
 	/*{
@@ -268,7 +237,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		//tempBody->SetGravityScale(0);
-
+		
 		std::vector<float> x = {
 			-2061, -1347, -1347, -697, -697, -643, -643, -586, -586, -547, -547, -358,
 			-358, -286, -286, -215, -215, 419, 419, 480, 480, 750, 750, 970, 970,
@@ -285,7 +254,22 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 			209, 209, 165, 165, 650, 650, 750, 750, 610, 610, 593, 593, 605, 605, 580, 580, 550, 550, 347, 347, 190,
 			190, 149, 149, 99, 99, 54, 54, 214, 214, 55
 		};
+
+		/*
+		std::cout << "b2Vec2 tempArray[" << x.size() << "] = {\n";
+		for (int count(0); count < x.size(); count++) {
+			if (count == x.size() - 1) {
+				std::cout << "\tb2Vec2(" << x[count] << ", " << y[count] << ")\n";
+			}
+			else {
+				std::cout << "\tb2Vec2(" << x[count] << ", " << y[count] << "),\n";
+			}
+		}
+		std::cout << "};\n";
+		*/
+
 		tempPhsBody = PhysicsBody(tempBody, x, y);
+		//tempPhsBody = PhysicsBody(tempBody, tempArray, 83);
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "map");
@@ -365,12 +349,19 @@ void MainMenu::GamepadStick(XInputController* con)
 		gunActive = true;
 		controllerInput = true;
 	}
-	else if (con->IsButtonStroked(Buttons::B))
+	else if (controllerMissile)
 	{
-		missileShot = true;
-		controllerInput = true;
+		if (con->IsButtonPressed(Buttons::B))
+		{
+			missileShot = true;
+			controllerInput = true;
+			controllerMissile = false;
+		}
 	}
-
+	else if (con->IsButtonReleased(Buttons::B))
+	{
+		controllerMissile = true;
+	}
 
 	Stick sticks[2];
 	con->GetSticks(sticks);
@@ -430,8 +421,8 @@ void MainMenu::GamepadStick(XInputController* con)
 		}
 		controllerInput = true;
 	}
-	if (temp.y < -projectileSpeed + ((bulletRadius < missileRadius) ? missileRadius : bulletRadius)) {
-		temp.y = -projectileSpeed + ((bulletRadius < missileRadius) ? missileRadius : bulletRadius);
+	if (temp.y < -projectileSpeed + ((bulletRadius < missileRadius) ? missileRadius : bulletRadius) * 2.f) {
+		temp.y = -projectileSpeed + ((bulletRadius < missileRadius) ? missileRadius : bulletRadius) * 2.f;
 	}
 	m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
 }
@@ -447,7 +438,7 @@ void MainMenu::KeyboardDown()
 		}
 
 		b2Vec2 temp = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
-		if (recoilDelay == 0) 
+		if (recoilDelay == 0)
 			temp.x = 0;
 		if (Input::GetKey(Key::RightArrow)) {
 			if (!crouching && recoilDelay == 0)
@@ -479,44 +470,49 @@ void MainMenu::KeyboardDown()
 				temp.y = jumpStrength;
 			}
 		}
-		if (temp.y < -projectileSpeed + ((bulletRadius < missileRadius) ? missileRadius : bulletRadius)) {
-			temp.y = -projectileSpeed + ((bulletRadius < missileRadius) ? missileRadius : bulletRadius);
+		if (temp.y < -projectileSpeed + ((bulletRadius < missileRadius) ? missileRadius : bulletRadius) * 2.f) {
+			temp.y = -projectileSpeed + ((bulletRadius < missileRadius) ? missileRadius : bulletRadius) * 2.f;
 		}
 		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
 
 
-		//zoom code, delete later
-		if (Input::GetKey(Key::One)) {
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(1);
-		}
-		if (Input::GetKey(Key::Two)) {
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-1);
-		}
-
+		/*
 		//zoom stuff
-		if (Input::GetKeyDown(Key::Three)) {
-			orthozoom = !orthozoom;
-		}
-
-		if (orthozoom) {
-			float yOrtho = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize().y;
-			float xPos = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
-			if (xPos > 100 && xPos < 200) {
-				if (yOrtho < 500) {
-					m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-1);
-				}
-			}
-			else {
-				if (yOrtho > 100) {
-					m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(1);
-				}
+		float yOrtho = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize().y;
+		float xPos = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
+		if (xPos > 0 && xPos < 500) {
+			if (yOrtho < 500) {
+				m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-1);
 			}
 		}
+		else {
+			if (yOrtho > 100) {
+				m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(1);
+			}
+		}
+		*/
 	}
 }
 
+/*
+std::string textingShiz = "Now Playing: Barotrauma                                                                                                 ";
+float textingDelay = 0.5f;
+int charCount = 1;
+*/
+
 void MainMenu::Update()
 {
+	/*if (textingDelay < 0.f) {
+		std::cout << '\r' << textingShiz;
+		std::string tempChar = textingShiz.substr(0, charCount);
+		textingShiz.erase(0, charCount);
+		textingShiz += tempChar;
+		textingDelay = 0.05f;
+	}
+	else {
+		textingDelay -= Timer::deltaTime;
+	}*/
+
 	//if delay is below 1 (used once), it starts decreasing timer
 	if (gunDelay < 1.f) {
 		gunDelay -= Timer::deltaTime;
@@ -535,7 +531,7 @@ void MainMenu::Update()
 	}
 
 	if (recoilDelay > 0) {
-		recoilDelay -= Timer::deltaTime;
+		recoilDelay -= (onGround ? 3 : 1) * Timer::deltaTime;
 		if (recoilDelay < 0) {
 			recoilDelay = 0;
 		}
@@ -600,9 +596,9 @@ void MainMenu::Update()
 		onGround = false;
 	}
 
-	//only shoot when both wweapons are ready
-	if (gunDelay == 1.f && missileDelay == 5.f) {
-		if (gunActive) {
+	//only shoot when both weapons are ready
+	if (gunActive) {
+		if (gunDelay == 1.f) {
 			if (crouching) {
 				//remove tag to make force horizontal
 				facingUp = false;
@@ -670,8 +666,10 @@ void MainMenu::Update()
 			//reset delay
 			gunDelay = gunCooldown;
 		}
+	}
 
-		if (missileShot) {
+	if (missileShot) {
+		if (gunDelay == 1.f && missileDelay == 5.f) {
 			//missiles only spawn when delay is 1 (ready to use) and you have enough NRG
 			if (true) {	// hasenoughtNRG <- function that checks that and uses NRG
 				if (crouching) {
@@ -783,6 +781,7 @@ void MainMenu::Update()
 				ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 				ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 				//reset delay
+				gunDelay = gunCooldown;
 				missileDelay = missileCooldown;
 			}
 		}
@@ -792,7 +791,7 @@ void MainMenu::Update()
 	missileShot = false;
 	gunActive = false;
 
-	//update bullet logic
+	//update projectile logic
 	Missiles::updateAllMissiles(m_sceneReg);
 	Bullets::updateAllBullets(m_sceneReg);
 
@@ -811,22 +810,22 @@ void MainMenu::Update()
 				else { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1); }
 			}
 			else {		//walking
-				if (movingRight) { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0); }
-				else { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1); }
+				if (movingRight) {	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0); }
+				else {				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1); }
 			}
 		}
 		else {
 			if (facingUp) {
-				if (movingRight) { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0); }
-				else { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1); }
+				if (movingRight) {	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0); }
+				else {				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1); }
 			}
 			else if (crouching) {
-				if (movingRight) { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(2); }
-				else { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(3); }
+				if (movingRight) {	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(2); }
+				else {				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(3); }
 			}
 			else {		//idle
-				if (movingRight) { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0); }
-				else { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1); }
+				if (movingRight) {	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0); }
+				else {				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1); }
 			}
 		}
 	}
@@ -848,14 +847,15 @@ void MainMenu::Update()
 
 bool MainMenu::grounded()
 {
-	//check contact list to check if bottom edge is touching something, 0 to 2 are side normals
-	if (b2ContactEdge* edge = m_sceneReg->get<PhysicsBody>(EntityStorage::GetEntity(0)).GetBody()->GetContactList()) {
+	//check contact list to check if bottom edge is touching something
+	if (b2ContactEdge* edge = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetContactList()) {
 		for (; edge; edge = edge->next) {
-			if (edge->contact->IsTouching()) {
-				if (edge->contact->GetFixtureA()->GetBody() == m_sceneReg->get<PhysicsBody>(EntityStorage::GetEntity(1)).GetBody() ||
-					edge->contact->GetFixtureA()->GetBody() == m_sceneReg->get<PhysicsBody>(EntityStorage::GetEntity(2)).GetBody())
-					return true;
-
+			float temp = edge->contact->GetManifold()->localNormal.y;
+			if (edge->contact->GetFixtureA()->GetType() == b2Shape::e_chain) {
+				temp = -temp;
+			}
+			if (temp < -0.9f && edge->contact->GetManifold()->pointCount == 2) {
+				return true;
 			}
 		}
 	}

@@ -43,6 +43,7 @@ public:
 	PhysicsBody(b2Body* body, float width, float height, vec2 centerOffset, bool isDynamic);
 
 	PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vector<float> yCoordinates);
+	//PhysicsBody(b2Body* body, b2Vec2 tempaArray[], int size);
 
 	void DeleteBody();
 

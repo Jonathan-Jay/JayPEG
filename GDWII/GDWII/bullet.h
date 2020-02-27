@@ -9,17 +9,17 @@ public:
 	//create/store bullet number
 	static void isBullet(unsigned int entity);
 
-	static std::vector<unsigned int> getBullets();
-
 	//update all existing bullets
 	static void updateAllBullets(entt::registry* m_register);
 private:
 	static std::vector<unsigned int> bullets;
 	static int maxBullets;
+	static int damage;
 };
 
 std::vector<unsigned int> Bullets::bullets = {};
 int Bullets::maxBullets = 5;
+int Bullets::damage = 5;
 
 void Bullets::isBullet(unsigned int entity)
 {
@@ -35,22 +35,17 @@ void Bullets::isBullet(unsigned int entity)
 	}
 }
 
-inline std::vector<unsigned int> Bullets::getBullets()
-{
-	return bullets;
-}
-
 void Bullets::updateAllBullets(entt::registry* m_register)
 {
 	//checks if bullet should die
 	float playerPosX = m_register->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
 	for (int x(0); x < bullets.size();) {
-		bool contacted = false;
+		bool contacted = true;
 		//player range check
 		if (abs(m_register->get<Transform>(bullets[x]).GetPositionX() - playerPosX) > 800.f) {
 			ECS::DestroyEntity(bullets[x]);
 			bullets.erase(bullets.begin() + x, bullets.begin() + x + 1);
-			break;
+			continue;
 		}
 
 		//contact check (touching any physics body)
@@ -62,8 +57,7 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 				//tests it does when it hits something
 				
 				//if it's the mainplayer
-				if (contact->contact->GetFixtureA()->GetBody() == m_register->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody() ||
-					contact->contact->GetFixtureA()->GetBody() == m_register->get<PhysicsBody>(EntityStorage::GetEntity(0)).GetBody()) {
+				if (contact->contact->GetFixtureA()->GetBody() == m_register->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()) {
 					break;
 				}
 
@@ -76,12 +70,11 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 
 				ECS::DestroyEntity(bullets[x]);
 				bullets.erase(bullets.begin() + x, bullets.begin() + x + 1);
-				contacted = true;
+				contacted = false;
 				break;
 			}
 		}
-		if (!contacted) {
-			x++;
-		}
+
+		x += contacted;
 	}
 }

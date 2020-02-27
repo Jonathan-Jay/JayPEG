@@ -270,7 +270,6 @@ void Game::MouseClick(SDL_MouseButtonEvent evnt)
 		int windowWidth = BackEnd::GetWindowWidth();
 		int maincamera = EntityIdentifier::MainCamera();
 		vec4 ortho = m_register->get<Camera>(maincamera).GetOrthoSize();
-		printf("%f, %f, %f, %f\n", ortho.x, ortho.y, ortho.z, ortho.w);
 		vec2 pos = vec2(
 			((evnt.x / static_cast<float>(windowHeight) * 2.f * ortho.w) - (ortho.w * static_cast<float>(windowWidth) / static_cast<float>(windowHeight))),
 			((-evnt.y / static_cast<float>(windowHeight) * 2.f * ortho.w) + ortho.w)
@@ -281,6 +280,11 @@ void Game::MouseClick(SDL_MouseButtonEvent evnt)
 		printf("(%f, %f)\n", pos.x, pos.y);
 		xPos.push_back(pos.x);
 		yPos.push_back(pos.y);
+	}
+
+	if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_MIDDLE)) {
+		vec4 ortho = m_register->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize();
+		printf("ortho: %f, %f, %f, %f\n", ortho.x, ortho.y, ortho.z, ortho.w);
 	}
 
 	if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
@@ -315,6 +319,8 @@ void Game::MouseWheel(SDL_MouseWheelEvent evnt)
 	//Active scene now captures this input and can use it
 	//Look at base Scene class for more info.
 	m_activeScene->MouseWheel(evnt);
+
+	m_register->get<Camera>(EntityIdentifier::MainCamera()).Zoom(evnt.y * 10.f);
 
 	if (m_guiActive)
 	{
