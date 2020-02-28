@@ -71,8 +71,9 @@ void Bullets::isBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Ve
 	tempBody = m_physicsWorld->CreateBody(&tempDef);
 	tempBody->SetGravityScale(0);
 	tempBody->SetFixedRotation(true);
+	tempBody->SetUserData((void*)entity);
 
-	tempPhsBody = PhysicsBody(tempBody, bulletRadius, vec2(0, 0), true, CollisionIDs::Bullet(), 0x999999 ^ CollisionIDs::Player());
+	tempPhsBody = PhysicsBody(tempBody, bulletRadius, vec2(0, 0), true, CollisionIDs::Bullet(), CollisionIDs::Max() ^ CollisionIDs::Player());
 
 	unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 	ECS::SetUpIdentifier(entity, bitHolder, "bullet");
@@ -106,27 +107,22 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 		if (abs(m_register->get<Transform>(bullets[x]).GetPositionX() - playerPosX) > 800.f) {
 			ECS::DestroyEntity(bullets[x]);
 			bullets.erase(bullets.begin() + x, bullets.begin() + x + 1);
-			break;
+			continue;
 		}
 
-		bool contacted{ false };
 		//contact check (touching any physics body)
-		for (b2ContactEdge* contact = m_register->get<PhysicsBody>(bullets[x]).GetBody()->GetContactList(); contact; contact = contact->next) {
-				//tests it does when it hits something
+		if (b2ContactEdge* contact = m_register->get<PhysicsBody>(bullets[x]).GetBody()->GetContactList()) {
+			//if not the world
+			if (contact->contact->GetFixtureA()->GetBody() != m_register->get<PhysicsBody>(EntityStorage::GetEntity(1)).GetBody() &&
+				contact->contact->GetFixtureA()->GetBody() != m_register->get<PhysicsBody>(EntityStorage::GetEntity(2)).GetBody()) {
+				printf("c: %u, m: %u\n", contact->contact->GetFixtureA()->GetFilterData().categoryBits, contact->contact->GetFixtureA()->GetFilterData().maskBits);
+			}
 
-				//if not the world
-				if (contact->contact->GetFixtureA()->GetBody() != m_register->get<PhysicsBody>(EntityStorage::GetEntity(1)).GetBody() &&
-					contact->contact->GetFixtureA()->GetBody() != m_register->get<PhysicsBody>(EntityStorage::GetEntity(2)).GetBody()) {
-					printf("A-[c: %u, m: %u]	B-[c: %u, m: %u]\n", contact->contact->GetFixtureA()->GetFilterData().categoryBits, contact->contact->GetFixtureA()->GetFilterData().maskBits,
-						contact->contact->GetFixtureB()->GetFilterData().categoryBits, contact->contact->GetFixtureB()->GetFilterData().maskBits);
-				}
-
-				contacted = true;
-				ECS::DestroyEntity(bullets[x]);
-				bullets.erase(bullets.begin() + x, bullets.begin() + x + 1);
-				break;
+			ECS::DestroyEntity(bullets[x]);
+			bullets.erase(bullets.begin() + x, bullets.begin() + x + 1);
+			continue;
 		}
-		if (!contacted)
-			x++;
+
+		x++;
 	}
 }

@@ -169,7 +169,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		tempBody->SetFixedRotation(true);
 
-		tempPhsBody = PhysicsBody(tempBody, playerWidth, playerHeight, vec2(0, 0), true, CollisionIDs::Player(), 0x999999);
+		tempPhsBody = PhysicsBody(tempBody, playerWidth, playerHeight, vec2(0, 0), true, CollisionIDs::Player());
 
 		tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
 
@@ -177,39 +177,6 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 			| EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "player");
 		ECS::SetIsMainPlayer(entity, true);
-
-
-		//ground detcection line
-		/*auto entityB = ECS::CreateEntity();
-
-		ECS::AttachComponent<PhysicsBody>(entityB);
-		ECS::AttachComponent<Transform>(entityB);
-
-		auto& tempPhsBody2 = ECS::GetComponent<PhysicsBody>(entityB);
-
-		b2Body* tempBody2;
-		b2BodyDef tempDef2;
-		tempDef2.type = b2_dynamicBody;
-		tempDef2.position.Set(float32(-1990 - playerHeight / 2.f), float32(70));
-		ECS::GetComponent<Transform>(entityB).SetPosition(vec3(-1990 - playerHeight / 2.f, 70, 0));
-
-		tempBody2 = m_physicsWorld->CreateBody(&tempDef2);
-		tempBody2->SetFixedRotation(true);
-		tempBody2->SetGravityScale(0);
-
-		tempPhsBody2 = PhysicsBody(tempBody2, (playerWidth / 2.f), 0.1f, vec2(0,0), true);
-
-		unsigned int bitHolder2 = EntityIdentifier::PhysicsBit() | EntityIdentifier::TransformBit();
-		ECS::SetUpIdentifier(entityB, bitHolder2, "ground detector");
-		EntityStorage::StoreEntity(entityB, 0);
-
-		b2WeldJointDef jointDef;
-		jointDef.collideConnected = false;
-		jointDef.bodyA = tempBody;
-		jointDef.bodyB = tempBody2;
-		jointDef.localAnchorB = b2Vec2(0.f, playerHeight / 2.f);
-
-		groundDetection = (b2WeldJoint*)m_physicsWorld->CreateJoint(&jointDef);*/
 	}
 
 	/*{
@@ -343,13 +310,12 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		tempDef.position.Set(float32(148 + 40 * wallcount), float32(-94));
 
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
-		//tempBody->SetGravityScale(0);
+		tempBody->SetUserData((void*)entity);
 
-		tempPhsBody = PhysicsBody(tempBody, 20, 120, vec2(0,0), false);
+		tempPhsBody = PhysicsBody(tempBody, 20, 120, vec2(0,0), false, CollisionIDs::Bombable());
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() || EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "bombwall");
-		Missiles::isBombable(entity);
 	}
 
 	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 850, -220);

@@ -26,9 +26,8 @@ private:
 	float missileDelay = 0;
 	float recoilDelay = 0;
 	float gunCooldown = 0.25f;
-	float missileCooldown = 0.25f;
+	float missileCooldown = 1.f;
 	float recoilCooldown = 0.25f;
-
 
 	bool orthozoom = false;
 

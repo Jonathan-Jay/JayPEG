@@ -126,7 +126,7 @@ void Enemy::findPlayer(entt::registry* m_reg, enemyList& enemyID) {
 		vec2 p3(p2.x - p1.x, p2.y - p1.y);
 		vec2 p4(facingRight ? 1 : -1, 0);
 
-		p3.Normalize();
+		p3 = p3.Normalize();
 
 		//								 / ||a|| * ||b|| [which is 1]
 		double FOVangle = acos(p3.Dot(p4));
@@ -224,8 +224,9 @@ void Enemies::CreateEnemy(b2World* m_physicsWorld, EnemyTypes m_type, float x, f
 
 	tempBody = m_physicsWorld->CreateBody(&tempDef);
 	tempBody->SetFixedRotation(true);
+	tempBody->SetUserData((void*)entity);
 
-	tempPhsBody = PhysicsBody(tempBody, 20.f, 20.f, vec2(0, 0), true);
+	tempPhsBody = PhysicsBody(tempBody, 20.f, 20.f, vec2(0, 0), true, CollisionIDs::Enemy());
 	tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
 
 	switch (m_type) {
@@ -239,8 +240,7 @@ void Enemies::CreateEnemy(b2World* m_physicsWorld, EnemyTypes m_type, float x, f
 		break;
 	}
 
-	unsigned int bitHolder = EntityIdentifier::AnimationBit() | EntityIdentifier::SpriteBit()
-		| EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit() | EntityIdentifier::EnemyBit();
+	unsigned int bitHolder = EntityIdentifier::AnimationBit() | EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit() | EntityIdentifier::EnemyBit();
 	ECS::SetUpIdentifier(entity, bitHolder, "enemy");
 
 	enemies.push_back(enemyList{entity});
