@@ -7,7 +7,7 @@ class Bullets
 friend class Missiles;
 public:
 	//create/store bullet number
-	static void isBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float bulletRadius);
+	static void CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float bulletRadius);
 
 	//update all existing bullets
 	static void updateAllBullets(entt::registry* m_register);
@@ -21,41 +21,38 @@ std::vector<unsigned int> Bullets::bullets = {};
 int Bullets::maxBullets = 5;
 int Bullets::damage = 5;
 
-void Bullets::isBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float bulletRadius) {
+void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float bulletRadius) {
 	auto entity = ECS::CreateEntity();
 
 	ECS::AttachComponent<Sprite>(entity);
 	ECS::AttachComponent<Transform>(entity);
 	ECS::AttachComponent<PhysicsBody>(entity);
+	ECS::AttachComponent<AnimationController>(entity);
 
 	std::string filename = "Bullet.png";
 
-	ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 2.f, bulletRadius * 2.f);
+	auto& animController = ECS::GetComponent<AnimationController>(entity);
+	animController.InitUVs(filename);
 
-	//position is player position plus a bit (x changes based on direction player is facing
-	/*float x = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX() + (movingRight ? (playerWidth / 2.f + bulletRadius) : -(playerWidth / 2.f + bulletRadius));
-    float y = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionY() + (crouching ? -(playerHeight / 4.f) : (playerHeight / 4.f));
-	Degrees rot(0);
-	if (facingUp) {
-		y += playerHeight / 4.f + bulletRadius;
-		x -= (movingRight ? (playerWidth / 2.f + bulletRadius) : -(playerWidth / 2.f + bulletRadius));
-		rot = 90;
-	} else if (facingDown) {
-		y -= playerHeight * 3.f / 4.f + bulletRadius;
-		x -= (movingRight ? (playerWidth / 2.f + bulletRadius) : -(playerWidth / 2.f + bulletRadius));
-		rot = -90;
-	} else {
-		rot = (movingRight ? 0 : 180);
-
-		+crouching ? -(playerHeight / 4.f) : (playerHeight / 4.f)
-		+facingUp ? (playerHeight / 4.f + bulletRadius) : -(playerHeight * 3.f / 4.f + bulletRadius)
+	animController.AddAnimation(Animation());
+	auto& anim = animController.GetAnimation(0);
+	for (int x(0); x < 5; x++) {
+		anim.AddFrame(vec2(250 * x, 250), vec2(250 * (x + 1), 0));
 	}
-	ECS::GetComponent<PhysicsBody>(entity).GetBody()->SetTransform(b2Vec2(x, y), Transform::ToRadians(rot));
+	anim.SetRepeating(true);
+	anim.SetSecPerFrame(0.04f);
+	animController.SetActiveAnim(0);
 
-	//depending on the direction player is facing, give acceleration
-	if (!facingDown && !facingUp) { m_sceneReg->get<PhysicsBody>(entity).GetBody()->SetLinearVelocity(b2Vec2((movingRight ? projectileSpeed : -projectileSpeed), 0)); }
-	else { m_sceneReg->get<PhysicsBody>(entity).GetBody()->SetLinearVelocity(b2Vec2(0, (facingUp ? projectileSpeed : -projectileSpeed))); }	
-	*/
+	if (vel.y == 0) {
+		animController.AddAnimation(Animation());
+		auto& anim2 = animController.GetAnimation(1);
+		anim2.AddFrame(vec2(0, 0), vec2(0, 0));
+		anim2.SetRepeating(false);
+		anim2.SetSecPerFrame(0.04f);
+		animController.SetActiveAnim(1);
+	}
+
+	ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 2.f, bulletRadius * 2.f, true, &animController);
 
 	ECS::GetComponent<Transform>(entity).SetPosition(vec3(pos.x, pos.y, 0.f));
 
@@ -98,6 +95,12 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 	//checks if bullet should die
 	float playerPosX = m_register->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
 	for (int x(0); x < bullets.size();) {
+		//returning the animation (since it appears behind the hand
+		if (m_register->get<AnimationController>(bullets[x]).GetAnimation(
+			m_register->get<AnimationController>(bullets[x]).GetActiveAnim()
+		).GetAnimationDone()) {
+			m_register->get<AnimationController>(bullets[x]).SetActiveAnim(0);
+		}
 		//player range check
 		if (abs(m_register->get<Transform>(bullets[x]).GetPositionX() - playerPosX) > 800.f) {
 			ECS::DestroyEntity(bullets[x]);
@@ -110,9 +113,8 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 		for (b2ContactEdge* contact = m_register->get<PhysicsBody>(bullets[x]).GetBody()->GetContactList(); contact; contact = contact->next) {
 				//tests it does when it hits something
 
-				//if not the world
-				if (contact->contact->GetFixtureA()->GetBody() != m_register->get<PhysicsBody>(EntityStorage::GetEntity(1)).GetBody() &&
-					contact->contact->GetFixtureA()->GetBody() != m_register->get<PhysicsBody>(EntityStorage::GetEntity(2)).GetBody()) {
+				//if not an environment
+				if (contact->contact->GetFixtureA()->GetFilterData().categoryBits != CollisionIDs::Environment()) {
 					printf("A-[c: %u, m: %u]	B-[c: %u, m: %u]\n", contact->contact->GetFixtureA()->GetFilterData().categoryBits, contact->contact->GetFixtureA()->GetFilterData().maskBits,
 						contact->contact->GetFixtureB()->GetFilterData().categoryBits, contact->contact->GetFixtureB()->GetFilterData().maskBits);
 				}
@@ -122,6 +124,7 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 				bullets.erase(bullets.begin() + x, bullets.begin() + x + 1);
 				break;
 		}
+
 		if (!contacted)
 			x++;
 	}

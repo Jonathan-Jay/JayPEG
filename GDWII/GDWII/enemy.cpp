@@ -225,7 +225,7 @@ void Enemies::CreateEnemy(b2World* m_physicsWorld, EnemyTypes m_type, float x, f
 	tempBody = m_physicsWorld->CreateBody(&tempDef);
 	tempBody->SetFixedRotation(true);
 
-	tempPhsBody = PhysicsBody(tempBody, 20.f, 20.f, vec2(0, 0), true);
+	tempPhsBody = PhysicsBody(tempBody, 20.f, 20.f, vec2(0, 0), true, CollisionIDs::Enemy());
 	tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
 
 	switch (m_type) {

@@ -45,8 +45,8 @@ public:
 	//Constructs a box collider
 	PhysicsBody(b2Body* body, float width, float height, vec2 centerOffset, bool isDynamic, uint16 categoryBits = 0x1, uint16 maskBits = 0x999999);
 
-	PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vector<float> yCoordinates);
-	//PhysicsBody(b2Body* body, b2Vec2 tempaArray[], int size);
+	PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vector<float> yCoordinates, uint16 categoryBits = 0x1, uint16 maskBits = 0x999999);
+	//PhysicsBody(b2Body* body, b2Vec2 tempaArray[], int size, uint16 categoryBits = 0x1, uint16 maskBits = 0x999999);
 
 	void DeleteBody();
 

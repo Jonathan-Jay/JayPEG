@@ -86,8 +86,8 @@ PhysicsBody::PhysicsBody(b2Body * body, float width, float height, vec2 centerOf
 	InitBody();
 }
 
-PhysicsBody::PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vector<float> yCoordinates)
-//PhysicsBody::PhysicsBody(b2Body* body, b2Vec2 tempArray[], int size)
+PhysicsBody::PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vector<float> yCoordinates, uint16 categoryBits, uint16 maskBits)
+//PhysicsBody::PhysicsBody(b2Body* body, b2Vec2 tempArray[], int size, uint16 categoryBits, uint16 maskBits)
 {
 	b2ChainShape tempShape;
 	b2Vec2* tempVec2 = new b2Vec2[xCoordinates.size()];
