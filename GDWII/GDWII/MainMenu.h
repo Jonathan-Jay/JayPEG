@@ -29,15 +29,16 @@ private:
 	float missileDelay = 0;
 	float recoilDelay = 0;
 	float gunCooldown = 0.25f;
-	float missileCooldown = 1.f;
+	float missileCooldown = 0.f;
 	float recoilCooldown = 0.5f;
 
 	//initializing variables
 	float jumpStrength = 75.f;
 	float playerHeight = 40.f;
-	float playerWidth = 20.f;
+	float playerWidth = 22.f;
 	float bulletRadius = 5.f;
 	float missileRadius = 5.f;
 
-	float projectileSpeed = 100.f;
+	float projectileSpeed = 50.f;
+	float playerSpeed = 25.f;
 };

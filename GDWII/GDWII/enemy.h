@@ -1,5 +1,7 @@
 #pragma once
 #include "JSON.h"
+#include "PhysicsSystem.h"
+#include <entt/entity/registry.hpp>
 
 //type, health 
 //movement speed, jump height, weapon, damage, attack pattern
@@ -9,34 +11,75 @@ enum class EnemyTypes {
 	SHOOTER
 };
 
+enum class EnemyState {
+	Follow,
+	Wander
+};
+
+struct enemyList {
+	unsigned int enemyID{ 0 };
+	bool isActive{ false };
+	bool wasActive{ false };
+};
+
 class Enemy {
 public:
-	int health;
-	EnemyTypes type;
-};
+	Enemy() {}
+	~Enemy() {}
 
-/*class Enemies abstract {
-public:
-	static void CreateEnemy(EnemyTypes type, float x, float y);
-	static void SetupEnemy(unsigned int enemyID);
-	static void UpdateEnemies(entt::registry* m_reg);
+	EnemyTypes type{ 0 };
+	EnemyState state{ 1 };
+	int health{ 0 };
+	int moveSpeed{ 0 };
+	int jumpHeight{ 0 };
+	int attackDamage{ 0 };
+	float refreshSightTime = 0.f;
+	bool canSeePlayer{ false };
+	bool facingRight{ false };
+	bool canJump{ false };
+	vec3 jumpInfo;	//times jumped, x pos at jump, y pos at jump
+	vec2 targetPos;
+	b2Vec2 previousLocalPoint;
+
+	void SetStats(EnemyTypes _type, int _health, int _moveSpeed, int _jumpHeight, int _attackDamage) { type = _type; health = _health; moveSpeed = _moveSpeed; jumpHeight = _jumpHeight; }
+	void Update(entt::registry* m_reg, enemyList& enemyID);
+	void Awake(entt::registry* m_reg, enemyList& enemyID);
+	void Sleep(entt::registry* m_reg, enemyList& enemyID);
 
 private:
-	static std::vector<unsigned int> enemies;
-	//how far off screen to deactivate the enemy
-	static int deactivationLength;
+	void findPlayer(entt::registry* m_reg, enemyList& enemyID);
+	b2Vec2 EnemyRaycast(b2Vec2 p1, b2Vec2 p2, bool onlyStatic = false);
 };
 
-std::vector<unsigned int> Enemies::enemies = {};
-int Enemies::deactivationLength = 10;*/
-
 inline void to_json(nlohmann::json& j, const Enemy& enem) {
-	j["Health"] = enem.health;
 	j["Type"] = enem.type;
+	j["Health"] = enem.health;
+	j["moveSpeed"] = enem.moveSpeed;
+	j["jumpHeight"] = enem.jumpHeight;
+	j["attackDamage"] = enem.attackDamage;
 }
 
-//Sends vertical scrolling camera TO json file
 inline void from_json(const nlohmann::json& j, Enemy& enem) {
-	enem.health = j["Health"];
 	enem.type = j["Type"];
+	enem.health = j["Health"];
+	enem.moveSpeed = j["moveSpeed"];
+	enem.jumpHeight = j["jumpHeight"];
+	enem.attackDamage = j["attackDamage"];
 }
+
+class Enemies abstract {
+public:
+	static void CreateEnemy(b2World* m_physicsWorld, EnemyTypes type, float x, float y);
+	static void UpdateEnemies(entt::registry* m_reg);
+	static float GetSightRefreshTime() { return sightRefreshTime; }
+	static b2World* GetPhysicsWorld() { return m_phyWorld; }
+	
+private:
+	static std::vector<enemyList> enemies;
+	//how far off screen to deactivate the enemy
+	static int deactivationLength;
+	//how long to wait to refresh the sight of the enemy
+	static float sightRefreshTime;
+
+	static b2World* m_phyWorld;
+};

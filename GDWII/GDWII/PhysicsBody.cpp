@@ -1,29 +1,15 @@
 #include "PhysicsBody.h"
 
-unsigned int CollisionIDs::m_playerID		=0x1;
-unsigned int CollisionIDs::m_environmentID	=0x10;
+unsigned int CollisionIDs::m_environmentID	=0x1;
+unsigned int CollisionIDs::m_playerID		=0x10;
 unsigned int CollisionIDs::m_enemyID		=0x100;
-
-
-unsigned int CollisionIDs::Player()
-{
-	return m_playerID;
-}
-
-unsigned int CollisionIDs::Environment()
-{
-	return m_environmentID;
-}
-
-unsigned int CollisionIDs::Enemy()
-{
-	return m_enemyID;
-}
+unsigned int CollisionIDs::m_bulletID		=0x1000;
+unsigned int CollisionIDs::m_bombableID		=0x10000;
 
 vec3 PhysicsBody::m_gravityAcceleration = vec3(0.f, -35.f, 0.f);
 bool PhysicsBody::m_drawBodies = false;
 
-PhysicsBody::PhysicsBody(b2Body * body, float radius, vec2 centerOffset, bool isDynamic)
+PhysicsBody::PhysicsBody(b2Body * body, float radius, vec2 centerOffset, bool isDynamic, uint16 categoryBits, uint16 maskBits)
 {
 	//Bodies don't reference a shape by themselves
 	//they need a shape that has been linked to a fixture
@@ -37,6 +23,8 @@ PhysicsBody::PhysicsBody(b2Body * body, float radius, vec2 centerOffset, bool is
 	tempFixture.shape = &tempShape;
 	tempFixture.density = 1.f;
 	tempFixture.friction = 0.f;
+	tempFixture.filter.categoryBits = categoryBits;
+	tempFixture.filter.maskBits = maskBits;
 
 	m_body = body;
 	m_body->CreateFixture(&tempFixture);
@@ -61,7 +49,7 @@ PhysicsBody::PhysicsBody(b2Body * body, float radius, vec2 centerOffset, bool is
 	InitBody();
 }
 
-PhysicsBody::PhysicsBody(b2Body * body, float width, float height, vec2 centerOffset, bool isDynamic)
+PhysicsBody::PhysicsBody(b2Body * body, float width, float height, vec2 centerOffset, bool isDynamic, uint16 categoryBits, uint16 maskBits)
 {
 	//Bodies don't reference a shape by themselves
 	//they need a shape that has been linked to a fixture
@@ -75,6 +63,8 @@ PhysicsBody::PhysicsBody(b2Body * body, float width, float height, vec2 centerOf
 	tempFixture.shape = &tempShape;
 	tempFixture.density = 1.f;
 	tempFixture.friction = 0.f;
+	tempFixture.filter.categoryBits = categoryBits;
+	tempFixture.filter.maskBits = maskBits;
 
 	m_body = body;
 	m_body->CreateFixture(&tempFixture);
@@ -96,8 +86,8 @@ PhysicsBody::PhysicsBody(b2Body * body, float width, float height, vec2 centerOf
 	InitBody();
 }
 
-PhysicsBody::PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vector<float> yCoordinates)
-//PhysicsBody::PhysicsBody(b2Body* body, b2Vec2 tempArray[], int size)
+PhysicsBody::PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vector<float> yCoordinates, uint16 categoryBits, uint16 maskBits)
+//PhysicsBody::PhysicsBody(b2Body* body, b2Vec2 tempArray[], int size, uint16 categoryBits, uint16 maskBits)
 {
 	b2ChainShape tempShape;
 	b2Vec2* tempVec2 = new b2Vec2[xCoordinates.size()];
@@ -112,6 +102,8 @@ PhysicsBody::PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vec
 	tempFixture.shape = &tempShape;
 	tempFixture.density = 1.f;
 	tempFixture.friction = 0.f;
+	tempFixture.filter.categoryBits = categoryBits;
+	tempFixture.filter.maskBits = maskBits;
 
 	m_body = body;
 	m_body->CreateFixture(&tempFixture);

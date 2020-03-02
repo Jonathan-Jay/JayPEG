@@ -1,17 +1,22 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
-#include <ctime>
+#include <cstdio>
+#include <chrono>
+#include <thread>
 
-#define ONE_OVER_CLOCKS_PER_SEC 1.f / (float)CLOCKS_PER_SEC;
+using std::milli;
+using std::chrono::system_clock;
+using std::chrono::duration;
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::this_thread::sleep_for;
 
 class Timer abstract
 {
 public:
-	//Current clock and last clock
-	static clock_t currentClock, lastClock;
-	//Change in time (time since last frame) and total game time
-	static float deltaTime, time;
+	static double minFrameTime, deltaTime, time;
+	static system_clock::time_point currentClock, lastClock;
 
 	//Resets the clock to zero
 	static void Reset();
