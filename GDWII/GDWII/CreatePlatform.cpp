@@ -77,5 +77,5 @@ void CreateStaticBox(std::string filename, float width, float height, vec2 place
 	//	unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 	//	ECS::SetUpIdentifier(entity, bitHolder, nameOfPhysBox);
 	//	//EntityStorage::StoreEntity(entity, 0);
-	}
+	
 }
