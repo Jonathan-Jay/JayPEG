@@ -169,7 +169,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		tempBody->SetFixedRotation(true);
 
-		tempPhsBody = PhysicsBody(tempBody, playerWidth, playerHeight, vec2(0, 0), true, CollisionIDs::Player());
+		tempPhsBody = PhysicsBody(tempBody, playerWidth, playerHeight, vec2(0, 0), true, CollisionIDs::Player(), CollisionIDs::Max() ^ CollisionIDs::Enemy());
 
 		tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
 
@@ -709,7 +709,7 @@ bool MainMenu::grounded()
 		b2Vec2 contactNormal = edge->contact->GetManifold()->localNormal;
 
 		if (edge->other->GetFixtureList()->GetType() == b2Shape::e_chain)
-			contactNormal *= -1;
+			contactNormal = -contactNormal;
 
 		if (contactNormal.y <= -0.9 && edge->contact->GetManifold()->pointCount == 2)
 			return true;

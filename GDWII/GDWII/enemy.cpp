@@ -11,6 +11,8 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 	b2Vec2 enemyb2Pos = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetPosition();
 	AnimationController& animCon = m_reg->get<AnimationController>(enemyID.enemyID);
 
+	//(ax < bx+bw && ax+aw > bx) && (ay < by+bh && ay+ah > by)
+
 	b2Vec2 temp = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetLinearVelocity();
 	temp.x = 0;
 
@@ -73,9 +75,19 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 			b2Manifold* man = edge->contact->GetManifold();
 
 			//find ID of collider to make sure that the next collision isnt it
-			if ( (man->localNormal.y <= -0.9 && man->pointCount == 1 || man->localNormal.x != 0) && man->localPoint != previousLocalPoint ) {
+			if (man->localNormal.y <= -0.9 && man->pointCount == 1 && man->localPoint != previousLocalPoint) {
 				animCon.SetActiveAnim(!animCon.GetActiveAnim());
 				previousLocalPoint = man->localPoint;
+				break;
+			}
+
+			if (man->localNormal.x < 0) {
+				animCon.SetActiveAnim(0);
+				break;
+			}
+
+			if (man->localNormal.x > 0) {
+				animCon.SetActiveAnim(1);
 				break;
 			}
 		}
@@ -226,7 +238,7 @@ void Enemies::CreateEnemy(b2World* m_physicsWorld, EnemyTypes m_type, float x, f
 	tempBody->SetFixedRotation(true);
 	tempBody->SetUserData((void*)entity);
 
-	tempPhsBody = PhysicsBody(tempBody, 20.f, 20.f, vec2(0, 0), true, CollisionIDs::Enemy());
+	tempPhsBody = PhysicsBody(tempBody, 20.f, 20.f, vec2(0, 0), true, CollisionIDs::Enemy(), CollisionIDs::Max() ^ CollisionIDs::Enemy());
 	tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
 
 	switch (m_type) {

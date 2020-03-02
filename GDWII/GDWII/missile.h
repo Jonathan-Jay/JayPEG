@@ -150,18 +150,23 @@ void Missiles::updateAllMissiles(entt::registry* m_register)
 						continue;
 
 					//printf("c: %u, x: %f, y: %f\n", bod->GetFixtureList()->GetFilterData().categoryBits, bod->GetPosition().x, bod->GetPosition().y);
+					unsigned int entity{ 0 };
 					switch (bod->GetFixtureList()->GetFilterData().categoryBits) {
 					case 0x0002:		//player
+						entity = EntityIdentifier::MainPlayer();
 						break;
 					case 0x0004:		//enemy
+						entity = (unsigned int)bod->GetUserData();
 						break;
 					case 0x0008:		//bullet
 						printf("bullet dead\n");
-						Bullets::bullets.erase(Bullets::bullets.begin() + (unsigned int)bod->GetUserData(), Bullets::bullets.begin() + (unsigned int)bod->GetUserData() + 1);
-						ECS::DestroyEntity((unsigned int)bod->GetUserData());
+						entity = (unsigned int)bod->GetUserData();
+						Bullets::bullets.erase(Bullets::bullets.begin() + entity, Bullets::bullets.begin() + entity + 1);
+						ECS::DestroyEntity(entity);
 						break;
 					case 0x0010:		//bombable
-						ECS::DestroyEntity((unsigned int)bod->GetUserData());
+						entity = (unsigned int)bod->GetUserData();
+						ECS::DestroyEntity(entity);
 						break;
 					default:
 						break;
