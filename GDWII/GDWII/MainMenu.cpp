@@ -89,39 +89,19 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 			| EntityIdentifier::AnimationBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "");
 	}
-
+	*/
+	std::string filename =  ".png";
+	float width = 100.f;
+	float height = 10.f;
+	std::string nameOfPhysBox = "hello";
+	vec2 placement(200.f, 5.f);
+	//CreateStaticBox(filename, width, height, placement, nameOfPhysBox); //creates a box
+	//CreateStaticBox(filename, 50, 50, vec2(-250.f,5), "box2");
+	
+	if(true)
 	{
-		auto entity = ECS::CreateEntity();
 
-		ECS::AttachComponent<Sprite>(entity);
-		ECS::AttachComponent<Transform>(entity);
-		ECS::AttachComponent<PhysicsBody>(entity);
 
-		std::string filename = ".png";
-
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, x, x);
-
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
-
-		auto& tempSpr = ECS::GetComponent<Sprite>(entity);
-		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
-
-		b2Body* tempBody;
-		b2BodyDef tempDef;
-		tempDef.type = b2_dynamicBody;
-		tempDef.position.Set(float32(x), float32(x));
-
-		tempBody = m_physicsWorld->CreateBody(&tempDef);
-		//tempBody->SetGravityScale(0);
-		tempBody->SetFixedRotation(true);
-
-		tempPhsBody = PhysicsBody(tempBody, float(x), vec2(0.f, 0.f), true);
-
-		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "");
-	}*/
-
-	{
 		auto entity = ECS::CreateEntity();
 
 		ECS::AttachComponent<Sprite>(entity);
@@ -195,6 +175,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		tempBody->SetFixedRotation(true);
+		tempPhsBody.SetFriction(0);
 
 		tempPhsBody = PhysicsBody(tempBody, playerWidth, playerHeight, vec2(0, 0), true, CollisionIDs::Player(), 0x999999);
 
@@ -366,8 +347,10 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
+
 }
 
+bool temp = true;
 void MainMenu::GamepadStick(XInputController* con)
 {
 	controllerInput = false;
@@ -784,3 +767,4 @@ bool MainMenu::grounded()
 
 	return false;
 }
+

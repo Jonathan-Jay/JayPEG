@@ -1,5 +1,6 @@
 #pragma once
 #include "EntityManager.h"
+#include "CreatePlatform.h"
 #include <string>
 
 class MainMenu : public Scene
@@ -42,3 +43,4 @@ private:
 	float projectileSpeed = 50.f;
 	float playerSpeed = 25.f;
 };
+
