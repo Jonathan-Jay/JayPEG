@@ -35,7 +35,8 @@ void Game::InitGame()
 
 	//Creates a new scene.
 	//Replace this with your own scene.
-	m_scenes.push_back(new MainMenu("Main Menu"));
+	m_scenes.push_back(new MainMenu("Main Scene")); //Main Scene
+	m_scenes.push_back(new ActualMainMenu("MainMenu")); //actual Main Menu
 
 	//Sets active scene reference to our scene
 	m_activeScene = m_scenes[0];
@@ -46,6 +47,9 @@ void Game::InitGame()
 	m_register = m_activeScene->GetScene();
 
 	BackEnd::SetWindowName(m_activeScene->GetName());
+
+	//delete this
+	//CreatePlatform::StoringScene(m_activeScene);
 
 	PhysicsSystem::Init();
 }
@@ -104,13 +108,12 @@ void Game::GUI()
 	UI::Start(BackEnd::GetWindowWidth(), BackEnd::GetWindowHeight());
 
 	ImGui::Text("Place your different tabs below.");
+		if (ImGui::BeginTabBar(""))
+		{
+			BackEnd::GUI(m_register, m_activeScene);
 
-	if (ImGui::BeginTabBar(""))
-	{
-		BackEnd::GUI(m_register, m_activeScene);
-
-		ImGui::EndTabBar();
-	}
+			ImGui::EndTabBar();
+		}
 
 	UI::End();
 }

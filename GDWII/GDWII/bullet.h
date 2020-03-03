@@ -21,7 +21,7 @@ std::vector<unsigned int> Bullets::bullets = {};
 int Bullets::maxBullets = 5;
 int Bullets::damage = 5;
 
-void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float bulletRadius) {
+inline void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float bulletRadius) {
 	auto entity = ECS::CreateEntity();
 
 	ECS::AttachComponent<Sprite>(entity);
@@ -90,7 +90,7 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 }
 
-void Bullets::updateAllBullets(entt::registry* m_register)
+inline void Bullets::updateAllBullets(entt::registry* m_register)
 {
 	//checks if bullet should die
 	float playerPosX = m_register->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
