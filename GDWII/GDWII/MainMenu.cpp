@@ -468,7 +468,7 @@ void MainMenu::Update()
 			b2Body* playerBody = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody();
 
 			b2PolygonShape tempBox;
-			tempBox.SetAsBox(playerWidth / 2.f, playerHeight / 4.f, b2Vec2(0, -playerHeight / 4.f), 0);
+			tempBox.SetAsBox(playerWidth / 2.f, playerHeight * 2.f / 6.f, b2Vec2(0, -playerHeight * 1.f / 6.f), 0);
 				
 			b2FixtureDef crouchingBox;
 			crouchingBox.shape = &tempBox;
