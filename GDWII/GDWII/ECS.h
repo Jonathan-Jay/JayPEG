@@ -12,6 +12,7 @@
 #include "VerticalScroll.h"
 #include "HorizontalScroll.h"
 #include "enemy.h"
+#include "Player.h"
 
 class ECS abstract
 {

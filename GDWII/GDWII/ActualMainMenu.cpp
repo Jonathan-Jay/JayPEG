@@ -1,6 +1,7 @@
 #include "ActualMainMenu.h"
 
 ActualMainMenu::ActualMainMenu(std::string name)
+	:Scene(name)
 {
 
 }

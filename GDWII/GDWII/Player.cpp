@@ -1,4 +1,27 @@
 #include "Player.h"
+#include "Timer.h"
+
+Player::Player()
+{
+}
+
+Player::Player(int maxHealth, int maxEnergy, float energyRegen)
+{
+	//Health related
+	this->maxHealth = maxHealth;
+	this->currentHealth = maxHealth;
+
+	//Energy related
+	this->maxEnergy = maxEnergy;
+	this->currentEnergy = maxEnergy;
+	this->energyRegen = energyRegen;
+
+	this->hasMissile = false;
+}
+
+Player::~Player()
+{
+}
 
 int Player::getMaxHealth() const
 {
@@ -20,22 +43,13 @@ void Player::setMaxEnergy(int maxEnergy)
     this->maxEnergy = maxEnergy;
 }
 
-//get the Health regen speed
-float Player::getHealthRegen() const
+bool Player::getMissile(bool change)
 {
-    return healthRegen;
-}
-
-//set the health regen speed
-void Player::setHealthRegen(float healthRegen)
-{
-    this->healthRegen = healthRegen;
-}
-
-//get the Energy regen speed
-float Player::getEnergyRegen() const
-{
-    return energyRegen;
+	if (change) {
+		this->hasMissile = true;
+	}
+	
+	return hasMissile;
 }
 
 //set the Energy regen speed
@@ -49,19 +63,9 @@ int Player::getCurrentHealth() const
     return currentHealth;
 }
 
-void Player::setCurrentHealth(int currentHealth)
-{
-    this->currentHealth = currentHealth;
-}
-
 int Player::getCurrentEnergy() const
 {
     return currentEnergy;
-}
-
-void Player::setCurrentEnergy(int currentEnergy)
-{
-    this->currentEnergy = currentEnergy;
 }
 
 void Player::addCurrentHealth(unsigned int addHealth)
@@ -88,19 +92,21 @@ void Player::addCurrentEnergy(unsigned int addEnergy)
 	}
 }
 
-bool Player::subCurrentHealth(int subHealth)
+void Player::subCurrentHealth(unsigned int subHealth)
 {
-	if (currentHealth - subHealth > 0) //You cannot have 0 health and continue to play
+	if (currentHealth >= subHealth) //You cannot have 0 health and continue to play
 	{
 		currentHealth -= subHealth;
-		return true; //continue game
 	}
-	return false; //Play death screen
+	else
+	{
+		currentHealth = 0;
+	}
 }
 
-bool Player::subCurrentEnergy(int subEnergy)
+bool Player::subCurrentEnergy(unsigned int subEnergy)
 {
-	if (currentEnergy - subEnergy >= 0) //You can have 0 energy and continue to play
+	if (currentEnergy >= subEnergy) //You can have 0 energy and continue to play
 	{
 		currentEnergy -= subEnergy;
 		return true; //ok to continue with action
@@ -108,14 +114,18 @@ bool Player::subCurrentEnergy(int subEnergy)
 	return false; //Do not continue action
 }
 
-
-float Player::getMissleDelay() const
+bool Player::updatePlayer()
 {
-    return missleDelay;
-}
+	if ((currentEnergy != maxEnergy) && (counter != 0)) {
+		counter -= Timer::deltaTime;
+		if (counter < 0) {
+			counter = 0;
+		}
+	}
+	else if (counter == 0) {
+		counter = energyRegen;
+		addCurrentEnergy(1);
+	}
 
-void Player::setMissleDelay(float missleDelay)
-{
-    this->missleDelay = missleDelay;
+	return ((currentHealth == 0) ? false : true);
 }
-

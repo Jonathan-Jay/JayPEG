@@ -1,5 +1,6 @@
 #include "MainMenu.h"
 #include "missile.h"
+#include <iomanip>
 
 MainMenu::MainMenu(std::string name)
 	: Scene(name)
@@ -40,56 +41,6 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 	}
 
 	/*
-	{
-		auto entity = ECS::CreateEntity();
-
-		ECS::AttachComponent<Sprite>(entity);
-		ECS::AttachComponent<Transform>(entity);
-		ECS::AttachComponent<PhysicsBody>(entity);
-		ECS::AttachComponent<AnimationController>(entity);
-
-		std::string filename = ".png";
-		auto& animController = ECS::GetComponent<AnimationController>(entity);
-		animController.InitUVs(filename);
-
-		animController.AddAnimation(Animation());
-		animController.AddAnimation(Animation());
-
-		auto& anim = animController.GetAnimation(0);
-		anim.AddFrame(top right, bottomleft);
-		anim.SetRepeating();
-		anim.SetSecPerFrame();
-
-		anim = animController.GetAnimation(1);
-		anim.AddFrame(top right, bottomleft);
-		anim.SetRepeating();
-		anim.SetSecPerFrame();
-
-		animController.SetActiveAnim(0);
-
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, x, y, true, &animController);
-
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, z.f));
-
-		auto& tempSpr = ECS::GetComponent<Sprite>(entity);
-		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
-
-		b2Body* tempBody;
-		b2BodyDef tempDef;
-		tempDef.type = b2_dynamicBody;
-		tempDef.position.Set(float32(x.f), float32(y.f));
-
-		tempBody = m_physicsWorld->CreateBody(&tempDef);
-		//tempBody->SetGravityScale(0);
-		tempBody->SetFixedRotation(true);
-
-		tempPhsBody = PhysicsBody(constructor);
-
-		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit()
-			| EntityIdentifier::AnimationBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "");
-	}
-	*/
 	std::string filename =  ".png";
 	float width = 100.f;
 	float height = 10.f;
@@ -97,8 +48,8 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 	vec2 placement(200.f, 5.f);
 	//CreateStaticBox(filename, width, height, placement, nameOfPhysBox); //creates a box
 	//CreateStaticBox(filename, 50, 50, vec2(-250.f,5), "box2");
-	
-	if(true)
+	*/
+
 	{
 
 
@@ -108,6 +59,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		ECS::AttachComponent<Transform>(entity);
 		ECS::AttachComponent<PhysicsBody>(entity);
 		ECS::AttachComponent<AnimationController>(entity);
+		ECS::AttachComponent<Player>(entity);
 
 		std::string filename = "player.png";
 		auto& animController = ECS::GetComponent<AnimationController>(entity);
@@ -181,44 +133,13 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 
 		tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
 
+		ECS::GetComponent<Player>(entity) = Player(10, 10, 1);
+
 		unsigned int bitHolder = EntityIdentifier::AnimationBit() | EntityIdentifier::SpriteBit()
-			| EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
+			| EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit() | EntityIdentifier::PlayerBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "player");
 		ECS::SetIsMainPlayer(entity, true);
 	}
-
-	/*{
-		auto entity = ECS::CreateEntity();
-
-		ECS::AttachComponent<Sprite>(entity);
-		ECS::AttachComponent<Transform>(entity);
-		ECS::AttachComponent<PhysicsBody>(entity);
-
-		std::string filename = "box.png";
-
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 604, 204);
-
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
-
-		auto& tempSpr = ECS::GetComponent<Sprite>(entity);
-		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
-
-		b2Body* tempBody;
-		b2BodyDef tempDef;
-		tempDef.type = b2_staticBody;
-		tempDef.position.Set(float32(0), float32(0));
-
-		tempBody = m_physicsWorld->CreateBody(&tempDef);
-		//tempBody->SetGravityScale(0);
-
-		std::vector<float> x = { -300,   -1,  -1,   1,    1,  300, 300, -300, -300 };
-		std::vector<float> y = { -100, -100, -80, -80, -100, -100, 100,  100, -100 };
-		tempPhsBody = PhysicsBody(tempBody, x, y);
-
-		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "floor");
-		EntityStorage::StoreEntity(entity, 0);
-	}*/
 
 	{
 		auto entity = ECS::CreateEntity();
@@ -504,26 +425,16 @@ void MainMenu::KeyboardDown()
 	}
 }
 
-/*
-std::string textingShiz = "Now Playing: Barotrauma                                                                                                 ";
-float textingDelay = 0.5f;
-int charCount = 1;
-*/
 bool tempAIPause = true;
 
 void MainMenu::Update()
 {
-	int maincamera = EntityIdentifier::MainCamera();
-	/*if (textingDelay < 0.f) {
-		std::cout << '\r' << textingShiz;
-		std::string tempChar = textingShiz.substr(0, charCount);
-		textingShiz.erase(0, charCount);
-		textingShiz += tempChar;
-		textingDelay = 0.05f;
-	}
-	else {
-		textingDelay -= Timer::deltaTime;
-	}*/
+	auto& playerData = m_sceneReg->get<Player>(EntityIdentifier::MainPlayer());
+
+	std::cout << std::setfill(' ') << "\rHP: " << std::setw(2) << playerData.getCurrentHealth() << '/' << playerData.getMaxHealth()
+		<< "\tNRG: " << std::setw(2) << playerData.getCurrentEnergy() << '/' << playerData.getMaxEnergy();
+
+	playerData.updatePlayer();
 
 	//if delay is below 1 (used once), it starts decreasing timer
 	if (gunDelay < 1.f) {
@@ -604,7 +515,7 @@ void MainMenu::Update()
 
 			{
 				float x = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
-				float y = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionY() + (crouching ? -(playerHeight / 4.f) : 0);
+				float y = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionY();
 
 				b2Vec2 vel(0, 0);
 
@@ -617,7 +528,9 @@ void MainMenu::Update()
 					vel.y = -projectileSpeed * 2.f;
 				}
 				else {
-					if (!crouching)
+					if (crouching)
+						y -= 5.5f;
+					else
 						y += 6.1f;
 					x += (movingRight ? (playerWidth / 2.f) : -(playerWidth / 2.f));
 					vel.x = (movingRight ? projectileSpeed : -projectileSpeed);
@@ -635,7 +548,7 @@ void MainMenu::Update()
 	if (missileShot) {
 		if (gunDelay == 1.f && missileDelay == 5.f) {
 			//missiles only spawn when delay is 1 (ready to use) and you have enough NRG
-			if (true) {	// hasenoughtNRG <- function that checks that and uses NRG
+			if (m_sceneReg->get<Player>(EntityIdentifier::MainPlayer()).subCurrentEnergy(missileCost)) {
 				if (crouching) {
 					//remove tag to make force horizontal
 					facingUp = false;
@@ -644,7 +557,7 @@ void MainMenu::Update()
 
 				{
 					float x = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
-					float y = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionY() + (crouching ? -(playerHeight / 4.f) : 0);
+					float y = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionY();
 
 					b2Vec2 vel(0, 0);
 					b2Vec2 velo = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
@@ -661,7 +574,9 @@ void MainMenu::Update()
 						vel.y = -projectileSpeed;
 					}
 					else {
-						if (!crouching)
+						if (crouching)
+							y -= 5.5f;
+						else
 							y += 6.1f;
 						if (!onGround) {
 							velo.x = movingRight ? -jumpStrength : jumpStrength;

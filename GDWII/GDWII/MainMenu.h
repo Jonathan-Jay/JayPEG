@@ -42,5 +42,7 @@ private:
 
 	float projectileSpeed = 50.f;
 	float playerSpeed = 25.f;
+
+	int missileCost = 5.f;
 };
 

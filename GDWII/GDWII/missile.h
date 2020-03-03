@@ -28,7 +28,7 @@ int Missiles::explosionRadius = 25;
 float Missiles::damage = 10;
 float Missiles::screenShake = 5;
 
-void Missiles::CreateMissile(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float missileRadius)
+inline void Missiles::CreateMissile(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float missileRadius)
 {
 	auto entity = ECS::CreateEntity();
 
@@ -102,19 +102,19 @@ void Missiles::CreateMissile(entt::registry* m_sceneReg, b2World* m_physicsWorld
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 }
 
-void Missiles::isBombable(unsigned int entity)
+inline void Missiles::isBombable(unsigned int entity)
 {
 	bombable.push_back(entity);
 }
 
-void Missiles::changeRadius(int newRadius)
+inline void Missiles::changeRadius(int newRadius)
 {
 	if (newRadius > 1) {
 		explosionRadius = newRadius;
 	}
 }
 
-void Missiles::updateAllMissiles(entt::registry* m_register)
+inline void Missiles::updateAllMissiles(entt::registry* m_register)
 {
 	//checks if missile should die
 	float playerPosX = m_register->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
