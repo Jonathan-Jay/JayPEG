@@ -80,7 +80,7 @@ inline void Missiles::CreateMissile(entt::registry* m_sceneReg, b2World* m_physi
 	tempBody->SetFixedRotation(true);
 	tempBody->SetUserData((void*)entity);
 
-	tempPhsBody = PhysicsBody(tempBody, missileRadius, vec2(0, 0), true, CollisionIDs::Missile(), CollisionIDs::Max() ^ CollisionIDs::Player());
+	tempPhsBody = PhysicsBody(tempBody, missileRadius, vec2(0, 0), true, CollisionIDs::Missile(), CollisionIDs::Max() ^ CollisionIDs::Player() ^ CollisionIDs::Bullet());
 
 	unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 	ECS::SetUpIdentifier(entity, bitHolder, "missile");
