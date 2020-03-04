@@ -89,6 +89,7 @@ PhysicsBody::PhysicsBody(b2Body * body, float width, float height, vec2 centerOf
 }
 
 PhysicsBody::PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vector<float> yCoordinates, uint16 categoryBits, uint16 maskBits)
+//PhysicsBody::PhysicsBody(b2Body* body, b2Vec2 tempArray[], int size, uint16 categoryBits, uint16 maskBits)
 {
 	b2ChainShape tempShape;
 	b2Vec2* tempVec2 = new b2Vec2[xCoordinates.size()];
@@ -97,6 +98,7 @@ PhysicsBody::PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vec
 		tempVec2[x].Set(xCoordinates[x], yCoordinates[x]);
 	}
 	tempShape.CreateChain(tempVec2, xCoordinates.size());
+	//tempShape.CreateChain(tempArray, size);
 
 	b2FixtureDef tempFixture;
 	tempFixture.shape = &tempShape;

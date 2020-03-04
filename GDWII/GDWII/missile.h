@@ -5,12 +5,10 @@ class Missiles
 {
 public:
 	//create/store entity number
-	static void isMissile(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float missileRadius);
+	static void CreateMissile(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float missileRadius);
 	static void isBombable(unsigned int entity);
 	
 	static void changeRadius(int newRadius);
-
-	static std::vector<unsigned int> getMissiles();
 
 	//update all existing missiles
 	static void updateAllMissiles(entt::registry* m_register);
@@ -19,14 +17,16 @@ private:
 	static int maxMissiles;
 	static int explosionRadius;
 	static float damage;
+	static float screenShake;
 };
 
 std::vector<unsigned int> Missiles::missiles = {};
 int Missiles::maxMissiles = 2;
-int Missiles::explosionRadius = 40;
+int Missiles::explosionRadius = 25;
 float Missiles::damage = 10;
+float Missiles::screenShake = 5;
 
-void Missiles::isMissile(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float missileRadius)
+inline void Missiles::CreateMissile(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float missileRadius)
 {
 	auto entity = ECS::CreateEntity();
 
@@ -45,9 +45,11 @@ void Missiles::isMissile(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2
 
 	{	//animation for shot
 		auto& anim = animController.GetAnimation(0);
+		if (vel.y == 0)
+			anim.AddFrame(vec2(383, 0), vec2(383, 0));
 		anim.AddFrame(vec2(0, 127), vec2(127, 0));
 		anim.SetRepeating(false);
-		anim.SetSecPerFrame(1.f);
+		anim.SetSecPerFrame(0.07f);
 	}
 
 	{	//animation for explosion
@@ -106,12 +108,7 @@ void Missiles::changeRadius(int newRadius)
 	}
 }
 
-inline std::vector<unsigned int> Missiles::getMissiles()
-{
-	return missiles;
-}
-
-void Missiles::updateAllMissiles(entt::registry* m_register)
+inline void Missiles::updateAllMissiles(entt::registry* m_register)
 {
 	//checks if missile should die
 	float playerPosX = m_register->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();

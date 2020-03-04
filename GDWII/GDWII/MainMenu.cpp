@@ -1,5 +1,6 @@
 #include "MainMenu.h"
 #include "missile.h"
+#include <iomanip>
 
 MainMenu::MainMenu(std::string name)
 	: Scene(name)
@@ -35,129 +36,87 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		ECS::GetComponent<Camera>(entity).Orthographic(aspectRatio, temp.x, temp.y, temp.z, temp.w, -100.f, 100.f);
 
 		unsigned int bitHolder = EntityIdentifier::CameraBit() | EntityIdentifier::HoriScrollCameraBit() | EntityIdentifier::VertScrollCameraBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "Scrolling Camera");
+		ECS::SetUpIdentifier(entity, bitHolder, "Camera");
 		ECS::SetIsMainCamera(entity, true);
 	}
 
 	/*
+	std::string filename =  ".png";
+	float width = 100.f;
+	float height = 10.f;
+	std::string nameOfPhysBox = "hello";
+	vec2 placement(200.f, 5.f);
+	//CreateStaticBox(filename, width, height, placement, nameOfPhysBox); //creates a box
+	//CreateStaticBox(filename, 50, 50, vec2(-250.f,5), "box2");
+	*/
+
 	{
+
+
 		auto entity = ECS::CreateEntity();
 
 		ECS::AttachComponent<Sprite>(entity);
 		ECS::AttachComponent<Transform>(entity);
 		ECS::AttachComponent<PhysicsBody>(entity);
 		ECS::AttachComponent<AnimationController>(entity);
+		ECS::AttachComponent<Player>(entity);
 
-		std::string filename = ".png";
-		auto& animController = ECS::GetComponent<AnimationController>(entity);
-		animController.InitUVs(filename);
-
-		animController.AddAnimation(Animation());
-		animController.AddAnimation(Animation());
-
-		auto& anim = animController.GetAnimation(0);
-		anim.AddFrame(top right, bottomleft);
-		anim.SetRepeating();
-		anim.SetSecPerFrame();
-
-		anim = animController.GetAnimation(1);
-		anim.AddFrame(top right, bottomleft);
-		anim.SetRepeating();
-		anim.SetSecPerFrame();
-
-		animController.SetActiveAnim(0);
-
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, x, y, true, &animController);
-
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, z.f));
-
-		auto& tempSpr = ECS::GetComponent<Sprite>(entity);
-		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
-
-		b2Body* tempBody;
-		b2BodyDef tempDef;
-		tempDef.type = b2_dynamicBody;
-		tempDef.position.Set(float32(x.f), float32(y.f));
-
-		tempBody = m_physicsWorld->CreateBody(&tempDef);
-		//tempBody->SetGravityScale(0);
-		tempBody->SetFixedRotation(true);
-
-		tempPhsBody = PhysicsBody(constructor);
-
-		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit()
-			| EntityIdentifier::AnimationBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "");
-	}
-
-	{
-		auto entity = ECS::CreateEntity();
-
-		ECS::AttachComponent<Sprite>(entity);
-		ECS::AttachComponent<Transform>(entity);
-		ECS::AttachComponent<PhysicsBody>(entity);
-
-		std::string filename = ".png";
-
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, x, x);
-
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
-
-		auto& tempSpr = ECS::GetComponent<Sprite>(entity);
-		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
-
-		b2Body* tempBody;
-		b2BodyDef tempDef;
-		tempDef.type = b2_dynamicBody;
-		tempDef.position.Set(float32(x), float32(x));
-
-		tempBody = m_physicsWorld->CreateBody(&tempDef);
-		//tempBody->SetGravityScale(0);
-		tempBody->SetFixedRotation(true);
-
-		tempPhsBody = PhysicsBody(tempBody, float(x), vec2(0.f, 0.f), true);
-
-		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "");
-	}*/
-
-	{
-		auto entity = ECS::CreateEntity();
-
-		ECS::AttachComponent<Sprite>(entity);
-		ECS::AttachComponent<Transform>(entity);
-		ECS::AttachComponent<PhysicsBody>(entity);
-		ECS::AttachComponent<AnimationController>(entity);
-
-		std::string filename = "direction.png";
+		std::string filename = "player.png";
 		auto& animController = ECS::GetComponent<AnimationController>(entity);
 		animController.InitUVs(filename);
 
 
 		//all animations will be equally seperated in the y, their opposite direction is done by flipping corner x values
-		for (int x(0); x < 2; x++) {
+		for (int y(1); y <= 2; y++) {
 			animController.AddAnimation(Animation());
 			animController.AddAnimation(Animation());
 
+			int frameCount = 0;
+			bool pingPong = false;
+			switch (y) {
+			case 1:
+				frameCount = 12;
+				pingPong = true;
+				break;
+			default:
+				frameCount = 1;
+				break;
+			}
 			{	//animation for right facing
-				auto& anim = animController.GetAnimation(0 + x * 2);
-				anim.AddFrame(vec2(0, 5 + x * 5), vec2(5, 0 + x * 5));
-				anim.SetRepeating(false);
-				anim.SetSecPerFrame(1.f);
+				auto& anim = animController.GetAnimation(y * 2 - 2);
+				for (int x(1); x <= frameCount; x++) {
+					if (pingPong) {
+						if ((frameCount / 2 + 2) <= x) {
+							anim.AddFrame(vec2(250 * (frameCount - x + 1 ), 250 * y), vec2(250 * (frameCount - x + 2), 250 * (y - 1)));
+							continue;
+						}
+					}
+					anim.AddFrame(vec2(250 * (x - 1), 250 * y), vec2(250 * x, 250 * (y - 1)));
+				}
+				anim.SetRepeating(true);
+				anim.SetSecPerFrame(0.1f);
 			}
 
 			{	//aniamtion for left facing
-				auto& anim = animController.GetAnimation(1 + x * 2);
-				anim.AddFrame(vec2(5, 5 + x * 5), vec2(0, 0 + x * 5));
-				anim.SetRepeating(false);
-				anim.SetSecPerFrame(1.f);
+				auto& anim = animController.GetAnimation(y * 2 - 1);
+				for (int x(1); x <= frameCount; x++) {
+					if (pingPong) {
+						if ((frameCount / 2 + 2) <= x) {
+							anim.AddFrame(vec2(250 * (frameCount - x + 2), 250 * y), vec2(250 * (frameCount - x + 1), 250 * (y - 1)));
+							continue;
+						}
+					}
+					anim.AddFrame(vec2(250 * x, 250 * y), vec2(250 * (x - 1), 250 * (y - 1)));
+				}
+				anim.SetRepeating(true);
+				anim.SetSecPerFrame(0.1f);
 			}
 		}
 		animController.SetActiveAnim(0);
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, playerWidth, playerHeight, true, &animController);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, playerHeight + 1, playerHeight + 1, true, &animController);
 
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 15.f));
 
 		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
@@ -168,49 +127,19 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		tempBody->SetFixedRotation(true);
+		tempPhsBody.SetFriction(0);
 
 		tempPhsBody = PhysicsBody(tempBody, playerWidth, playerHeight, vec2(0, 0), true, CollisionIDs::Player(), CollisionIDs::Max() ^ CollisionIDs::Enemy());
 
 		tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
 
+		ECS::GetComponent<Player>(entity) = Player(10, 10, 1);
+
 		unsigned int bitHolder = EntityIdentifier::AnimationBit() | EntityIdentifier::SpriteBit()
-			| EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
+			| EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit() | EntityIdentifier::PlayerBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "player");
 		ECS::SetIsMainPlayer(entity, true);
 	}
-
-	/*{
-		auto entity = ECS::CreateEntity();
-
-		ECS::AttachComponent<Sprite>(entity);
-		ECS::AttachComponent<Transform>(entity);
-		ECS::AttachComponent<PhysicsBody>(entity);
-
-		std::string filename = "box.png";
-
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 604, 204);
-
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
-
-		auto& tempSpr = ECS::GetComponent<Sprite>(entity);
-		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
-
-		b2Body* tempBody;
-		b2BodyDef tempDef;
-		tempDef.type = b2_staticBody;
-		tempDef.position.Set(float32(0), float32(0));
-
-		tempBody = m_physicsWorld->CreateBody(&tempDef);
-		//tempBody->SetGravityScale(0);
-
-		std::vector<float> x = { -300,   -1,  -1,   1,    1,  300, 300, -300, -300 };
-		std::vector<float> y = { -100, -100, -80, -80, -100, -100, 100,  100, -100 };
-		tempPhsBody = PhysicsBody(tempBody, x, y);
-
-		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "floor");
-		EntityStorage::StoreEntity(entity, 0);
-	}*/
 
 	{
 		auto entity = ECS::CreateEntity();
@@ -223,7 +152,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 
 		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 4329, 1926);
 
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 20.f));
 
 		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
@@ -234,7 +163,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		//tempBody->SetGravityScale(0);
-
+		
 		std::vector<float> x = {
 			-2061, -1347, -1347, -697, -697, -643, -643, -586, -586, -547, -547, -358,
 			-358, -286, -286, -215, -215, 419, 419, 480, 480, 750, 750, 970, 970,
@@ -251,7 +180,22 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 			209, 209, 165, 165, 650, 650, 750, 750, 610, 610, 593, 593, 605, 605, 580, 580, 550, 550, 347, 347, 190,
 			190, 149, 149, 99, 99, 54, 54, 214, 214, 55
 		};
-		tempPhsBody = PhysicsBody(tempBody, x, y);
+
+		/*
+		std::cout << "b2Vec2 tempArray[" << x.size() << "] = {\n";
+		for (int count(0); count < x.size(); count++) {
+			if (count == x.size() - 1) {
+				std::cout << "\tb2Vec2(" << x[count] << ", " << y[count] << ")\n";
+			}
+			else {
+				std::cout << "\tb2Vec2(" << x[count] << ", " << y[count] << "),\n";
+			}
+		}
+		std::cout << "};\n";
+		*/
+
+		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment());
+		//tempPhsBody = PhysicsBody(tempBody, tempArray, 83);
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "map");
@@ -281,7 +225,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		std::vector<float> y = {
 			187, 187, 226, 226, 445, 445, 412, 412, 387, 387, 356, 356, 327, 327, 283, 283, 245, 245, 214, 214, 187
 		};
-		tempPhsBody = PhysicsBody(tempBody, x, y);
+		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment());
 
 		unsigned int bitHolder = EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "island");
@@ -323,8 +267,10 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
+
 }
 
+bool temp = true;
 void MainMenu::GamepadStick(XInputController* con)
 {
 	controllerInput = false;
@@ -333,12 +279,19 @@ void MainMenu::GamepadStick(XInputController* con)
 		gunActive = true;
 		controllerInput = true;
 	}
-	else if (con->IsButtonStroked(Buttons::B))
+	else if (controllerMissile)
 	{
-		missileShot = true;
-		controllerInput = true;
+		if (con->IsButtonPressed(Buttons::B))
+		{
+			missileShot = true;
+			controllerInput = true;
+			controllerMissile = false;
+		}
 	}
-
+	else if (con->IsButtonReleased(Buttons::B))
+	{
+		controllerMissile = true;
+	}
 
 	Stick sticks[2];
 	con->GetSticks(sticks);
@@ -348,14 +301,14 @@ void MainMenu::GamepadStick(XInputController* con)
 	if (sticks[0].x > 0.25f)
 	{
 		if (!crouching && recoilDelay == 0)
-			temp.x += 50;
+			temp.x += playerSpeed;
 		movingRight = true;
 		controllerInput = true;
 	}
 	else if (sticks[0].x < -0.25f)
 	{
 		if (!crouching && recoilDelay == 0)
-			temp.x -= 50;
+			temp.x -= playerSpeed;
 		movingRight = false;
 		controllerInput = true;
 	}
@@ -379,13 +332,13 @@ void MainMenu::GamepadStick(XInputController* con)
 	if (temp.x == 0) {
 		if (con->IsButtonPressed(Buttons::DPAD_RIGHT)) {
 			if (!crouching)
-				temp.x += 50;
+				temp.x += playerSpeed;
 			movingRight = true;
 			controllerInput = true;
 		}
 		if (con->IsButtonPressed(Buttons::DPAD_LEFT)) {
 			if (!crouching)
-				temp.x -= 50;
+				temp.x -= playerSpeed;
 			movingRight = false;
 			controllerInput = true;
 		}
@@ -398,8 +351,8 @@ void MainMenu::GamepadStick(XInputController* con)
 		}
 		controllerInput = true;
 	}
-	if (temp.y < -projectileSpeed + ((bulletRadius < missileRadius) ? missileRadius : bulletRadius)) {
-		temp.y = -projectileSpeed + ((bulletRadius < missileRadius) ? missileRadius : bulletRadius);
+	if (temp.y < -projectileSpeed * 1.5f) {
+		temp.y = -projectileSpeed * 1.5f;
 	}
 	m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
 }
@@ -419,12 +372,12 @@ void MainMenu::KeyboardDown()
 			temp.x = 0;
 		if (Input::GetKey(Key::RightArrow)) {
 			if (!crouching && recoilDelay == 0)
-				temp.x += 50;
+				temp.x += playerSpeed;
 			movingRight = true;
 		}
 		if (Input::GetKey(Key::LeftArrow)) {
 			if (!crouching && recoilDelay == 0)
-				temp.x -= 50;
+				temp.x -= playerSpeed;
 			movingRight = false;
 		}
 		if (Input::GetKey(Key::UpArrow)) {
@@ -447,44 +400,41 @@ void MainMenu::KeyboardDown()
 				temp.y = jumpStrength;
 			}
 		}
-		if (temp.y < -projectileSpeed + ((bulletRadius < missileRadius) ? missileRadius : bulletRadius)) {
-			temp.y = -projectileSpeed + ((bulletRadius < missileRadius) ? missileRadius : bulletRadius);
+		if (temp.y < -projectileSpeed * 1.5f) {
+			temp.y = -projectileSpeed * 1.5f;
 		}
 		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
 
 
-		//zoom code, delete later
-		if (Input::GetKey(Key::One)) {
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(1);
-		}
-		if (Input::GetKey(Key::Two)) {
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-1);
-		}
-
+		/*
 		//zoom stuff
-		if (Input::GetKeyDown(Key::Three)) {
-			orthozoom = !orthozoom;
-		}
-
-		if (orthozoom) {
-			float yOrtho = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize().y;
-			float xPos = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
-			if (xPos > 100 && xPos < 200) {
-				if (yOrtho < 500) {
-					m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-1);
-				}
-			}
-			else {
-				if (yOrtho > 100) {
-					m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(1);
-				}
+		float yOrtho = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize().y;
+		float xPos = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
+		if (xPos > 0 && xPos < 500) {
+			if (yOrtho < 500) {
+				m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-1);
 			}
 		}
+		else {
+			if (yOrtho > 100) {
+				m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(1);
+			}
+		}
+		*/
 	}
 }
 
+bool tempAIPause = true;
+
 void MainMenu::Update()
 {
+	auto& playerData = m_sceneReg->get<Player>(EntityIdentifier::MainPlayer());
+
+	std::cout << std::setfill(' ') << "\rHP: " << std::setw(2) << playerData.getCurrentHealth() << '/' << playerData.getMaxHealth()
+		<< "\tNRG: " << std::setw(2) << playerData.getCurrentEnergy() << '/' << playerData.getMaxEnergy();
+
+	playerData.updatePlayer();
+
 	//if delay is below 1 (used once), it starts decreasing timer
 	if (gunDelay < 1.f) {
 		gunDelay -= Timer::deltaTime;
@@ -503,20 +453,21 @@ void MainMenu::Update()
 	}
 
 	if (recoilDelay > 0) {
-		recoilDelay -= Timer::deltaTime;
+		recoilDelay -= (onGround ? 3 : 1) * Timer::deltaTime;
 		if (recoilDelay < 0) {
 			recoilDelay = 0;
 		}
 	}
 
 	onGround = grounded();
+
 	if (onGround && facingDown) {
 		//set collision to crouch height (half player height) once (first will be if starting off not crouching
 		if (!crouching) {
 			b2Body* playerBody = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody();
 
 			b2PolygonShape tempBox;
-			tempBox.SetAsBox(playerWidth / 2.f, playerHeight / 4.f, b2Vec2(0, -playerHeight / 4.f), 0);
+			tempBox.SetAsBox(playerWidth / 2.f, playerHeight * 2.f / 6.f, b2Vec2(0, -playerHeight * 1.f / 6.f), 0);
 				
 			b2FixtureDef crouchingBox;
 			crouchingBox.shape = &tempBox;
@@ -552,9 +503,9 @@ void MainMenu::Update()
 		crouching = false;
 	}
 
-	//only shoot when both wweapons are ready
-	if (gunDelay == 1.f && missileDelay == 5.f) {
-		if (gunActive) {
+	//only shoot when both weapons are ready
+	if (gunActive) {
+		if (gunDelay == 1.f) {
 			if (crouching) {
 				//remove tag to make force horizontal
 				facingUp = false;
@@ -563,30 +514,40 @@ void MainMenu::Update()
 
 			{
 				float x = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
-				float y = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionY() + (crouching ? -(playerHeight / 4.f) : (playerHeight / 4.f));
+				float y = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionY();
 
-				if (facingUp)
-					y += playerHeight / 4.f + bulletRadius;
-				else if (facingDown)
-					y -= playerHeight * 3.f / 4.f + bulletRadius;
+				b2Vec2 vel(0, 0);
 
-				b2Vec2 vel;
+				if (facingUp) {
+					y += playerHeight / 2.f + bulletRadius;
+					vel.y = projectileSpeed;
+				}
+				else if (facingDown) {
+					y -= playerHeight / 2.f + bulletRadius;
+					vel.y = -projectileSpeed * 2.f;
+				}
+				else {
+					if (crouching)
+						y -= 5.5f;
+					else
+						y += 6.1f;
+					x += (movingRight ? (playerWidth / 2.f) : -(playerWidth / 2.f));
+					vel.x = (movingRight ? projectileSpeed : -projectileSpeed);
+				}
 
-				if (!facingDown && !facingUp)
-					vel = b2Vec2((movingRight ? projectileSpeed : -projectileSpeed), 0);
-				else
-					vel = b2Vec2(0, (facingUp ? projectileSpeed : -projectileSpeed));
-
-				Bullets::isBullet(m_sceneReg, m_physicsWorld, b2Vec2(x, y), vel, bulletRadius);
+				Bullets::CreateBullet(m_sceneReg, m_physicsWorld, b2Vec2(x, y), vel, bulletRadius);
 			}
 
 			//reset delay
 			gunDelay = gunCooldown;
 		}
+		gunActive = false;
+	}
 
-		if (missileShot) {
+	if (missileShot) {
+		if (gunDelay == 1.f && missileDelay == 5.f) {
 			//missiles only spawn when delay is 1 (ready to use) and you have enough NRG
-			if (true) {	// hasenoughtNRG <- function that checks that and uses NRG
+			if (m_sceneReg->get<Player>(EntityIdentifier::MainPlayer()).subCurrentEnergy(missileCost)) {
 				if (crouching) {
 					//remove tag to make force horizontal
 					facingUp = false;
@@ -595,64 +556,60 @@ void MainMenu::Update()
 
 				{
 					float x = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
-					float y = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionY() + (crouching ? -(playerHeight / 8.f) : (playerHeight / 4.f));
+					float y = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionY();
 
-					if (facingUp)
-						y += playerHeight / 4.f + missileRadius;
-					else if (facingDown)
-						y -= playerHeight * 3.f / 4.f + missileRadius;
-
-					b2Vec2 vel = b2Vec2(0, 0);
+					b2Vec2 vel(0, 0);
 					b2Vec2 velo = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
 
 					//depending on the direction player is facing, give acceleration
-					if (!facingDown && !facingUp) {
-						vel.x = movingRight ? projectileSpeed : -projectileSpeed;
-						if (!onGround) {
-							velo.x = movingRight ? -jumpStrength : jumpStrength;
-							recoilDelay = recoilCooldown;
-						}
+					if (facingUp) {
+						if (velo.y > 0)		velo.y = 0;
+						y += playerHeight / 2.f + missileRadius;
+						vel.y = projectileSpeed;
+					}
+					else if (facingDown) {
+						velo.y = jumpStrength;
+						y -= playerHeight / 2.f + missileRadius;
+						vel.y = -projectileSpeed;
 					}
 					else {
-						if (facingDown) {
-							velo.y = jumpStrength;
-							vel.y = -projectileSpeed;
+						if (crouching)
+							y -= 5.5f;
+						else
+							y += 6.1f;
+						if (!onGround) {
+							velo.x = movingRight ? -jumpStrength : jumpStrength;
 						}
 						else {
-							if (velo.y > 0)
-								velo.y = 0;
-
-							vel.y = projectileSpeed;
+							velo.x = 0;
 						}
+						x += (movingRight ? (playerWidth / 2.f) : -(playerWidth / 2.f));
+						vel.x = (movingRight ? projectileSpeed : -projectileSpeed);
+						recoilDelay = recoilCooldown;
 					}
 
 					m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(velo);
-					Missiles::isMissile(m_sceneReg, m_physicsWorld, b2Vec2(x, y), vel, missileRadius);
+					Missiles::CreateMissile(m_sceneReg, m_physicsWorld, b2Vec2(x, y), vel, missileRadius);
 				}
 
 				//reset delay
+				gunDelay = gunCooldown;
 				missileDelay = missileCooldown;
 			}
 		}
+		missileShot = false;
 	}
+	
 
-	//reset weapon bools (is button held?)
-	missileShot = false;
-	gunActive = false;
-
-	//update bullet logic
+	//update projectile logic
 	Missiles::updateAllMissiles(m_sceneReg);
 	Bullets::updateAllBullets(m_sceneReg);
 
-	Enemies::UpdateEnemies(m_sceneReg);
+	if (Input::GetKeyDown(Key::A))
+		tempAIPause = !tempAIPause;
 
-	/*
-	
-	
-	have a function in enemy bit that returns the vector of all enemy numbers
-	
-	
-	*/
+	if (tempAIPause)
+		Enemies::UpdateEnemies(m_sceneReg);
 
 	/*Animations:
 	0: right
@@ -667,23 +624,27 @@ void MainMenu::Update()
 				if (movingRight) { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0); }
 				else { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1); }
 			}
+			else if (crouching) {		//you can't move while crouching, but can be moved
+				if (movingRight) {	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(2); }
+				else {				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(3); }
+			}
 			else {		//walking
-				if (movingRight) { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0); }
-				else { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1); }
+				if (movingRight) {	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0); }
+				else {				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1); }
 			}
 		}
 		else {
 			if (facingUp) {
-				if (movingRight) { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0); }
-				else { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1); }
+				if (movingRight) {	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0); }
+				else {				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1); }
 			}
 			else if (crouching) {
-				if (movingRight) { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(2); }
-				else { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(3); }
+				if (movingRight) {	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(2); }
+				else {				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(3); }
 			}
 			else {		//idle
-				if (movingRight) { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0); }
-				else { m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1); }
+				if (movingRight) {	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0); }
+				else {				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1); }
 			}
 		}
 	}
@@ -701,19 +662,13 @@ void MainMenu::Update()
 			else {				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(1);	}
 		}
 	}
-} 
+}
 
 bool MainMenu::grounded()
 {
-	for (b2ContactEdge* edge = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetContactList(); edge; edge = edge->next) {
-		b2Vec2 contactNormal = edge->contact->GetManifold()->localNormal;
-
 		if (edge->other->GetFixtureList()->GetType() == b2Shape::e_chain)
-			contactNormal = -contactNormal;
-
-		if (contactNormal.y <= -0.9 && edge->contact->GetManifold()->pointCount == 2)
-			return true;
 	}
 
 	return false;
 }
+

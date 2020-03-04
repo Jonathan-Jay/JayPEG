@@ -35,7 +35,8 @@ void Game::InitGame()
 
 	//Creates a new scene.
 	//Replace this with your own scene.
-	m_scenes.push_back(new MainMenu("Main Menu"));
+	m_scenes.push_back(new MainMenu("Main Scene")); //Main Scene
+	m_scenes.push_back(new ActualMainMenu("MainMenu")); //actual Main Menu
 
 	//Sets active scene reference to our scene
 	m_activeScene = m_scenes[0];
@@ -46,6 +47,9 @@ void Game::InitGame()
 	m_register = m_activeScene->GetScene();
 
 	BackEnd::SetWindowName(m_activeScene->GetName());
+
+	//delete this
+	//CreatePlatform::StoringScene(m_activeScene);
 
 	PhysicsSystem::Init();
 }
@@ -104,13 +108,12 @@ void Game::GUI()
 	UI::Start(BackEnd::GetWindowWidth(), BackEnd::GetWindowHeight());
 
 	ImGui::Text("Place your different tabs below.");
+		if (ImGui::BeginTabBar(""))
+		{
+			BackEnd::GUI(m_register, m_activeScene);
 
-	if (ImGui::BeginTabBar(""))
-	{
-		BackEnd::GUI(m_register, m_activeScene);
-
-		ImGui::EndTabBar();
-	}
+			ImGui::EndTabBar();
+		}
 
 	UI::End();
 }
@@ -270,7 +273,6 @@ void Game::MouseClick(SDL_MouseButtonEvent evnt)
 		int windowWidth = BackEnd::GetWindowWidth();
 		int maincamera = EntityIdentifier::MainCamera();
 		vec4 ortho = m_register->get<Camera>(maincamera).GetOrthoSize();
-		printf("%f, %f, %f, %f\n", ortho.x, ortho.y, ortho.z, ortho.w);
 		vec2 pos = vec2(
 			((evnt.x / static_cast<float>(windowHeight) * 2.f * ortho.w) - (ortho.w * static_cast<float>(windowWidth) / static_cast<float>(windowHeight))),
 			((-evnt.y / static_cast<float>(windowHeight) * 2.f * ortho.w) + ortho.w)
@@ -281,6 +283,11 @@ void Game::MouseClick(SDL_MouseButtonEvent evnt)
 		printf("(%f, %f)\n", pos.x, pos.y);
 		xPos.push_back(pos.x);
 		yPos.push_back(pos.y);
+	}
+
+	if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_MIDDLE)) {
+		vec4 ortho = m_register->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize();
+		printf("ortho: %f, %f, %f, %f\n", ortho.x, ortho.y, ortho.z, ortho.w);
 	}
 
 	if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
@@ -315,6 +322,8 @@ void Game::MouseWheel(SDL_MouseWheelEvent evnt)
 	//Active scene now captures this input and can use it
 	//Look at base Scene class for more info.
 	m_activeScene->MouseWheel(evnt);
+
+	m_register->get<Camera>(EntityIdentifier::MainCamera()).Zoom(evnt.y * 10.f);
 
 	if (m_guiActive)
 	{
