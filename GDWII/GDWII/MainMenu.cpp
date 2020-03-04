@@ -666,7 +666,16 @@ void MainMenu::Update()
 
 bool MainMenu::grounded()
 {
+	for (b2ContactEdge* edge = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetContactList(); edge; edge = edge->next) {
+		b2Vec2 normal = edge->contact->GetManifold()->localNormal;
+
 		if (edge->other->GetFixtureList()->GetType() == b2Shape::e_chain)
+			normal = -normal;
+
+		if (normal.y <= -0.9 && edge->contact->GetManifold()->pointCount == 2) {
+			return true;
+			break;
+		}
 	}
 
 	return false;

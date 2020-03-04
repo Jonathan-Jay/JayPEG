@@ -112,10 +112,10 @@ inline void Bullets::updateAllBullets(entt::registry* m_register)
 		//contact check (touching any physics body)
 		if (b2ContactEdge* contact = m_register->get<PhysicsBody>(bullets[x]).GetBody()->GetContactList()) {
 			//if not the world
-			if (contact->contact->GetFixtureA()->GetBody() != m_register->get<PhysicsBody>(EntityStorage::GetEntity(1)).GetBody() &&
+			/*if (contact->contact->GetFixtureA()->GetBody() != m_register->get<PhysicsBody>(EntityStorage::GetEntity(1)).GetBody() &&
 				contact->contact->GetFixtureA()->GetBody() != m_register->get<PhysicsBody>(EntityStorage::GetEntity(2)).GetBody()) {
 				printf("c: %u, m: %u\n", contact->contact->GetFixtureA()->GetFilterData().categoryBits, contact->contact->GetFixtureA()->GetFilterData().maskBits);
-			}
+			}*/
 
 			ECS::DestroyEntity(bullets[x]);
 			bullets.erase(bullets.begin() + x, bullets.begin() + x + 1);
