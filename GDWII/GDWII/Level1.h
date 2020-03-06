@@ -1,0 +1,77 @@
+#ifndef __LVL1__
+#define __LVL1__
+
+#include "EntityManager.h"
+#include "CreatePlatform.h"
+#include "missile.h"
+#include <iomanip>
+
+class Level1 : public Scene
+{
+public:
+	Level1(std::string name);
+
+	void InitScene(float windowWidth, float windowHeight) override;
+	void GamepadStick(XInputController* con) override;
+	void KeyboardDown() override;
+	void Update() override;
+
+private:
+	//tests if player is grounded
+	bool Grounded();
+	//updates counters
+	void UpdateCounters();
+	//UI elements
+	void UpdateUI();
+	void CreateUI();
+
+	vec3 uiOffset = {53, -22, 50}; // from top left corner
+	std::vector<unsigned int> uiElements = {};
+
+	//variables used by the engine
+	bool onGround = false;
+	bool canJump = true;
+	bool controllerInput = false;
+	bool gunActive = false;
+	bool missileActive = false;
+	bool missileShot = false;
+	bool movingRight = true;
+	bool facingUp = false;
+	bool facingDown = false;
+	bool crouching = false;
+	float jumpHeight = 0;
+	float gunDelay = 0;
+	float missileDelay = 0;
+	float recoilDelay = 0;
+
+	//bullet variables
+	float bulletRadius = 5.f;
+	float gunCooldown = 0.25f;
+
+	//missile variables
+	int missileCost = 5;
+	int maxMissileLevel = 2;
+	float missileRadius = 5.f;
+	float missileCooldown = 1.0f;
+	float missileDamage = 2.f;
+
+	//general projectile variables
+	float projectileSpeed = 0.f;
+	float recoilCooldown = 0.5f;
+
+	//player related variables (max 99 for HP and NRG please)
+	int itemCount = 1;		//how many do you start with (increase when you spawn a item)
+	int totalItems = 3;		//how many in total (including starting amount)
+	int maxHP = 10;
+	int maxNRG = 10;
+	float EnergyRegenPerSec = 1.f;
+	float playerHeight = 40.f;
+	float playerWidth = 22.f;
+	float playerSpeed = 25.f;
+	float minJumpStrength = 25.f;
+	float maxJumpStrength = 50.f;
+	float jumpIncrementPerSec = 125.f;
+};
+
+#endif // !__LVL1__
+

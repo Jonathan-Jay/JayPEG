@@ -4,9 +4,9 @@ std::vector<int> EntityStorage::storage = {};
 
 void EntityStorage::StoreEntity(unsigned int entity, unsigned int number)
 {
-	if (number + 1 > storage.size())
+	if (number + static_cast<unsigned int>(1) > storage.size())
 	{
-		for (int x = storage.size(); x <= number + 1; x++)
+		for (unsigned int x = storage.size(); x <= number + 1; x++)
 		{
 			storage.push_back(-1);
 		}
@@ -23,4 +23,9 @@ int EntityStorage::GetEntity(unsigned int number)
 	}
 
 	return storage[number];
+}
+
+void EntityStorage::Reset()
+{
+	storage.resize(0);
 }

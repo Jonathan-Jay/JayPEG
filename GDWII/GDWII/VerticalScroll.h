@@ -14,17 +14,24 @@ public:
 	Camera* GetCam() const;
 	Transform* GetFocus() const;
 	float GetOffset() const;
+	float GetTopLimit() const;
+	float GetBottomLimit() const;
 
 	//Setters
 	void SetCam(Camera* cam);
 	void SetFocus(Transform* focus);
 	void SetOffset(float offset);
+	void SetLimits(float bottom, float top);
+	void SetTopLimit(float top);
+	void SetBottomLimit(float bottom);
 		
 private:
 	Camera* m_cam = nullptr;
 	Transform* m_focus = nullptr;
 
 	float m_offset = 5.f;
+	float m_topLimit = INT_MAX;
+	float m_bottomLimit = INT_MIN;
 };
 
 //Sends vertical scrolling camera TO json file

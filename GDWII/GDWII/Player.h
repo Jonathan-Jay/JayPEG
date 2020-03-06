@@ -7,6 +7,9 @@ public:
 	Player();
 	Player(int maxHealth, int maxEnergy, float energyRegen);
 	~Player();
+
+	void reset(int maxHealth, int maxEnergy, float energyRegen);
+	
 	//Getters and setters for health and energy
 	int getMaxHealth() const;
 	void setMaxHealth(int maxHealth);
@@ -14,26 +17,25 @@ public:
 	int getMaxEnergy() const;
 	void setMaxEnergy(int maxEnergy);
 
-	bool getMissile(bool change = false);
+	int getMissile(bool change = false);
 
 	void setEnergyRegen(float energyRegen);
 
 	int getCurrentHealth() const;
-
-	int getCurrentEnergy() const;
+	float getCurrentEnergy() const;
 
 	//adds an amount to the current health
 	void addCurrentHealth(unsigned int addHealth);
 	//adds an amount to the current energy
-	void addCurrentEnergy(unsigned int addHealth);
+	void addCurrentEnergy(float addEnergy);
 
 	//substracts an amount of the current Health
 	void subCurrentHealth(unsigned int subHealth);
 
 	//Substracts an amount of the current Energy
-	bool subCurrentEnergy(unsigned int subEnergy);
+	bool subCurrentEnergy(float subEnergy);
 
-	//returns true if player is alive, false when dead
+	//returns true if player is dead, false when alive
 	bool updatePlayer();
 
 private:
@@ -41,11 +43,10 @@ private:
 	int currentHealth = 0;
 
 	int maxEnergy = 100;
-	int currentEnergy = 0;
+	float currentEnergy = 0;
 	float energyRegen = 0.f;
-	float counter = 0.f;
 
-	bool hasMissile = false;
+	int missileStat = 0;
 };
 
 inline void to_json(nlohmann::json& j, const Player& player) 
