@@ -18,38 +18,26 @@ enum class BodyType
 	NUM_TYPES
 };
 
-struct CollisionIDs
-{
-public:
-	//Gets the different IDs
-	static uint16 Player() { return m_playerID; }
-	static uint16 Environment() { return m_environmentID; }
-	static uint16 Enemy() { return m_enemyID; }
-	static uint16 Bullet() { return m_bulletID; }
-	static uint16 Bombable() { return m_bombableID; }
-	static uint16 Missile() { return m_missileID; }
-	static uint16 Max() { return 0xFFFF; }
-private:
-	//Holds the different IDs
-	static uint16 m_environmentID;
-	static uint16 m_playerID;
-	static uint16 m_enemyID;
-	static uint16 m_bulletID;
-	static uint16 m_bombableID;
-	static uint16 m_missileID;
+static struct CollisionIDs abstract {
+	static const uint16 Environment = 0x0001;
+	static const uint16 Player = 0x0002;
+	static const uint16 Enemy = 0x0004;
+	static const uint16 Bullet = 0x0008;
+	static const uint16 Bombable = 0x0010;
+	static const uint16 Missile = 0x0020;
+	static const uint16 Max = 0xFFFF;
 };
-
 
 class PhysicsBody
 {
 public:
 	PhysicsBody() { };
 	//Constructs a circle collider
-	PhysicsBody(b2Body* body, float radius, vec2 centerOffset, bool isDynamic, uint16 categoryBits = 0x1, uint16 maskBits = CollisionIDs::Max());
+	PhysicsBody(b2Body* body, float radius, vec2 centerOffset, bool isDynamic, uint16 categoryBits = 0x1, uint16 maskBits = CollisionIDs::Max);
 	//Constructs a box collider
-	PhysicsBody(b2Body* body, float width, float height, vec2 centerOffset, bool isDynamic, uint16 categoryBits = 0x1, uint16 maskBits = CollisionIDs::Max());
+	PhysicsBody(b2Body* body, float width, float height, vec2 centerOffset, bool isDynamic, uint16 categoryBits = 0x1, uint16 maskBits = CollisionIDs::Max);
 
-	PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vector<float> yCoordinates, uint16 categoryBits = 0x1, uint16 maskBits = CollisionIDs::Max());
+	PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vector<float> yCoordinates, uint16 categoryBits = 0x1, uint16 maskBits = CollisionIDs::Max);
 
 	void DeleteBody();
 

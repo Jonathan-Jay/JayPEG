@@ -1,13 +1,5 @@
 #include "PhysicsBody.h"
 
-//refereced raw values at missle.h,
-uint16 CollisionIDs::m_environmentID=0x0001;
-uint16 CollisionIDs::m_playerID		=0x0002;
-uint16 CollisionIDs::m_enemyID		=0x0004;
-uint16 CollisionIDs::m_bulletID		=0x0008;
-uint16 CollisionIDs::m_bombableID	=0x0010;
-uint16 CollisionIDs::m_missileID	=0x0020;
-
 vec3 PhysicsBody::m_gravityAcceleration = vec3(0.f, -35.f, 0.f);
 bool PhysicsBody::m_drawBodies = false;
 

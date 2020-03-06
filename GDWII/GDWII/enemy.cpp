@@ -12,6 +12,7 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 	AnimationController& animCon = m_reg->get<AnimationController>(enemyID.enemyID);
 
 	//(ax < bx+bw && ax+aw > bx) && (ay < by+bh && ay+ah > by)
+	//test if in other enemy and try to push it back
 
 	b2Vec2 temp = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetLinearVelocity();
 	temp.x = 0;
@@ -55,16 +56,15 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 			//detect if enemy has jumped multiple times in same place, if so then wander as it is stuck jumping
 			jumpInfo.x++;
 			if (jumpInfo.y == enemyPos.x || jumpInfo.z == enemyPos.y) {
-				if (jumpInfo.x >= 3) {
+				if (jumpInfo.x > 3) {
 					jumpInfo = vec3(0, 0, 0);
 					state = EnemyState::Wander;
 					break;
 				}
-			} else
-				jumpInfo = vec3(0, 0, 0);
-
-			jumpInfo.y = enemyPos.x;
-			jumpInfo.z = enemyPos.y;
+			} else {
+				jumpInfo.y = enemyPos.x;
+				jumpInfo.z = enemyPos.y;
+			}
 
 			temp.y = jumpHeight;
 		}
@@ -238,7 +238,7 @@ void Enemies::CreateEnemy(b2World* m_physicsWorld, EnemyTypes m_type, float x, f
 	tempBody->SetFixedRotation(true);
 	tempBody->SetUserData((void*)entity);
 
-	tempPhsBody = PhysicsBody(tempBody, 20.f, 20.f, vec2(0, 0), true, CollisionIDs::Enemy(), CollisionIDs::Max() ^ CollisionIDs::Enemy());
+	tempPhsBody = PhysicsBody(tempBody, 20.f, 20.f, vec2(0, 0), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy);
 	tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
 
 	switch (m_type) {

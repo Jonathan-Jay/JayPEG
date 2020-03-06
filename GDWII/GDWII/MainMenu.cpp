@@ -129,7 +129,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		tempBody->SetFixedRotation(true);
 		tempPhsBody.SetFriction(0);
 
-		tempPhsBody = PhysicsBody(tempBody, playerWidth, playerHeight, vec2(0, 0), true, CollisionIDs::Player(), CollisionIDs::Max() ^ CollisionIDs::Enemy());
+		tempPhsBody = PhysicsBody(tempBody, playerWidth, playerHeight, vec2(0, 0), true, CollisionIDs::Player, CollisionIDs::Max ^ CollisionIDs::Enemy);
 
 		tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
 
@@ -194,7 +194,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		std::cout << "};\n";
 		*/
 
-		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment());
+		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment);
 		//tempPhsBody = PhysicsBody(tempBody, tempArray, 83);
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
@@ -225,7 +225,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		std::vector<float> y = {
 			187, 187, 226, 226, 445, 445, 412, 412, 387, 387, 356, 356, 327, 327, 283, 283, 245, 245, 214, 214, 187
 		};
-		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment());
+		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment);
 
 		unsigned int bitHolder = EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "island");
@@ -256,7 +256,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		tempBody->SetUserData((void*)entity);
 
-		tempPhsBody = PhysicsBody(tempBody, 20, 120, vec2(0,0), false, CollisionIDs::Bombable());
+		tempPhsBody = PhysicsBody(tempBody, 20, 120, vec2(0,0), false, CollisionIDs::Bombable);
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() || EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "bombwall");
@@ -535,7 +535,7 @@ void MainMenu::Update()
 					vel.x = (movingRight ? projectileSpeed : -projectileSpeed);
 				}
 
-				Bullets::CreateBullet(m_sceneReg, m_physicsWorld, b2Vec2(x, y), vel, bulletRadius);
+				Bullets::CreateBullet(m_sceneReg, m_physicsWorld, b2Vec2(x, y), vel, bulletRadius, CollisionIDs::Player);
 			}
 
 			//reset delay

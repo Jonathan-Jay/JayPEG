@@ -80,7 +80,7 @@ inline void Missiles::CreateMissile(entt::registry* m_sceneReg, b2World* m_physi
 	tempBody->SetFixedRotation(true);
 	tempBody->SetUserData((void*)entity);
 
-	tempPhsBody = PhysicsBody(tempBody, missileRadius, vec2(0, 0), true, CollisionIDs::Missile(), CollisionIDs::Max() ^ CollisionIDs::Player() ^ CollisionIDs::Bullet());
+	tempPhsBody = PhysicsBody(tempBody, missileRadius, vec2(0, 0), true, CollisionIDs::Missile, CollisionIDs::Max ^ CollisionIDs::Player ^ CollisionIDs::Bullet);
 
 	unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 	ECS::SetUpIdentifier(entity, bitHolder, "missile");
@@ -149,19 +149,19 @@ inline void Missiles::updateAllMissiles(entt::registry* m_register)
 					//printf("c: %u, x: %f, y: %f\n", bod->GetFixtureList()->GetFilterData().categoryBits, bod->GetPosition().x, bod->GetPosition().y);
 					unsigned int entity{ 0 };
 					switch (bod->GetFixtureList()->GetFilterData().categoryBits) {
-					case 0x0002:		//player
+					case CollisionIDs::Player:
 						entity = EntityIdentifier::MainPlayer();
 						break;
-					case 0x0004:		//enemy
+					case CollisionIDs::Enemy:
 						entity = (unsigned int)bod->GetUserData();
 						break;
-					case 0x0008:		//bullet
+					case CollisionIDs::Bullet:
 						printf("bullet dead\n");
 						entity = (unsigned int)bod->GetUserData();
 						Bullets::bullets.erase(Bullets::bullets.begin() + entity, Bullets::bullets.begin() + entity + 1);
 						ECS::DestroyEntity(entity);
 						break;
-					case 0x0010:		//bombable
+					case CollisionIDs::Bombable:
 						entity = (unsigned int)bod->GetUserData();
 						ECS::DestroyEntity(entity);
 						break;

@@ -7,7 +7,7 @@ class Bullets
 friend class Missiles;
 public:
 	//create/store bullet number
-	static void CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float bulletRadius);
+	static void CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float bulletRadius, uint16 shooter);
 
 	//update all existing bullets
 	static void updateAllBullets(entt::registry* m_register);
@@ -21,7 +21,7 @@ std::vector<unsigned int> Bullets::bullets = {};
 int Bullets::maxBullets = 5;
 int Bullets::damage = 5;
 
-inline void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float bulletRadius) {
+inline void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float bulletRadius, uint16 shooter) {
 	auto entity = ECS::CreateEntity();
 
 	ECS::AttachComponent<Sprite>(entity);
@@ -70,7 +70,7 @@ inline void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physics
 	tempBody->SetFixedRotation(true);
 	tempBody->SetUserData((void*)entity);
 
-	tempPhsBody = PhysicsBody(tempBody, bulletRadius, vec2(0, 0), true, CollisionIDs::Bullet(), CollisionIDs::Max() ^ CollisionIDs::Player());
+	tempPhsBody = PhysicsBody(tempBody, bulletRadius, vec2(0, 0), true, CollisionIDs::Bullet, CollisionIDs::Max ^ CollisionIDs::Bullet ^ shooter);
 
 	unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 	ECS::SetUpIdentifier(entity, bitHolder, "bullet");
