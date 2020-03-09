@@ -262,8 +262,8 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 		ECS::SetUpIdentifier(entity, bitHolder, "bombwall");
 	}
 
-	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 850, -220);
-	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 750, -209);
+	//Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 850, -220);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
 
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
