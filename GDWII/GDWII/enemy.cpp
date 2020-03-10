@@ -24,13 +24,14 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 
 	if (canSeePlayer) {
 		switch (type) {
-		case EnemyTypes::WALKER:
+		case EnemyTypes::WALKER:	
 			targetPos = playerPos;
 			break;
 		case EnemyTypes::SHOOTER:
 			targetPos.x = playerPos.x - enemyPos.x;
 			targetPos.x = playerPos.x - targetPos.x / abs(targetPos.x) * 150;
 			targetPos.y = playerPos.y;
+			targetPos2 = playerPos;
 			break;
 		default:
 			break;
@@ -44,11 +45,11 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 	switch (state) {
 	case EnemyState::Follow:
 		tempCalc = targetPos.x - enemyPos.x;
-		if (abs(tempCalc) < moveSpeed * 2) {
-			if (!canSeePlayer)
-				state = EnemyState::Wander;
-			else
+		if (abs(tempCalc) < moveSpeed) {
+			if (canSeePlayer)
 				animCon.SetActiveAnim(playerPos.x - enemyPos.x < 0 ? 0 : 1);
+			else
+				state = EnemyState::Wander;
 
 			break;
 		}
@@ -65,20 +66,20 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 
 		//jump by doing raycast to side and checking to see if intersection point is different then p2 for the raycast
 		jumpTestPoint = b2Vec2(enemyb2Pos.x + temp.x * 3, enemyb2Pos.y);
-		jumpTestPoint.x = clamp(jumpTestPoint.x, -abs(targetPos.x), abs(targetPos.x));
+		//jumpTestPoint.x = clamp(jumpTestPoint.x, -abs(targetPos.x), abs(targetPos.x));
 		if (canJump && EnemyRaycast(enemyb2Pos, jumpTestPoint, true).x != jumpTestPoint.x) {
 			//detect if enemy has jumped multiple times in same place, if so then wander as it is stuck jumping
-			jumpInfo.x++;
-			if (jumpInfo.y == enemyPos.x && jumpInfo.z == enemyPos.y) {
-				if (jumpInfo.x > 3) {
-					jumpInfo = vec3(0, 0, 0);
+			if (jumpInfo.y == enemyb2Pos.x || jumpInfo.z == enemyb2Pos.y) {
+				jumpInfo.x++;
+				if (jumpInfo.x >= 2) {
+					jumpInfo = b2Vec3(0, 0, 0);
 					state = EnemyState::Wander;
 					break;
 				}
 			} else {
 				jumpInfo.x = 0;
-				jumpInfo.y = enemyPos.x;
-				jumpInfo.z = enemyPos.y;
+				jumpInfo.y = enemyb2Pos.x;
+				jumpInfo.z = enemyb2Pos.y;
 			}
 
 			temp.y = jumpHeight;
@@ -99,11 +100,13 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 
 			if (man->localNormal.x < 0) {
 				animCon.SetActiveAnim(0);
+				previousLocalPoint = man->localPoint;
 				break;
 			}
 
 			if (man->localNormal.x > 0) {
 				animCon.SetActiveAnim(1);
+				previousLocalPoint = man->localPoint;
 				break;
 			}
 		}

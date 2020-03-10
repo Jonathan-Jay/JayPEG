@@ -38,8 +38,9 @@ public:
 	bool canSeePlayer{ false };
 	bool facingRight{ false };
 	bool canJump{ false };
-	vec3 jumpInfo;	//times jumped, x pos at jump, y pos at jump
 	vec2 targetPos;
+	vec2 targetPos2;
+	b2Vec3 jumpInfo;	//times jumped, x pos at jump, y pos at jump
 	b2Vec2 previousLocalPoint;
 
 	void SetStats(EnemyTypes _type, int _health, int _moveSpeed, int _jumpHeight, int _attackDamage) { type = _type; health = _health; moveSpeed = _moveSpeed; jumpHeight = _jumpHeight; }
