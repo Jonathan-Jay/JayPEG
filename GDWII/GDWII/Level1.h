@@ -3,10 +3,10 @@
 #include "CreatePlatform.h"
 #include <string>
 
-class MainMenu : public Scene
+class Level1 : public Scene
 {
 public:
-	MainMenu(std::string name);
+	Level1(std::string name);
 	void InitScene(float windowWidth, float windowHeight) override;
 	void GamepadStick(XInputController* con) override;
 	void KeyboardDown() override;

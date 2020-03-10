@@ -1,15 +1,15 @@
-#include "MainMenu.h"
+#include "Level1.h"
 #include "missile.h"
 #include <iomanip>
 
-MainMenu::MainMenu(std::string name)
+Level1::Level1(std::string name)
 	: Scene(name)
 {
 	m_gravity = b2Vec2(float32(0.f), float32(-20.f));
 	m_physicsWorld->SetGravity(m_gravity);
 }
 
-void MainMenu::InitScene(float windowWidth, float windowHeight)
+void Level1::InitScene(float windowWidth, float windowHeight)
 {
 	m_sceneReg = new entt::registry;
 
@@ -271,7 +271,7 @@ void MainMenu::InitScene(float windowWidth, float windowHeight)
 }
 
 bool temp = true;
-void MainMenu::GamepadStick(XInputController* con)
+void Level1::GamepadStick(XInputController* con)
 {
 	controllerInput = false;
 	if (con->IsButtonPressed(Buttons::X))
@@ -357,7 +357,7 @@ void MainMenu::GamepadStick(XInputController* con)
 	m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
 }
 
-void MainMenu::KeyboardDown()
+void Level1::KeyboardDown()
 {
 	if (!controllerInput) {
 		if (Input::GetKey(Key::Z)) {
@@ -426,7 +426,7 @@ void MainMenu::KeyboardDown()
 
 bool tempAIPause = true;
 
-void MainMenu::Update()
+void Level1::Update()
 {
 	auto& playerData = m_sceneReg->get<Player>(EntityIdentifier::MainPlayer());
 
@@ -664,7 +664,7 @@ void MainMenu::Update()
 	}
 }
 
-bool MainMenu::grounded()
+bool Level1::grounded()
 {
 	for (b2ContactEdge* edge = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetContactList(); edge; edge = edge->next) {
 		b2Vec2 normal = edge->contact->GetManifold()->localNormal;
