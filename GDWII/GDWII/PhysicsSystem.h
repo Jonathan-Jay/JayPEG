@@ -48,3 +48,21 @@ namespace PhysicsSystem
 	//Run our Box-Box Collision detection system
 	bool BoxBoxCollision(std::pair<PhysicsBody&, Box> group1, std::pair<PhysicsBody&, Box> group2);
 }
+
+class RealQueryCallback : public b2QueryCallback {
+public:
+	std::vector<b2Body*> foundBodies;
+	bool ReportFixture(b2Fixture* fixture) {
+		foundBodies.push_back(fixture->GetBody());
+		return true;//keep going to find all fixtures in the query area
+	}
+};
+
+class RealRaycastCallback : public b2RayCastCallback {
+public:
+	std::vector<b2Body*> foundBodies;
+	float32 ReportFixture(b2Fixture* fixture, const b2Vec2& point, const b2Vec2& normal, float32 fraction) {
+		foundBodies.push_back(fixture->GetBody());
+		return fraction;
+	}
+};

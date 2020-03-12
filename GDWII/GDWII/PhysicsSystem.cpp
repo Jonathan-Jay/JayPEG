@@ -7,11 +7,13 @@ void PhysicsSystem::Init()
 
 void PhysicsSystem::Update(entt::registry * reg, b2World & world)
 {
-	auto view = reg->view<PhysicsBody, Transform>();
+	//Runs the various things
+	//(currently just checking collisions)
+	Run(world);
 
+	auto view = reg->view<PhysicsBody, Transform>();
 	//Runs the update for the physics bodies
-	for (auto entity : view)
-	{
+	for (auto entity : view) {
 		//Grabs references to each component within view
 		auto& physBod = view.get<PhysicsBody>(entity);
 		auto& trans = view.get<Transform>(entity);
@@ -19,19 +21,15 @@ void PhysicsSystem::Update(entt::registry * reg, b2World & world)
 		//Updates physics body
 		physBod.Update(&trans);
 	}
-
-	//Runs the various things
-	//(currently just checking collisions)
-	Run(world);
 }
 
 void PhysicsSystem::Draw(entt::registry * reg)
 {
-	auto view = reg->view<PhysicsBody, Transform>();
-	auto& cam = reg->get<Camera>(EntityIdentifier::MainCamera());
-
 	if (PhysicsBody::GetDraw())
 	{
+		auto view = reg->view<PhysicsBody, Transform>();
+		auto& cam = reg->get<Camera>(EntityIdentifier::MainCamera());
+
 		for (auto entity : view)
 		{
 			auto& physBody = view.get<PhysicsBody>(entity);
@@ -51,19 +49,14 @@ void PhysicsSystem::Draw(entt::registry * reg)
 				continue;
 			}
 
-			auto& trans = view.get<Transform>(entity);
-
-			//Temporary transform so we can actually draw the bodies
-			Transform temp = trans;
-			temp.SetScale(vec3(physBody.GetWidth(), physBody.GetHeight(), 1.f));
+			Transform trans = view.get<Transform>(entity);
+			b2AABB tempAABB = physBody.GetBody()->GetFixtureList()->GetAABB(0);
+			trans.SetScale(vec3(2 * tempAABB.GetExtents().x, 2 * tempAABB.GetExtents().y, 1.f));
 			//Sets the position so the center offset is still relevant
-			temp.SetPosition(temp.GetPosition() + vec3(physBody.GetCenterOffset().x, physBody.GetCenterOffset().y, 0.f));
-			//Puts the temporary transform for the physics body at the top z-layer
-			temp.SetPositionZ(100.f);
+			trans.SetPosition(vec3(tempAABB.GetCenter().x, tempAABB.GetCenter().y, 100.f));
 
 			//Updates the transform to create model matrix
-			temp.Update();
-
+			trans.Update();
 
 			Texture* mask = TextureManager::FindTexture(fileName);
 
@@ -73,7 +66,7 @@ void PhysicsSystem::Draw(entt::registry * reg)
 			//Sends the uniforms we need for drawing the bodies
 			physicsDrawShader.SendUniform("uView", cam.GetView());
 			physicsDrawShader.SendUniform("uProj", cam.GetProjection());
-			physicsDrawShader.SendUniform("uModel", temp.GetLocalToWorldMatrix());
+			physicsDrawShader.SendUniform("uModel", trans.GetLocalToWorldMatrix());
 			physicsDrawShader.SendUniform("uColor", vec4(1.f, 0.f, 0.f, 0.3f));
 
 			mask->Bind(0);
@@ -102,7 +95,7 @@ void PhysicsSystem::Run(b2World & world)
 	int32 positionIterations = 3;
 
 	//steps through the world
-	for (size_t i = 0; i < static_cast<size_t>(500 * Timer::deltaTime); i++)
+	for (size_t i = 0; i < static_cast<size_t>(500 * std::min(Timer::deltaTime, 0.2)); i++)
 		world.Step(timeStep, velocityIterations, positionIterations);
 }
 

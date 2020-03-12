@@ -1,11 +1,5 @@
 #include "PhysicsBody.h"
 
-unsigned int CollisionIDs::m_environmentID	=0x1;
-unsigned int CollisionIDs::m_playerID		=0x10;
-unsigned int CollisionIDs::m_enemyID		=0x100;
-unsigned int CollisionIDs::m_bulletID		=0x1000;
-unsigned int CollisionIDs::m_bombableID		=0x10000;
-
 vec3 PhysicsBody::m_gravityAcceleration = vec3(0.f, -35.f, 0.f);
 bool PhysicsBody::m_drawBodies = false;
 
@@ -163,7 +157,7 @@ void PhysicsBody::Update(Transform * trans)
 	m_position = m_body->GetPosition();
 
 	//Sets the transform position to the position of the physics body
-	trans->SetPosition(vec3(m_body->GetPosition().x, m_body->GetPosition().y, trans->GetPosition().z));
+	trans->SetPosition(vec3(m_position.x, m_position.y, trans->GetPosition().z));
 	trans->SetRotationAngleZ(Degrees(m_body->GetAngle()));
 }
 

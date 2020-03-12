@@ -3,8 +3,7 @@
 #include "PhysicsSystem.h"
 #include <entt/entity/registry.hpp>
 
-//type, health 
-//movement speed, jump height, weapon, damage, attack pattern
+using std::clamp;
 
 enum class EnemyTypes {
 	WALKER,
@@ -34,11 +33,14 @@ public:
 	int jumpHeight{ 0 };
 	int attackDamage{ 0 };
 	float refreshSightTime = 0.f;
+	size_t enemyCheckingIndex{ 0 };
+	std::vector<unsigned int> insideEnemies;
 	bool canSeePlayer{ false };
 	bool facingRight{ false };
 	bool canJump{ false };
-	vec3 jumpInfo;	//times jumped, x pos at jump, y pos at jump
 	vec2 targetPos;
+	vec2 targetPos2;
+	b2Vec3 jumpInfo;	//times jumped, x pos at jump, y pos at jump
 	b2Vec2 previousLocalPoint;
 
 	void SetStats(EnemyTypes _type, int _health, int _moveSpeed, int _jumpHeight, int _attackDamage) { type = _type; health = _health; moveSpeed = _moveSpeed; jumpHeight = _jumpHeight; }
@@ -71,6 +73,7 @@ class Enemies abstract {
 public:
 	static void CreateEnemy(b2World* m_physicsWorld, EnemyTypes type, float x, float y);
 	static void UpdateEnemies(entt::registry* m_reg);
+	static std::vector<enemyList> GetEnemies() { return enemies; }
 	static float GetSightRefreshTime() { return sightRefreshTime; }
 	static b2World* GetPhysicsWorld() { return m_phyWorld; }
 	

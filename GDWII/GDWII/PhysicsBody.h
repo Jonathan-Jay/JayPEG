@@ -18,22 +18,14 @@ enum class BodyType
 	NUM_TYPES
 };
 
-struct CollisionIDs
-{
-public:
-	//Gets the different IDs
-	static unsigned int Player() { return m_playerID; }
-	static unsigned int Environment() { return m_environmentID; }
-	static unsigned int Enemy() { return m_enemyID; }
-	static unsigned int Bullet() { return m_bulletID; }
-	static unsigned int Bombable() { return m_bulletID; }
-private:
-	//Holds the different IDs
-	static unsigned int m_environmentID;
-	static unsigned int m_playerID;
-	static unsigned int m_enemyID;
-	static unsigned int m_bulletID;
-	static unsigned int m_bombableID;
+static struct CollisionIDs abstract {
+	static const uint16 Environment = 0x0001;
+	static const uint16 Player = 0x0002;
+	static const uint16 Enemy = 0x0004;
+	static const uint16 Bullet = 0x0008;
+	static const uint16 Bombable = 0x0010;
+	static const uint16 Missile = 0x0020;
+	static const uint16 Max = 0xFFFF;
 };
 
 class PhysicsBody
@@ -41,12 +33,11 @@ class PhysicsBody
 public:
 	PhysicsBody() { };
 	//Constructs a circle collider
-	PhysicsBody(b2Body* body, float radius, vec2 centerOffset, bool isDynamic, uint16 categoryBits = 0x1, uint16 maskBits = 0x999999);
+	PhysicsBody(b2Body* body, float radius, vec2 centerOffset, bool isDynamic, uint16 categoryBits = 0x1, uint16 maskBits = CollisionIDs::Max);
 	//Constructs a box collider
-	PhysicsBody(b2Body* body, float width, float height, vec2 centerOffset, bool isDynamic, uint16 categoryBits = 0x1, uint16 maskBits = 0x999999);
+	PhysicsBody(b2Body* body, float width, float height, vec2 centerOffset, bool isDynamic, uint16 categoryBits = 0x1, uint16 maskBits = CollisionIDs::Max);
 
-	PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vector<float> yCoordinates, uint16 categoryBits = 0x1, uint16 maskBits = 0x999999);
-	//PhysicsBody(b2Body* body, b2Vec2 tempaArray[], int size, uint16 categoryBits = 0x1, uint16 maskBits = 0x999999);
+	PhysicsBody(b2Body* body, std::vector<float> xCoordinates, std::vector<float> yCoordinates, uint16 categoryBits = 0x1, uint16 maskBits = CollisionIDs::Max);
 
 	void DeleteBody();
 

@@ -48,6 +48,9 @@ public:
 
 	vec2 operator*(float f);
 	vec2 operator/(float s);
+
+	bool operator==(const vec2 v1);
+	bool operator!=(const vec2 v1);
 };
 
 class vec3
@@ -78,6 +81,9 @@ public:
 
 	vec3 operator*(float f);
 	vec3 operator/(float f);
+
+	bool operator==(const vec3 v1);
+	bool operator!=(const vec3 v1);
 };
 
 class vec4
