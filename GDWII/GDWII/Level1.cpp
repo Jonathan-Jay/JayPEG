@@ -15,6 +15,8 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 	float aspectRatio = windowWidth / windowHeight;
 
+	vec3 playerPos = { -1243.f, -186.f, 30.f };
+
 	{
 		auto entity = ECS::CreateEntity();
 
@@ -136,14 +138,14 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, playerHeight + 1, playerHeight + 1, true, &animController);
 
 		//-1243, -186
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(-1243.f, -186.f, 30.f));
+		ECS::GetComponent<Transform>(entity).SetPosition(playerPos);
 
 		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
 		b2Body* tempBody;
 		b2BodyDef tempDef;
 		tempDef.type = b2_dynamicBody;
-		tempDef.position.Set(float32(-1243), float32(-186));
+		tempDef.position.Set(playerPos.x, playerPos.y);
 
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		tempBody->SetFixedRotation(true);
@@ -330,6 +332,9 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 750, -209);
 	*/
 
+	Bullets::CreateBullet(m_sceneReg, m_physicsWorld, b2Vec2(playerPos.x - 1000, playerPos.y), b2Vec2(0, 0), 0, CollisionIDs::Player);
+	Missiles::CreateMissile(m_sceneReg, m_physicsWorld, b2Vec2(playerPos.x - 1000, playerPos.y), b2Vec2(0, 0), 0);
+
 	Bullets::setDamage(bulletDamage);
 	Missiles::setDamage(missileDamage);
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
@@ -429,6 +434,51 @@ void Level1::GamepadStick(XInputController* con)
 		if (con->IsButtonReleased(Buttons::B))
 			missileShot = false;
 	}
+}
+
+void Level1::MouseClick(SDL_MouseButtonEvent evnt)
+{
+	if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)) {
+		int windowHeight = BackEnd::GetWindowHeight();
+		int windowWidth = BackEnd::GetWindowWidth();
+		int maincamera = EntityIdentifier::MainCamera();
+		vec4 ortho = m_sceneReg->get<Camera>(maincamera).GetOrthoSize();
+		vec2 pos = vec2(
+			((evnt.x / static_cast<float>(windowHeight) * 2.f * ortho.w) - (ortho.w * static_cast<float>(windowWidth) / static_cast<float>(windowHeight))),
+			((-evnt.y / static_cast<float>(windowHeight) * 2.f * ortho.w) + ortho.w)
+		);
+		pos = pos + vec2(m_sceneReg->get<Camera>(maincamera).GetPositionX(),
+			m_sceneReg->get<Camera>(maincamera).GetPositionY());
+
+		printf("(%f, %f)\n", pos.x, pos.y);
+		xPos.push_back(pos.x);
+		yPos.push_back(pos.y);
+	}
+
+	if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_MIDDLE)) {
+		vec4 ortho = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize();
+		printf("ortho: %f, %f, %f, %f\n", ortho.x, ortho.y, ortho.z, ortho.w);
+	}
+
+	if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
+		for (int x(0); x < xPos.size(); x++) {
+			if (x == xPos.size() - 1)
+				std::cout << std::fixed << std::setprecision(2) << xPos[x] << '\n';
+			else
+				std::cout << std::fixed << std::setprecision(2) << xPos[x] << ", ";
+		}
+		for (int x(0); x < yPos.size(); x++) {
+			if (x == yPos.size() - 1)
+				std::cout << std::fixed << std::setprecision(2) << yPos[x] << '\n';
+			else
+				std::cout << std::fixed << std::setprecision(2) << yPos[x] << ", ";
+		}
+	}
+}
+
+void Level1::MouseWheel(SDL_MouseWheelEvent evnt)
+{
+	m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(evnt.y * 10.f);
 }
 
 void Level1::KeyboardDown()

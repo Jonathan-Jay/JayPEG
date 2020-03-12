@@ -99,6 +99,11 @@ Uint32 Window::GetFullscreen() const
 	return m_fullscreen;
 }
 
+void Window::SetWindowSize(int w, int h)
+{
+	SDL_SetWindowSize(m_window, w, h);
+}
+
 void Window::Close()
 {
 	//Set window open to false

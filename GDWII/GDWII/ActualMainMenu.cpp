@@ -118,6 +118,20 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 void ActualMainMenu::Update()
 {
+	if (Input::GetKeyDown(Key::LeftArrow))
+	{
+		leftOnMenu();
+	}
+	else if (Input::GetKeyDown(Key::RightArrow))
+	{
+		rightOnMenu();
+	}
+	if (Input::GetKeyDown(Key::Z) || Input::GetKeyDown(Key::Space) || Input::GetKeyDown(Key::Enter))
+	{
+		menuSelected();
+	}
+
+
 	switch (index) {
 	case 1:
 		m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
@@ -129,10 +143,15 @@ void ActualMainMenu::Update()
 		m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
 		m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
 		break;
-	default:
+	case 3:
 		m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
 		m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
 		m_sceneReg->get<Sprite>(5).SetSizeScale(1.f);
+		break;
+	default:
+		m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
+		m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
+		m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
 		break;
 	}
 }
@@ -141,32 +160,68 @@ void ActualMainMenu::Update()
 void ActualMainMenu::MouseClick(SDL_MouseButtonEvent evnt)
 {
 	if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)) {
-		int windowHeight = BackEnd::GetWindowHeight();
-		int windowWidth = BackEnd::GetWindowWidth();
+		float windowHeight = BackEnd::GetWindowHeight();
+		float windowWidth = BackEnd::GetWindowWidth();
 		int maincamera = EntityIdentifier::MainCamera();
 		vec4 ortho = m_sceneReg->get<Camera>(maincamera).GetOrthoSize();
-		printf("%f, %f, %f, %f\n", ortho.x, ortho.y, ortho.z, ortho.w);
 		vec2 pos = vec2(
-			((evnt.x / static_cast<float>(windowHeight) * 2.f * ortho.w) - (ortho.w * static_cast<float>(windowWidth) / static_cast<float>(windowHeight))),
-			((-evnt.y / static_cast<float>(windowHeight) * 2.f * ortho.w) + ortho.w)
+			((evnt.x / windowHeight * 2.f * ortho.w) - (ortho.w * windowWidth / windowHeight)),
+			((-evnt.y / windowHeight * 2.f * ortho.w) + ortho.w)
 		);
 		pos = pos + vec2(m_sceneReg->get<Camera>(maincamera).GetPositionX(),
 			m_sceneReg->get<Camera>(maincamera).GetPositionY());
-		//Main menu screen buttons
-		if (positionTesting(3, pos))
+		mousePos = pos;
+
+		if (positionTesting(3, mousePos))
 		{
-			clickedPlay = true;
+			index = 2;
 		}
-		else if (positionTesting(4, pos))
+		else if (positionTesting(4, mousePos))
 		{
-			credits();
+			index = 1;
 		}
-		else if (positionTesting(5, pos))
+		else if (positionTesting(5, mousePos))
 		{
-			std::exit(NULL);
+			index = 3;
 		}
+		else {
+			index = 0;
+		}
+
+		menuSelected();
 	}
 
+}
+
+void ActualMainMenu::MouseMotion(SDL_MouseMotionEvent evnt)
+{
+	float windowHeight = BackEnd::GetWindowHeight();
+	float windowWidth = BackEnd::GetWindowWidth();
+	int maincamera = EntityIdentifier::MainCamera();
+	vec4 ortho = m_sceneReg->get<Camera>(maincamera).GetOrthoSize();
+	vec2 pos = vec2(
+		((evnt.x / windowHeight * 2.f * ortho.w) - (ortho.w * windowWidth / windowHeight)),
+		((-evnt.y / windowHeight * 2.f * ortho.w) + ortho.w)
+	);
+	pos = pos + vec2(m_sceneReg->get<Camera>(maincamera).GetPositionX(),
+		m_sceneReg->get<Camera>(maincamera).GetPositionY());
+	mousePos = pos;
+
+	if (positionTesting(3, mousePos))
+	{
+		index = 2;
+	}
+	else if (positionTesting(4, mousePos))
+	{
+		index = 1;
+	}
+	else if (positionTesting(5, mousePos))
+	{
+		index = 3;
+	}
+	else {
+		index = 0;
+	}
 }
 
 void ActualMainMenu::GamepadStick(XInputController* con)
@@ -177,27 +232,27 @@ void ActualMainMenu::GamepadStick(XInputController* con)
 	if (reset) {
 		if (sticks[0].x < -0.75f)
 		{
-			upOnMenu();
+			leftOnMenu();
 		}
 		else if (sticks[0].x > 0.75f)
 		{
-			downOnMenu();
+			rightOnMenu();
 		}
 		else if (sticks[1].x < -0.75f)
 		{
-			upOnMenu();
+			leftOnMenu();
 		}
 		else if (sticks[1].x > 0.75f)
 		{
-			downOnMenu();
+			rightOnMenu();
 		}
 		else if (con->IsButtonPressed(Buttons::DPAD_LEFT))
 		{
-			upOnMenu();
+			leftOnMenu();
 		}
 		else if (con->IsButtonPressed(Buttons::DPAD_RIGHT))
 		{
-			downOnMenu();
+			rightOnMenu();
 		}
 	}
 	else 
@@ -211,18 +266,7 @@ void ActualMainMenu::GamepadStick(XInputController* con)
 	//BUTTON PRESSES
 	if (con->IsButtonPressed(Buttons::A))
 	{
-		if (index == 1) // credits button press
-		{
-			credits();
-		}
-		else if (index == 2) //Start button press
-		{
-			clickedPlay = true;
-		}
-		else if (index == 3) //Quit button press
-		{
-			std::exit(NULL);
-		}
+		menuSelected();
 	}
 	if (con->IsButtonPressed(Buttons::B))
 	{
@@ -247,30 +291,49 @@ int ActualMainMenu::ChangeScene()
 	
 	return -1;
 }
-void ActualMainMenu::downOnMenu()
+void ActualMainMenu::rightOnMenu()
 {
-	if (index < 3)
+	if (index < 3 && index > 0)
 	{
 		index++;
 	}
+	if (index == 0)
+	{
+		index = 3;
+	}
 	reset = false;
 }
-void ActualMainMenu::upOnMenu()
+void ActualMainMenu::leftOnMenu()
 {
-	if (index > 1)
+	if (index > 1 && index < 4)
 	{
 		index--;
 	}
+	if (index == 0)
+	{
+		index = 1;
+	}
 	reset = false;															
 }
-void ActualMainMenu::credits()
+void ActualMainMenu::menuSelected()
 {
-	std::cout << "lol xd\n";
+	if (index == 1)
+	{
+		std::cout << "lol\n";
+	}
+	else if (index == 2)
+	{
+		clickedPlay = true;
+	}
+	else if (index == 3)
+	{
+		std::exit(NULL);
+	}
 }
 //Tests if mouse is on button
-bool ActualMainMenu::positionTesting(int entity, vec2(mousePosition))
+bool ActualMainMenu::positionTesting(int entity, vec2 otherPos)
 {
-	vec2(Pos) = mousePosition - m_sceneReg->get<Transform>(entity).GetPosition();
+	vec2(Pos) = otherPos - m_sceneReg->get<Transform>(entity).GetPosition();
 		if (Pos.x <= m_sceneReg->get<Sprite>(entity).GetWidth() / 2.f &&
 			Pos.x >= -(m_sceneReg->get<Sprite>(entity).GetWidth() / 2.f) &&
 			Pos.y <=  m_sceneReg->get<Sprite>(entity).GetHeight() / 2.f &&

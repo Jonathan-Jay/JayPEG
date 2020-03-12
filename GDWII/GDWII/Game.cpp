@@ -44,13 +44,18 @@ void Game::InitGame()
 	m_activeScene->InitScene(float(BackEnd::GetWindowWidth()), float(BackEnd::GetWindowHeight()));
 	m_window->SetFullscreen(1);
 
+
+
+
+	PhysicsBody::SetDraw(true);
+
+
+
+
 	//Sets m_register to point to the register in the active scene
 	m_register = m_activeScene->GetScene();
 
 	BackEnd::SetWindowName(m_activeScene->GetName());
-
-	//delete this
-	//CreatePlatform::StoringScene(m_activeScene);
 
 	PhysicsSystem::Init();
 }
@@ -110,11 +115,11 @@ void Game::Update()
 	//Updates the active scene
 	m_activeScene->Update();
 
-	//Update the backend
-	BackEnd::Update(m_register);
-
 	//Update Physics System
 	PhysicsSystem::Update(m_register, m_activeScene->GetPhysicsWorld());
+
+	//Update the backend
+	BackEnd::Update(m_register);
 }
 
 void Game::GUI()
@@ -232,6 +237,18 @@ void Game::KeyboardDown()
 	//Look at base Scene class for more info.
 	m_activeScene->KeyboardDown();
 
+	if (Input::GetKeyDown(Key::F)) {
+		if (m_window->GetFullscreen()) {
+			m_window->SetWindowSize(1152, 648);
+			m_window->SetFullscreen(0);
+			m_window->SetWindowResizable(false);
+		}
+		else {
+			m_window->SetWindowSize(1500, 450);
+			m_window->SetFullscreen(1);
+		}
+	}
+
 	if (Input::GetKeyDown(Key::P)) {
 		PhysicsBody::SetDraw(!PhysicsBody::GetDraw());
 	}
@@ -273,51 +290,11 @@ void Game::MouseMotion(SDL_MouseMotionEvent evnt)
 	m_motion = false;
 }
 
-std::vector<float> xPos = {};
-std::vector<float> yPos = {};
-
 void Game::MouseClick(SDL_MouseButtonEvent evnt)
 {
 	//Active scene now captures this input and can use it
 	//Look at base Scene class for more info.
 	m_activeScene->MouseClick(evnt);
-
-	if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)) {
-		int windowHeight = BackEnd::GetWindowHeight();
-		int windowWidth = BackEnd::GetWindowWidth();
-		int maincamera = EntityIdentifier::MainCamera();
-		vec4 ortho = m_register->get<Camera>(maincamera).GetOrthoSize();
-		vec2 pos = vec2(
-			((evnt.x / static_cast<float>(windowHeight) * 2.f * ortho.w) - (ortho.w * static_cast<float>(windowWidth) / static_cast<float>(windowHeight))),
-			((-evnt.y / static_cast<float>(windowHeight) * 2.f * ortho.w) + ortho.w)
-		);
-		pos = pos + vec2(m_register->get<Camera>(maincamera).GetPositionX(),
-				m_register->get<Camera>(maincamera).GetPositionY());
-
-		printf("(%f, %f)\n", pos.x, pos.y);
-		xPos.push_back(pos.x);
-		yPos.push_back(pos.y);
-	}
-
-	if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_MIDDLE)) {
-		vec4 ortho = m_register->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize();
-		printf("ortho: %f, %f, %f, %f\n", ortho.x, ortho.y, ortho.z, ortho.w);
-	}
-
-	if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
-		for (int x(0); x < xPos.size(); x++) {
-			if (x == xPos.size() - 1)
-				std::cout << std::fixed << std::setprecision(2) << xPos[x] << '\n';
-			else
-				std::cout << std::fixed << std::setprecision(2) << xPos[x] << ", ";
-		}
-		for (int x(0); x < yPos.size(); x++) {
-			if (x == yPos.size() - 1)
-				std::cout << std::fixed << std::setprecision(2) << yPos[x] << '\n';
-			else
-				std::cout << std::fixed << std::setprecision(2) << yPos[x] << ", ";
-		}
-	}
 
 	if (m_guiActive)
 	{
@@ -336,8 +313,6 @@ void Game::MouseWheel(SDL_MouseWheelEvent evnt)
 	//Active scene now captures this input and can use it
 	//Look at base Scene class for more info.
 	m_activeScene->MouseWheel(evnt);
-
-	m_register->get<Camera>(EntityIdentifier::MainCamera()).Zoom(evnt.y * 10.f);
 
 	if (m_guiActive)
 	{
