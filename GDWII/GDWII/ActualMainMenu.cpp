@@ -254,23 +254,25 @@ void ActualMainMenu::GamepadStick(XInputController* con)
 		{
 			rightOnMenu();
 		}
+
+		//BUTTON PRESSES
+		if (con->IsButtonPressed(Buttons::A))
+		{
+			menuSelected();
+		}
+		if (con->IsButtonPressed(Buttons::B))
+		{
+			printf("B pressed\n");
+		}
 	}
 	else 
 	{
 		if (sticks[0].x > -0.75f && sticks[0].x < 0.75f  && sticks[1].x > -0.75f && sticks[1].x < 0.75f && 
-			!(con->IsButtonPressed(Buttons::DPAD_LEFT)) && !(con->IsButtonPressed(Buttons::DPAD_RIGHT)))
+			con->IsButtonReleased(Buttons::DPAD_LEFT) && con->IsButtonReleased(Buttons::DPAD_RIGHT) &&
+			con->IsButtonReleased(Buttons::A) && con->IsButtonReleased(Buttons::B))
 		{
 			reset = true;
 		}
-	}
-	//BUTTON PRESSES
-	if (con->IsButtonPressed(Buttons::A))
-	{
-		menuSelected();
-	}
-	if (con->IsButtonPressed(Buttons::B))
-	{
-		printf("B press\n");
 	}
 
 
@@ -297,7 +299,7 @@ void ActualMainMenu::rightOnMenu()
 	{
 		index++;
 	}
-	if (index == 0)
+	else
 	{
 		index = 3;
 	}
@@ -309,7 +311,7 @@ void ActualMainMenu::leftOnMenu()
 	{
 		index--;
 	}
-	if (index == 0)
+	else
 	{
 		index = 1;
 	}
@@ -329,6 +331,10 @@ void ActualMainMenu::menuSelected()
 	{
 		std::exit(NULL);
 	}
+	else {
+		index = 2;
+	}
+	reset = false;
 }
 //Tests if mouse is on button
 bool ActualMainMenu::positionTesting(int entity, vec2 otherPos)

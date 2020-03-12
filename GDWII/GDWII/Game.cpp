@@ -47,7 +47,7 @@ void Game::InitGame()
 
 
 
-	PhysicsBody::SetDraw(true);
+	//PhysicsBody::SetDraw(true);
 
 
 

@@ -317,7 +317,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Bullets::CreateWall(m_physicsWorld, vec3(-253, -805, 50.f), 25, 90, "tempmap.png");
 
 	Collectibles::CreateCollectible(vec3(-1286, 1233, 50.f), 30, 30, CollectiblesType::RegenUp);
-	Collectibles::CreateCollectible(vec3(212, 870, 50.f), 30, 30, CollectiblesType::RegenUp);
+	Collectibles::CreateCollectible(vec3(212, 870, 50.f), 30, 30, CollectiblesType::BulletStrengthUp);
 	Collectibles::CreateCollectible(vec3(1011, 290, 50), 30, 30, CollectiblesType::Missile);
 	Collectibles::CreateCollectible(vec3(1502, -1325, 50), 30, 30, CollectiblesType::HPUp);
 
@@ -630,11 +630,11 @@ void Level1::Update()
 				b2Vec2 vel(0, 0);
 
 				if (facingUp) {
-					pos.y += playerHeight / 2.f + bulletRadius;
+					pos.y += playerHeight / 2.f;
 					vel.y = projectileSpeed;
 				}
 				else if (facingDown) {
-					pos.y -= playerHeight / 2.f + bulletRadius;
+					pos.y -= playerHeight / 2.f;
 					vel.y = -projectileSpeed * 2.f;
 				}
 				else {
@@ -676,12 +676,12 @@ void Level1::Update()
 					//depending on the direction player is facing, give acceleration
 					if (facingUp) {
 						if (velo.y > 0)		velo.y = 0;
-						pos.y += playerHeight / 2.f + missileRadius;
+						pos.y += playerHeight / 2.f;
 						vel.y = projectileSpeed;
 					}
 					else if (facingDown) {
 						velo.y = maxJumpStrength;
-						pos.y -= playerHeight / 2.f + missileRadius;
+						pos.y -= playerHeight / 2.f;
 						vel.y = -projectileSpeed;
 					}
 					else {
