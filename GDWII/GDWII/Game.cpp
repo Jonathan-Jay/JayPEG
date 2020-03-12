@@ -28,10 +28,18 @@ Game::~Game()
 void Game::InitGame()
 {
 	//Initializes the backend with window width and height values
-	BackEnd::InitBackEnd(1500.f, 450.f);
+	BackEnd::InitBackEnd(640.f, 480.f);
 
 	//Grabs the initialized window
 	m_window = BackEnd::GetWindow();
+
+	SDL_DisplayMode dm;
+	if (SDL_GetCurrentDisplayMode(0, &dm) == 0) {
+		m_width = dm.w;
+		m_height = dm.h;
+	} else {
+		SDL_Log("SDL_GetDesktopDisplayMode failed: %s", SDL_GetError());
+	}
 
 	//Creates a new scene.
 	//Replace this with your own scene.
@@ -42,7 +50,7 @@ void Game::InitGame()
 	m_activeScene = m_scenes[0];
 
 	m_activeScene->InitScene(float(BackEnd::GetWindowWidth()), float(BackEnd::GetWindowHeight()));
-	m_window->SetFullscreen(1);
+	//m_window->SetFullscreen(1);
 
 
 
@@ -55,6 +63,7 @@ void Game::InitGame()
 	//Sets m_register to point to the register in the active scene
 	m_register = m_activeScene->GetScene();
 
+	BackEnd::ReshapeWindow(m_width / 2, m_height / 2, m_register);
 	BackEnd::SetWindowName(m_activeScene->GetName());
 
 	PhysicsSystem::Init();
@@ -239,13 +248,14 @@ void Game::KeyboardDown()
 
 	if (Input::GetKeyDown(Key::F11)) {
 		if (m_window->GetFullscreen()) {
-			m_window->SetWindowSize(1152, 648);
 			m_window->SetFullscreen(0);
-			m_window->SetWindowResizable(false);
+			m_window->SetWindowResizable(true);
+			BackEnd::ReshapeWindow(m_width / 2, m_height / 2, m_register);
 		}
 		else {
-			m_window->SetWindowSize(1500, 450);
 			m_window->SetFullscreen(1);
+			m_window->SetWindowResizable(false);
+			BackEnd::ReshapeWindow(m_width, m_height, m_register);
 		}
 	}
 
