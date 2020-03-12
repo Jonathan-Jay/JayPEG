@@ -15,6 +15,16 @@ public:
 	void KeyboardDown() override;
 	void Update() override;
 
+
+
+	//delete
+	std::vector<float> xPos = {};
+	std::vector<float> yPos = {};
+	void MouseClick(SDL_MouseButtonEvent evnt) override;
+	void MouseWheel(SDL_MouseWheelEvent evnt) override;
+
+
+
 private:
 	//tests if player is grounded
 	bool Grounded();

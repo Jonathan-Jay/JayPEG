@@ -39,6 +39,8 @@ public:
 	//Grabs whether or not the window is fullscreen
 	Uint32 GetFullscreen() const;
 
+	void SetWindowSize(int w, int h);
+
 	//Closes the window
 	void Close();
 
