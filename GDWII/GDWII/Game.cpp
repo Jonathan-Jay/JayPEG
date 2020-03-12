@@ -237,7 +237,7 @@ void Game::KeyboardDown()
 	//Look at base Scene class for more info.
 	m_activeScene->KeyboardDown();
 
-	if (Input::GetKeyDown(Key::F)) {
+	if (Input::GetKeyDown(Key::F11)) {
 		if (m_window->GetFullscreen()) {
 			m_window->SetWindowSize(1152, 648);
 			m_window->SetFullscreen(0);

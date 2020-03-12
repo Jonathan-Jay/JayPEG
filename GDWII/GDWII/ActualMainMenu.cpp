@@ -118,41 +118,42 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 void ActualMainMenu::Update()
 {
-	if (Input::GetKeyDown(Key::LeftArrow))
-	{
-		leftOnMenu();
-	}
-	else if (Input::GetKeyDown(Key::RightArrow))
-	{
-		rightOnMenu();
-	}
-	if (Input::GetKeyDown(Key::Z) || Input::GetKeyDown(Key::Space) || Input::GetKeyDown(Key::Enter))
-	{
-		menuSelected();
-	}
+	if (wait == 1) {
+		if (Input::GetKeyDown(Key::LeftArrow))
+		{
+			leftOnMenu();
+		}
+		else if (Input::GetKeyDown(Key::RightArrow))
+		{
+			rightOnMenu();
+		}
+		if (Input::GetKeyDown(Key::Z) || Input::GetKeyDown(Key::Space) || Input::GetKeyDown(Key::Enter))
+		{
+			menuSelected();
+		}
 
-
-	switch (index) {
-	case 1:
-		m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
-		m_sceneReg->get<Sprite>(4).SetSizeScale(1.f);
-		m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
-		break;
-	case 2:
-		m_sceneReg->get<Sprite>(3).SetSizeScale(1.f);
-		m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
-		m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
-		break;
-	case 3:
-		m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
-		m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
-		m_sceneReg->get<Sprite>(5).SetSizeScale(1.f);
-		break;
-	default:
-		m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
-		m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
-		m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
-		break;
+		switch (index) {
+		case 1:
+			m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
+			m_sceneReg->get<Sprite>(4).SetSizeScale(1.f);
+			m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
+			break;
+		case 2:
+			m_sceneReg->get<Sprite>(3).SetSizeScale(1.f);
+			m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
+			m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
+			break;
+		case 3:
+			m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
+			m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
+			m_sceneReg->get<Sprite>(5).SetSizeScale(1.f);
+			break;
+		default:
+			m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
+			m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
+			m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
+			break;
+		}
 	}
 }
 
@@ -172,23 +173,25 @@ void ActualMainMenu::MouseClick(SDL_MouseButtonEvent evnt)
 			m_sceneReg->get<Camera>(maincamera).GetPositionY());
 		mousePos = pos;
 
-		if (positionTesting(3, mousePos))
-		{
-			index = 2;
-		}
-		else if (positionTesting(4, mousePos))
-		{
-			index = 1;
-		}
-		else if (positionTesting(5, mousePos))
-		{
-			index = 3;
-		}
-		else {
-			index = 0;
-		}
+		if (wait == 1) {
+			if (positionTesting(3, mousePos))
+			{
+				index = 2;
+			}
+			else if (positionTesting(4, mousePos))
+			{
+				index = 1;
+			}
+			else if (positionTesting(5, mousePos))
+			{
+				index = 3;
+			}
+			else {
+				index = 0;
+			}
 
-		menuSelected();
+			menuSelected();
+		}
 	}
 
 }
@@ -207,20 +210,22 @@ void ActualMainMenu::MouseMotion(SDL_MouseMotionEvent evnt)
 		m_sceneReg->get<Camera>(maincamera).GetPositionY());
 	mousePos = pos;
 
-	if (positionTesting(3, mousePos))
-	{
-		index = 2;
-	}
-	else if (positionTesting(4, mousePos))
-	{
-		index = 1;
-	}
-	else if (positionTesting(5, mousePos))
-	{
-		index = 3;
-	}
-	else {
-		index = 0;
+	if (wait == 1.f) {
+		if (positionTesting(3, mousePos))
+		{
+			index = 2;
+		}
+		else if (positionTesting(4, mousePos))
+		{
+			index = 1;
+		}
+		else if (positionTesting(5, mousePos))
+		{
+			index = 3;
+		}
+		else {
+			index = 0;
+		}
 	}
 }
 
@@ -229,7 +234,7 @@ void ActualMainMenu::GamepadStick(XInputController* con)
 	Stick sticks[2];
 	con->GetSticks(sticks);
 	//ANALOG STICK MOVEMENTS FOR MAIN MENU (LEFT AND RIGHT DPAD AS WELL)
-	if (reset) {
+	if (reset && wait == 1) {
 		if (sticks[0].x < -0.75f)
 		{
 			leftOnMenu();
@@ -280,9 +285,9 @@ void ActualMainMenu::GamepadStick(XInputController* con)
 int ActualMainMenu::ChangeScene()
 {
 	if (clickedPlay) {
-		m_sceneReg->get<Sprite>(3).SetWidth(-1);
-		m_sceneReg->get<Sprite>(4).SetWidth(-1);
-		m_sceneReg->get<Sprite>(5).SetWidth(-1);
+		m_sceneReg->get<Sprite>(3).SetSizeScale(1.f * wait);
+		m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f * wait);
+		m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f * wait);
 		if (wait < 0) {
 			wait = 1.f;
 			clickedPlay = false;
