@@ -117,6 +117,14 @@ vec2 vec2::operator/(float s)
 	return vec2(this->x / s, this->y / s);
 }
 
+bool vec2::operator==(const vec2 v1) {
+	return x == v1.x && y == v1.y;
+}
+
+bool vec2::operator!=(const vec2 v1) {
+	return x != v1.x || y != v1.y;
+}
+
 vec3::vec3()
 {
 }
@@ -180,6 +188,14 @@ vec3 vec3::operator*(float f)
 vec3 vec3::operator/(float f)
 {
 	return vec3(this->x / f, this->y / f, this->z / f);
+}
+
+bool vec3::operator==(const vec3 v1) {
+	return x == v1.x && y == v1.y && z == v1.z;
+}
+
+bool vec3::operator!=(const vec3 v1) {
+	return x != v1.x || y != v1.y || z != v1.z;
 }
 
 vec4::vec4()

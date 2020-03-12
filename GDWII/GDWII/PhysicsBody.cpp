@@ -157,7 +157,7 @@ void PhysicsBody::Update(Transform * trans)
 	m_position = m_body->GetPosition();
 
 	//Sets the transform position to the position of the physics body
-	trans->SetPosition(vec3(m_body->GetPosition().x, m_body->GetPosition().y, trans->GetPosition().z));
+	trans->SetPosition(vec3(m_position.x, m_position.y, trans->GetPosition().z));
 	trans->SetRotationAngleZ(Degrees(m_body->GetAngle()));
 }
 

@@ -262,12 +262,50 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		ECS::SetUpIdentifier(entity, bitHolder, "bombwall");
 	}
 
-	//Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 850, -220);
-	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 550, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 650, -209);
 
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
-
 }
 
 bool temp = true;
@@ -464,10 +502,11 @@ void Level1::Update()
 	if (onGround && facingDown) {
 		//set collision to crouch height (half player height) once (first will be if starting off not crouching
 		if (!crouching) {
-			b2Body* playerBody = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody();
+			PhysicsBody& phyBod = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer());
+			b2Body* playerBody = phyBod.GetBody();
 
 			b2PolygonShape tempBox;
-			tempBox.SetAsBox(playerWidth / 2.f, playerHeight * 2.f / 6.f, b2Vec2(0, -playerHeight * 1.f / 6.f), 0);
+			tempBox.SetAsBox(playerWidth / 2.f, playerHeight / 3.f, b2Vec2(0, 0), 0);
 				
 			b2FixtureDef crouchingBox;
 			crouchingBox.shape = &tempBox;
@@ -479,12 +518,14 @@ void Level1::Update()
 			b2Fixture *fixtureA = playerBody->GetFixtureList();
 			playerBody->DestroyFixture(fixtureA);
 			playerBody->CreateFixture(&crouchingBox);
+			playerBody->SetTransform(playerBody->GetPosition() - b2Vec2(0, playerHeight / 6.f), 0);
 		}
 		crouching = true;
 	} else {
 		//if just exited crouch
 		if (crouching) {
-			b2Body* playerBody = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody();
+			PhysicsBody& phyBod = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer());
+			b2Body* playerBody = phyBod.GetBody();
 
 			b2PolygonShape tempBox;
 			tempBox.SetAsBox(playerWidth / 2.f, playerHeight / 2.f);
@@ -499,6 +540,7 @@ void Level1::Update()
 			b2Fixture* fixtureA = playerBody->GetFixtureList();
 			playerBody->DestroyFixture(fixtureA);
 			playerBody->CreateFixture(&standingBox);
+			playerBody->SetTransform(playerBody->GetPosition() + b2Vec2(0, playerHeight / 6.f), 0);
 		}
 		crouching = false;
 	}
