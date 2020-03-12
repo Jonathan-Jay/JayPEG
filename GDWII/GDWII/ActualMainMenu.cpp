@@ -153,44 +153,69 @@ void ActualMainMenu::MouseClick(SDL_MouseButtonEvent evnt)
 
 }
 
-int index = 1;
-bool reset = true;
+int index = 2;
+//so it only moves one at a time, instead of an entire section
+bool reset = true; 
 void ActualMainMenu::GamepadStick(XInputController* con)
 {
 	Stick sticks[2];
 	con->GetSticks(sticks);
-	//ANALOG STICK MOVEMENTS
-	if (sticks[0].y > 0.75f && reset)
-	{
-		upOnMenu();
-	}
-	else if (sticks[0].y < -0.75f && reset)
-	{
-		downOnMenu();
-	}
-	else if (sticks[1].y > 0.75f && reset)
-	{
-		upOnMenu();
-	}
-	else if (sticks[1].y < -0.75f && reset)
-	{
-		downOnMenu();
-	}
-	else if (con->IsButtonPressed(Buttons::DPAD_UP) && reset)
-	{
-		upOnMenu();
-	}
-	else if (con->IsButtonPressed(Buttons::DPAD_DOWN) && reset)
-	{
-		downOnMenu();
+	//ANALOG STICK MOVEMENTS FOR MAIN MENU (LEFT AND RIGHT DPAD AS WELL)
+	if (reset) {
+		if (sticks[0].x < -0.75f)
+		{
+			upOnMenu();
+			reset = false; 
+		}
+		else if (sticks[0].x > 0.75f)
+		{
+			downOnMenu();
+			reset = false;
+		}
+		else if (sticks[1].x < -0.75f)
+		{
+			upOnMenu();
+			reset = false;
+		}
+		else if (sticks[1].x > 0.75f)
+		{
+			downOnMenu();
+			reset = false;
+		}
+		else if (con->IsButtonPressed(Buttons::DPAD_LEFT))
+		{
+			upOnMenu();
+			reset = false;
+		}
+		else if (con->IsButtonPressed(Buttons::DPAD_RIGHT))
+		{
+			downOnMenu();
+			reset = false;
+		}
 	}
 	else 
 	{
-		reset = true;
+		if (sticks[0].x > -0.75f && sticks[0].x < 0.75f  && sticks[1].x > -0.75f && sticks[1].x < 0.75f && 
+			!(con->IsButtonPressed(Buttons::DPAD_LEFT)) && !(con->IsButtonPressed(Buttons::DPAD_RIGHT)))
+		{
+			reset = true;
+		}
 	}
 	//BUTTON PRESSES
 	if (con->IsButtonPressed(Buttons::A))
 	{
+		if (index == 1) // credits button press
+		{
+
+		}
+		else if (index == 2) //Start button press
+		{
+		
+		}
+		else if (index == 3) //Quit button press
+		{
+			std::exit(NULL);
+		}
 		printf("A press\n");
 	}
 	if (con->IsButtonPressed(Buttons::B))
