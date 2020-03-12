@@ -38,7 +38,7 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 		previousLocalPoint = b2Vec2_zero;
 		state = EnemyState::Follow;
 	}
-	
+
 	float tempCalc{ 0 };
 	b2Vec2 jumpTestPoint;
 	switch (state) {
@@ -71,9 +71,11 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 				break;
 			}
 
+		
 		//limit the jump check distance if enemyPos is too closer to targetPos
 		jumpTestPoint = b2Vec2(enemyb2Pos.x + temp.x * 3, enemyb2Pos.y);
-		if ( canSeePlayer && (temp.x > 0 ? abs(targetPos.x) < abs(jumpTestPoint.x) : abs(targetPos.x) > abs(jumpTestPoint.x)) )
+
+		if ( canSeePlayer && (temp.x > 0 ? targetPos.x < jumpTestPoint.x : targetPos.x > jumpTestPoint.x) )
 			jumpTestPoint.x = targetPos.x;
 
 		//jump by doing raycast to side and checking to see if intersection point is different then p2 for the raycast
