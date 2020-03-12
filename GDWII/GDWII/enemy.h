@@ -41,7 +41,8 @@ public:
 	vec2 targetPos;
 	vec2 targetPos2;
 	b2Vec3 jumpInfo;	//times jumped, x pos at jump, y pos at jump
-	b2Vec2 previousLocalPoint;
+	b2Fixture* previousFixture{ nullptr };
+	int32 previousChildEndex{ 0 };
 
 	void SetStats(EnemyTypes _type, int _health, int _moveSpeed, int _jumpHeight, int _attackDamage) { type = _type; health = _health; moveSpeed = _moveSpeed; jumpHeight = _jumpHeight; }
 	void Update(entt::registry* m_reg, enemyList& enemyID);

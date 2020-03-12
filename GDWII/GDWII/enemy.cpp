@@ -1,7 +1,7 @@
 #include "enemy.h"
 
 std::vector<enemyList> Enemies::enemies = {};
-int Enemies::deactivationLength = 600;
+int Enemies::deactivationLength = 6000;
 float Enemies::sightRefreshTime = 0.125f;
 b2World* Enemies::m_phyWorld = nullptr;
 
@@ -35,10 +35,11 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 			break;
 		}
 
-		previousLocalPoint = b2Vec2_zero;
+		previousFixture = nullptr;
+		previousChildEndex = 0;
 		state = EnemyState::Follow;
 	}
-	
+
 	float tempCalc{ 0 };
 	b2Vec2 jumpTestPoint;
 	switch (state) {
@@ -71,9 +72,11 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 				break;
 			}
 
+		
 		//limit the jump check distance if enemyPos is too closer to targetPos
 		jumpTestPoint = b2Vec2(enemyb2Pos.x + temp.x * 3, enemyb2Pos.y);
-		if ( canSeePlayer && (temp.x > 0 ? abs(targetPos.x) < abs(jumpTestPoint.x) : abs(targetPos.x) > abs(jumpTestPoint.x)) )
+
+		if ( canSeePlayer && (temp.x > 0 ? targetPos.x < jumpTestPoint.x : targetPos.x > jumpTestPoint.x) )
 			jumpTestPoint.x = targetPos.x;
 
 		//jump by doing raycast to side and checking to see if intersection point is different then p2 for the raycast
@@ -99,26 +102,36 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 	case EnemyState::Wander:
 		//change direction when hitting wall/edge
 		for (b2ContactEdge* edge = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetContactList(); edge; edge = edge->next) {
+			if (!edge->contact->IsTouching())
+				continue;
+
 			b2Manifold* man = edge->contact->GetManifold();
+			b2Vec2 locNorm = man->localNormal;
+
+			if (edge->contact->GetFixtureA()->GetType() == b2Shape::e_polygon)
+				locNorm = -locNorm;
 
 			//find ID of collider (edge) to make sure that the next collision isnt it
-			if (man->localNormal.y <= -0.9 && man->pointCount == 1 && man->localPoint != previousLocalPoint) {
+			if (locNorm.y <= -0.9 && man->pointCount == 1 && (previousFixture != edge->contact->GetFixtureA() || previousFixture == edge->contact->GetFixtureA() && previousChildEndex != edge->contact->GetChildIndexA() ) ) {
 				findPlayer(m_reg, enemyID);
 
 				animCon.SetActiveAnim(!animCon.GetActiveAnim());
-				previousLocalPoint = man->localPoint;
+				previousFixture = edge->contact->GetFixtureA();
+				previousChildEndex = edge->contact->GetChildIndexA();
 				break;
 			}
 
-			if (man->localNormal.x < 0) {
+			if (locNorm.x < 0) {
 				animCon.SetActiveAnim(0);
-				previousLocalPoint = man->localPoint;
+				previousFixture = edge->contact->GetFixtureA();
+				previousChildEndex = edge->contact->GetChildIndexA();
 				break;
 			}
 
-			if (man->localNormal.x > 0) {
+			if (locNorm.x > 0) {
 				animCon.SetActiveAnim(1);
-				previousLocalPoint = man->localPoint;
+				previousFixture = edge->contact->GetFixtureA();
+				previousChildEndex = edge->contact->GetChildIndexA();
 				break;
 			}
 		}
