@@ -1,6 +1,7 @@
 #include "ActualMainMenu.h"
 
 ActualMainMenu::ActualMainMenu(std::string name)
+	:Scene(name)
 {
 
 }
@@ -86,9 +87,9 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 		std::string filename = "CreditsText.png";
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 740/4, 130/4, false);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 740/2, 130/2, false);
 
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(-400.f, -133.f, 2.f));
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(-325.f, -133.f, 2.f));
 
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
@@ -103,9 +104,9 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 		std::string filename = "QuitText.png";
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 430/4, 150/4, false);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 430/2, 150/2, false);
 
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(400.f, -133.f, 2.f));
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(325.f, -133.f, 2.f));
 
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
@@ -117,7 +118,23 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 void ActualMainMenu::Update()
 {
-
+	switch (index) {
+	case 1:
+		m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
+		m_sceneReg->get<Sprite>(4).SetSizeScale(1.f);
+		m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
+		break;
+	case 2:
+		m_sceneReg->get<Sprite>(3).SetSizeScale(1.f);
+		m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
+		m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
+		break;
+	default:
+		m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
+		m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
+		m_sceneReg->get<Sprite>(5).SetSizeScale(1.f);
+		break;
+	}
 }
 
 //Mouse click on menu buttons
@@ -138,12 +155,11 @@ void ActualMainMenu::MouseClick(SDL_MouseButtonEvent evnt)
 		//Main menu screen buttons
 		if (positionTesting(3, pos))
 		{
-			//printf("Start Game\n");
-
+			clickedPlay = true;
 		}
 		else if (positionTesting(4, pos))
 		{
-			printf("Credits Button\n");
+			credits();
 		}
 		else if (positionTesting(5, pos))
 		{
@@ -153,9 +169,6 @@ void ActualMainMenu::MouseClick(SDL_MouseButtonEvent evnt)
 
 }
 
-int index = 2;
-//so it only moves one at a time, instead of an entire section
-bool reset = true; 
 void ActualMainMenu::GamepadStick(XInputController* con)
 {
 	Stick sticks[2];
@@ -165,32 +178,26 @@ void ActualMainMenu::GamepadStick(XInputController* con)
 		if (sticks[0].x < -0.75f)
 		{
 			upOnMenu();
-			reset = false; 
 		}
 		else if (sticks[0].x > 0.75f)
 		{
 			downOnMenu();
-			reset = false;
 		}
 		else if (sticks[1].x < -0.75f)
 		{
 			upOnMenu();
-			reset = false;
 		}
 		else if (sticks[1].x > 0.75f)
 		{
 			downOnMenu();
-			reset = false;
 		}
 		else if (con->IsButtonPressed(Buttons::DPAD_LEFT))
 		{
 			upOnMenu();
-			reset = false;
 		}
 		else if (con->IsButtonPressed(Buttons::DPAD_RIGHT))
 		{
 			downOnMenu();
-			reset = false;
 		}
 	}
 	else 
@@ -206,17 +213,16 @@ void ActualMainMenu::GamepadStick(XInputController* con)
 	{
 		if (index == 1) // credits button press
 		{
-
+			credits();
 		}
 		else if (index == 2) //Start button press
 		{
-		
+			clickedPlay = true;
 		}
 		else if (index == 3) //Quit button press
 		{
 			std::exit(NULL);
 		}
-		printf("A press\n");
 	}
 	if (con->IsButtonPressed(Buttons::B))
 	{
@@ -225,13 +231,28 @@ void ActualMainMenu::GamepadStick(XInputController* con)
 
 
 }
+int ActualMainMenu::ChangeScene()
+{
+	if (clickedPlay) {
+		m_sceneReg->get<Sprite>(3).SetWidth(-1);
+		m_sceneReg->get<Sprite>(4).SetWidth(-1);
+		m_sceneReg->get<Sprite>(5).SetWidth(-1);
+		if (wait < 0) {
+			wait = 1.f;
+			clickedPlay = false;
+			return 1;
+		}
+		wait -= Timer::deltaTime;
+	}
+	
+	return -1;
+}
 void ActualMainMenu::downOnMenu()
 {
 	if (index < 3)
 	{
 		index++;
 	}
-	std::cout << index << "\n";
 	reset = false;
 }
 void ActualMainMenu::upOnMenu()
@@ -240,15 +261,16 @@ void ActualMainMenu::upOnMenu()
 	{
 		index--;
 	}
-	std::cout << index << "\n";
 	reset = false;															
+}
+void ActualMainMenu::credits()
+{
+	std::cout << "lol xd\n";
 }
 //Tests if mouse is on button
 bool ActualMainMenu::positionTesting(int entity, vec2(mousePosition))
 {
 	vec2(Pos) = mousePosition - m_sceneReg->get<Transform>(entity).GetPosition();
-
-
 		if (Pos.x <= m_sceneReg->get<Sprite>(entity).GetWidth() / 2.f &&
 			Pos.x >= -(m_sceneReg->get<Sprite>(entity).GetWidth() / 2.f) &&
 			Pos.y <=  m_sceneReg->get<Sprite>(entity).GetHeight() / 2.f &&

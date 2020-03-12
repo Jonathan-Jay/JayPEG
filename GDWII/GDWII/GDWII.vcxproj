@@ -159,7 +159,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="collectibles.h" />
-    <ClInclude Include="MainMenu.h" />
+    <ClInclude Include="ActualMainMenu.h" />
     <ClInclude Include="AnimationController.h" />
     <ClInclude Include="AnimationSystem.h" />
     <ClInclude Include="BackEnd.h" />
@@ -167,7 +167,6 @@
     <ClInclude Include="bullet.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraSystem.h" />
-    <ClInclude Include="CreatePlatform.h" />
     <ClInclude Include="ECS.h" />
     <ClInclude Include="EffectManager.h" />
     <ClInclude Include="enemy.h" />
@@ -219,14 +218,13 @@
   <ItemGroup>
     <ClCompile Include="bullet.cpp" />
     <ClCompile Include="collectibles.cpp" />
-    <ClCompile Include="MainMenu.cpp" />
+    <ClCompile Include="ActualMainMenu.cpp" />
     <ClCompile Include="AnimationController.cpp" />
     <ClCompile Include="AnimationSystem.cpp" />
     <ClCompile Include="BackEnd.cpp" />
     <ClCompile Include="BloomEffect.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CameraSystem.cpp" />
-    <ClCompile Include="CreatePlatform.cpp" />
     <ClCompile Include="ECS.cpp" />
     <ClCompile Include="EffectManager.cpp" />
     <ClCompile Include="enemy.cpp" />
@@ -246,7 +244,6 @@
     <ClCompile Include="JSON.cpp" />
     <ClCompile Include="Level1.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Level1.cpp" />
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="missile.cpp" />
     <ClCompile Include="PhysicsBody.cpp" />

@@ -1,8 +1,6 @@
 #ifndef __LVL1__
 #define __LVL1__
 
-#include "EntityManager.h"
-#include "CreatePlatform.h"
 #include "missile.h"
 #include "collectibles.h"
 #include <iomanip>
@@ -16,8 +14,6 @@ public:
 	void GamepadStick(XInputController* con) override;
 	void KeyboardDown() override;
 	void Update() override;
-
-	int ChangeScene() override;
 
 private:
 	//tests if player is grounded

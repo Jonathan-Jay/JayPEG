@@ -107,8 +107,12 @@ int Sprite::GetHeight() const
 
 void Sprite::SetSizeScale(float size)
 {
-	//Sets the size scale
-	m_size = size;
+	if (size != m_size) {
+		m_width = m_width / m_size * size;
+		m_height = m_height / m_size * size;
+		//Sets the size scale
+		m_size = size;
+	}
 }
 
 float Sprite::GetSizeScale() const

@@ -25,6 +25,7 @@ static struct CollisionIDs abstract {
 	static const uint16 Bullet = 0x0008;
 	static const uint16 Bombable = 0x0010;
 	static const uint16 Missile = 0x0020;
+	static const uint16 Breakable = 0x0030;
 	static const uint16 Max = 0xFFFF;
 };
 

@@ -1,11 +1,10 @@
 #include "bullet.h"
 
 std::vector<unsigned int> Bullets::bullets = {};
-std::vector<unsigned int> Bullets::walls = {};
 int Bullets::maxBullets = 5;
 int Bullets::damage = 5;
 
-void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float bulletRadius) {
+void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float bulletRadius, uint16 shooter) {
 	auto entity = ECS::CreateEntity();
 
 	ECS::AttachComponent<Sprite>(entity);
@@ -21,7 +20,7 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 	animController.AddAnimation(Animation());
 	auto& anim = animController.GetAnimation(0);
 	for (int x(0); x < 5; x++) {
-		anim.AddFrame(vec2(250 * x, 250), vec2(250 * (x + 1) - 1, 0));
+		anim.AddFrame(vec2(250 * x, 250), vec2(250 * (x + 1), 0));
 	}
 	anim.SetRepeating(true);
 	anim.SetSecPerFrame(0.04f);
@@ -52,10 +51,11 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 	tempBody = m_physicsWorld->CreateBody(&tempDef);
 	tempBody->SetGravityScale(0);
 	tempBody->SetFixedRotation(true);
+	tempBody->SetUserData((void*)entity);
 
-	tempPhsBody = PhysicsBody(tempBody, bulletRadius, vec2(0, 0), true, CollisionIDs::Bullet(), 0x999999 ^ CollisionIDs::Player() | CollisionIDs::Bullet());
+	tempPhsBody = PhysicsBody(tempBody, bulletRadius, vec2(0, 0), true, CollisionIDs::Bullet, CollisionIDs::Max ^ CollisionIDs::Bullet ^ shooter);
 
-	unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit() | EntityIdentifier::AnimationBit();
+	unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 	ECS::SetUpIdentifier(entity, bitHolder, "bullet");
 
 	//check if max amount of bulets on sceen reached
@@ -94,14 +94,12 @@ void Bullets::CreateWall(b2World* m_physicsWorld, vec3 pos, float width, float h
 
 	tempBody = m_physicsWorld->CreateBody(&tempDef);
 
-	tempPhsBody = PhysicsBody(tempBody, width, height, vec2(0, 0), false, CollisionIDs::Bombable());
+	tempPhsBody = PhysicsBody(tempBody, width, height, vec2(0, 0), false, CollisionIDs::Breakable);
 
 	tempBody->SetUserData((void*)entity);
 
 	unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 	ECS::SetUpIdentifier(entity, bitHolder, "destructible wall");
-
-	walls.push_back(entity);
 }
 
 void Bullets::setDamage(int newDamage)
@@ -121,14 +119,13 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 	//checks if bullet should die
 	float playerPosX = m_register->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
 	for (int x(0); x < bullets.size();) {
-		//returning the animation (since it appears behind the hand
+		//returning the animation (since it appears behind the hand)
 		if (m_register->get<AnimationController>(bullets[x]).GetAnimation(
 			m_register->get<AnimationController>(bullets[x]).GetActiveAnim()
 		).GetAnimationDone()) {
 			m_register->get<AnimationController>(bullets[x]).SetActiveAnim(0);
-		}
-		//player range check
-		if (abs(m_register->get<Transform>(bullets[x]).GetPositionX() - playerPosX) > 800.f) {
+		}		//player range check
+		else if (abs(m_register->get<Transform>(bullets[x]).GetPositionX() - playerPosX) > 500.f) {
 			ECS::DestroyEntity(bullets[x]);
 			bullets.erase(bullets.begin() + x, bullets.begin() + x + 1);
 			continue;
@@ -137,24 +134,13 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 		bool contacted{ false };
 		//contact check (touching any physics body)
 		for (b2ContactEdge* contact = m_register->get<PhysicsBody>(bullets[x]).GetBody()->GetContactList(); contact; contact = contact->next) {
-			//tests it does when it hits something
-
-			//if not an environment
-			if (contact->contact->GetFixtureA()->GetFilterData().categoryBits != CollisionIDs::Environment()) {
-				//testing if destructibe wall
-				for (int x(0); x < walls.size(); x++) {
-					if (contact->contact->GetFixtureA()->GetBody()->GetUserData() == (void*)walls[x]) {
-						ECS::DestroyEntity(walls[x]);
-						walls.erase(walls.begin() + x, walls.begin() + x + 1);
-						break;
-					}
-				}
-
-
-				/*
-				printf("A-[c: %u, m: %u]	B-[c: %u, m: %u]\n", contact->contact->GetFixtureA()->GetFilterData().categoryBits, contact->contact->GetFixtureA()->GetFilterData().maskBits,
-					contact->contact->GetFixtureB()->GetFilterData().categoryBits, contact->contact->GetFixtureB()->GetFilterData().maskBits);
-				*/
+			//testing if destructibe wall
+			switch (contact->contact->GetFixtureA()->GetFilterData().categoryBits) {
+			case CollisionIDs::Breakable:
+				ECS::DestroyEntity((unsigned int)contact->contact->GetFixtureA()->GetBody()->GetUserData());
+				break;
+			default:
+				break;
 			}
 
 			contacted = true;

@@ -148,7 +148,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		tempBody->SetFixedRotation(true);
 
-		tempPhsBody = PhysicsBody(tempBody, playerWidth, playerHeight, vec2(0, 0), true, CollisionIDs::Player(), 0x999999);
+		tempPhsBody = PhysicsBody(tempBody, playerWidth, playerHeight, vec2(0, 0), true, CollisionIDs::Player, 0x999999);
 
 		tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
 
@@ -196,7 +196,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 			- 191, - 191, - 245, - 245, - 93, - 93, -247, -247, 105, 105, -470, -470, -420, -420, -1310, -1310
 		};
 		std::vector<float> y = {
-			-202, -202, -215, -215, -408, -408, -375, - 375, - 300, - 300, - 373, - 373, - 417, - 417, - 460, - 460,
+			-202, -202, -215, -215, -408, -408, -375, - 375, - 330, - 330, - 373, - 373, - 417, - 417, - 460, - 460,
 			- 416,  - 416,  - 220, - 220, - 209,  - 209,  - 229,  - 229,  - 1051,  - 1051,  - 845, - 845, - 684,  - 684,
 			- 760,  - 760,  - 671, -671, -1200, -1200, -900,  - 900,  - 1210, - 1210, - 1370,  - 1370, - 1200,  - 1200,
 			- 1182,  - 1182,  - 229,  - 229,  - 207,  - 207,  - 11, - 11, - 198, - 198, - 215, - 215, - 155, - 155, - 56, - 56, 1, 1,
@@ -207,23 +207,6 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		};
 
 		/*
-		std::vector<float> x = {
-			-2061, -1347, -1347, -697, -697, -643, -643, -586, -586, -547, -547, -358,
-			-358, -286, -286, -215, -215, 419, 419, 480, 480, 750, 750, 970, 970,
-			1130, 1130, 66, 66, -1263, -1263, -710, -710, -265, -265, 474, 474, 1190, 1190, 890, 890, 1190, 1190, 590,
-			590, 538, 538, 162, 162, 132, 132, 2009,
-			2009, 1617, 1617, 1604, 1604, 785, 785, 575, 575, 675, 675, 543, 543, 500, 500, 467, 467, -11, -11, -325, -325,
-			-716, -716, -760, -760, -800, -800, -1190, -1190, -2061, -2061
-		};
-		std::vector<float> y = {
-			55, 55, -144, -144, -104, -104, -66.5, -66.5, -34, -34, 0, 0,
-			-38, -38, -91, -91, -147, -147, -189, -189, -230, -230, -312, -312, -172,
-			-172, -553, -553, -346, -346, -600, -600, -475, -475, -704, -704, -811, -811, -722, -722, -694, -694, -69, -69,
-			-17, -17, 48, 48, -25, -25, 90, 90,
-			209, 209, 165, 165, 650, 650, 750, 750, 610, 610, 593, 593, 605, 605, 580, 580, 550, 550, 347, 347, 190,
-			190, 149, 149, 99, 99, 54, 54, 214, 214, 55
-		};
-
 		std::cout << "b2Vec2 tempArray[" << x.size() << "] = {\n";
 		for (int count(0); count < x.size(); count++) {
 			if (count == x.size() - 1) {
@@ -236,7 +219,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		std::cout << "};\n";
 		*/
 
-		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment());
+		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment);
 		//tempPhsBody = PhysicsBody(tempBody, tempArray, 83);
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
@@ -274,7 +257,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 			392, 392, 577, 577, 625, 625, 841, 841, 894, 894, 1050, 1050, 997, 997, 392
 		};
 
-		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment());
+		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment);
 
 		unsigned int bitHolder = EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "island 1");
@@ -303,7 +286,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 			361, 997, 997, 1050, 1050, 1020, 1020, 584, 584, 361, 361
 		};
 
-		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment());
+		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment);
 
 		unsigned int bitHolder = EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "island 2");
@@ -311,11 +294,13 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 	CreateUI();
 
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 270, -280);
+
 	Missiles::CreateWall(m_physicsWorld, vec3(675, -300, 50.f), 50, 160, "png.jpg");
 	Missiles::CreateWall(m_physicsWorld, vec3(920, -435, 50.f), 120, 45, "png.jpg");
 	Missiles::CreateWall(m_physicsWorld, vec3(730, 300, 50.f), 60, 130, "png.jpg");
 	Missiles::CreateWall(m_physicsWorld, vec3(210, 1025, 50.f), 130, 50, "png.jpg");
-	Missiles::CreateWall(m_physicsWorld, vec3(1355, -1290, 50.f), 40, 150, "png.jpg");
+	Missiles::CreateWall(m_physicsWorld, vec3(1250, -1290, 50.f), 40, 150, "png.jpg");
 	Missiles::CreateWall(m_physicsWorld, vec3(205, 810, 50.f), 220, 60, "png.jpg", false);
 	Missiles::CreateWall(m_physicsWorld, vec3(-465, -1035, 50.f), 130, 30, "png.jpg", false);
 	Missiles::CreateWall(m_physicsWorld, vec3(-690, -915, 50.f), 140, 30, "png.jpg", false);
@@ -508,6 +493,10 @@ void Level1::KeyboardDown()
 		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
 	}
 
+	if (Input::GetKeyDown(Key::Escape)) {
+		std::exit(NULL);
+	}
+
 	/*
 	b2Vec2 velo = { 0,0 };
 	if (Input::GetKey(Key::W)) {
@@ -607,7 +596,7 @@ void Level1::Update()
 					vel.x = (movingRight ? projectileSpeed : -projectileSpeed);
 				}
 
-				Bullets::CreateBullet(m_sceneReg, m_physicsWorld, pos, vel, bulletRadius);
+				Bullets::CreateBullet(m_sceneReg, m_physicsWorld, pos, vel, bulletRadius, CollisionIDs::Player);
 			}
 
 			//reset delay
@@ -719,14 +708,6 @@ void Level1::Update()
 		//aiing left-right
 		else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
 	}
-}
-
-int Level1::ChangeScene()
-{
-	if (Input::GetKeyDown(Key::I)) {
-		return 1;
-	}
-	return -1;
 }
 
 bool Level1::Grounded()

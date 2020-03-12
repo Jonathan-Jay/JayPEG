@@ -171,22 +171,19 @@
     <ClInclude Include="missile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CreatePlatform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Level1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MainMenu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="collectibles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Level1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ActualMainMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -338,16 +335,10 @@
     <ClCompile Include="enemy.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CreatePlatform.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Level1.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MainMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="missile.cpp">
@@ -360,6 +351,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Level1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ActualMainMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -28,21 +28,21 @@ Game::~Game()
 void Game::InitGame()
 {
 	//Initializes the backend with window width and height values
-	BackEnd::InitBackEnd(800.f, 450.f);
+	BackEnd::InitBackEnd(1500.f, 450.f);
 
 	//Grabs the initialized window
 	m_window = BackEnd::GetWindow();
 
 	//Creates a new scene.
 	//Replace this with your own scene.
-	//m_scenes.push_back(new MainMenu("MainMenu")); //actual Main Menu
-	m_scenes.push_back(new Level1("Main Scene")); //Main Scene
-	m_scenes.push_back(new Level1("test"));
+	m_scenes.push_back(new ActualMainMenu("Main Menu")); //actual Main Menu
+	m_scenes.push_back(new Level1("BaroTrauma")); //Main Scene
 
 	//Sets active scene reference to our scene
 	m_activeScene = m_scenes[0];
 
 	m_activeScene->InitScene(float(BackEnd::GetWindowWidth()), float(BackEnd::GetWindowHeight()));
+	m_window->SetFullscreen(1);
 
 	//Sets m_register to point to the register in the active scene
 	m_register = m_activeScene->GetScene();
@@ -93,6 +93,7 @@ bool Game::Run()
 			m_activeScene->Unload();
 			m_activeScene->InitScene(BackEnd::GetWindowWidth(), BackEnd::GetWindowHeight());
 			m_register = m_activeScene->GetScene();
+			m_window->SetWindowName(m_activeScene->GetName());
 		}
 	}
 
