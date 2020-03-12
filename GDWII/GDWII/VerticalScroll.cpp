@@ -6,18 +6,24 @@ VerticalScroll::VerticalScroll()
 
 void VerticalScroll::Update()
 {
-	if (m_focus->GetPosition().y > m_cam->m_localPosition.y + m_offset)
-	{
-		float difference = m_focus->GetPosition().y - (m_cam->m_localPosition.y + m_offset);
+	//Above Focus
+	if (m_cam->GetPositionY() < m_topLimit) {
+		if (m_focus->GetPosition().y > m_cam->m_localPosition.y + m_offset)
+		{
+			float difference = m_focus->GetPosition().y - (m_cam->m_localPosition.y + m_offset);
 
-		m_cam->SetPosition(vec3(m_cam->GetPosition().x, m_cam->GetPosition().y + difference, m_cam->GetPosition().z));
+			m_cam->SetPosition(vec3(m_cam->GetPosition().x, m_cam->GetPosition().y + difference, m_cam->GetPosition().z));
+		}
 	}
 
-	if (m_focus->GetPosition().y < m_cam->m_localPosition.y - m_offset)
-	{
-		float difference = m_focus->GetPosition().y - (m_cam->m_localPosition.y - m_offset);
+	//Below focus
+	if (m_cam->GetPositionY() > m_bottomLimit) {
+		if (m_focus->GetPosition().y < m_cam->m_localPosition.y - m_offset)
+		{
+			float difference = m_focus->GetPosition().y - (m_cam->m_localPosition.y - m_offset);
 
-		m_cam->SetPosition(vec3(m_cam->GetPosition().x, m_cam->GetPosition().y + difference, m_cam->GetPosition().z));
+			m_cam->SetPosition(vec3(m_cam->GetPosition().x, m_cam->GetPosition().y + difference, m_cam->GetPosition().z));
+		}
 	}
 }
 
@@ -36,6 +42,16 @@ float VerticalScroll::GetOffset() const
 	return m_offset;
 }
 
+float VerticalScroll::GetTopLimit() const
+{
+	return m_topLimit;
+}
+
+float VerticalScroll::GetBottomLimit() const
+{
+	return m_bottomLimit;
+}
+
 void VerticalScroll::SetCam(Camera * cam)
 {
 	m_cam = cam;
@@ -49,4 +65,26 @@ void VerticalScroll::SetFocus(Transform * focus)
 void VerticalScroll::SetOffset(float offset)
 {
 	m_offset = offset;
+}
+
+void VerticalScroll::SetLimits(float bottom, float top)
+{
+	if (bottom < top) {
+		m_bottomLimit = bottom;
+		m_topLimit = top;
+	}
+}
+
+void VerticalScroll::SetTopLimit(float top)
+{
+	if (m_bottomLimit < top) {
+		m_topLimit = top;
+	}
+}
+
+void VerticalScroll::SetBottomLimit(float bottom)
+{
+	if (bottom < m_topLimit) {
+		m_bottomLimit = bottom;
+	}
 }

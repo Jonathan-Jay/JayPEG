@@ -20,6 +20,8 @@ namespace RenderingSystem
 	//Updates everything drawable within the registry
 	void Update(entt::registry* reg);
 
+	void UpdateScroll(entt::registry* reg);
+
 	//Draws everything drawable within the registry
 	void Draw(entt::registry* reg);
 

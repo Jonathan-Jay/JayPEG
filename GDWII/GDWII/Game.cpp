@@ -28,15 +28,16 @@ Game::~Game()
 void Game::InitGame()
 {
 	//Initializes the backend with window width and height values
-	BackEnd::InitBackEnd(719.f, 436.f);
+	BackEnd::InitBackEnd(800.f, 450.f);
 
 	//Grabs the initialized window
 	m_window = BackEnd::GetWindow();
 
 	//Creates a new scene.
 	//Replace this with your own scene.
-	m_scenes.push_back(new MainMenu("Main Scene")); //Main Scene
-	m_scenes.push_back(new ActualMainMenu("MainMenu")); //actual Main Menu
+	//m_scenes.push_back(new MainMenu("MainMenu")); //actual Main Menu
+	m_scenes.push_back(new Level1("Main Scene")); //Main Scene
+	m_scenes.push_back(new Level1("test"));
 
 	//Sets active scene reference to our scene
 	m_activeScene = m_scenes[0];
@@ -84,6 +85,15 @@ bool Game::Run()
 			//Accept all input
 			AcceptInput();
 		}
+
+		unsigned int index = m_activeScene->ChangeScene();
+		if (index != -1) {
+			m_activeScene->Unload();
+			m_activeScene = m_scenes[index];
+			m_activeScene->Unload();
+			m_activeScene->InitScene(BackEnd::GetWindowWidth(), BackEnd::GetWindowHeight());
+			m_register = m_activeScene->GetScene();
+		}
 	}
 
 	return true;
@@ -93,14 +103,17 @@ void Game::Update()
 {
 	//Update timer
 	Timer::Update();
+
+	RenderingSystem::UpdateScroll(m_register);
+
+	//Updates the active scene
+	m_activeScene->Update();
+
 	//Update the backend
 	BackEnd::Update(m_register);
 
 	//Update Physics System
 	PhysicsSystem::Update(m_register, m_activeScene->GetPhysicsWorld());
-
-	//Updates the active scene
-	m_activeScene->Update();
 }
 
 void Game::GUI()

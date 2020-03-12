@@ -2,7 +2,6 @@
 #define __GAME_H__
 
 #include "BackEnd.h"
-//#include "CreatePlatform.h"
 
 
 //Our main class for running our game
