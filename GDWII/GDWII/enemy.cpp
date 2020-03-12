@@ -1,7 +1,7 @@
 #include "enemy.h"
 
 std::vector<enemyList> Enemies::enemies = {};
-int Enemies::deactivationLength = 6000;
+int Enemies::deactivationLength = 600;
 float Enemies::sightRefreshTime = 0.125f;
 b2World* Enemies::m_phyWorld = nullptr;
 

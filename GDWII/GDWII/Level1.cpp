@@ -296,7 +296,10 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 	CreateUI();
 
-	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 270, -280);
+	for (size_t i = 0; i < 2; i++) {	
+		Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 270, -280);
+		Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 270, -280);
+	}
 
 	Missiles::CreateWall(m_physicsWorld, vec3(675, -300, 50.f), 50, 160, "png.jpg");
 	Missiles::CreateWall(m_physicsWorld, vec3(920, -435, 50.f), 120, 45, "png.jpg");
