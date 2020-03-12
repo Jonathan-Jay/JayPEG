@@ -43,6 +43,7 @@ public:
 							bool * mouseMotion, bool * mouseClick, 
 								bool * mouseWheel);
 	
+	
 	//Draws the gamessss
 	//*Calls draw on the rendering system
 	static void Draw(entt::registry* mainReg);

@@ -1,6 +1,7 @@
 #include "bullet.h"
 
 std::vector<unsigned int> Bullets::bullets = {};
+std::vector<unsigned int> Bullets::walls = {};
 int Bullets::maxBullets = 5;
 int Bullets::damage = 5;
 
@@ -54,7 +55,7 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 
 	tempPhsBody = PhysicsBody(tempBody, bulletRadius, vec2(0, 0), true, CollisionIDs::Bullet(), 0x999999 ^ CollisionIDs::Player() | CollisionIDs::Bullet());
 
-	unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
+	unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit() | EntityIdentifier::AnimationBit();
 	ECS::SetUpIdentifier(entity, bitHolder, "bullet");
 
 	//check if max amount of bulets on sceen reached
@@ -71,6 +72,48 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 	//fix camera focus (focus breaks when entities are spawned)
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
+}
+
+void Bullets::CreateWall(b2World* m_physicsWorld, vec3 pos, float width, float height, std::string filename)
+{
+	auto entity = ECS::CreateEntity();
+
+	ECS::AttachComponent<Sprite>(entity);
+	ECS::AttachComponent<Transform>(entity);
+	ECS::AttachComponent<PhysicsBody>(entity);
+
+	ECS::GetComponent<Transform>(entity).SetPosition(pos);
+	ECS::GetComponent<Sprite>(entity).LoadSprite(filename, width, height);
+
+	auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
+
+	b2Body* tempBody;
+	b2BodyDef tempDef;
+	tempDef.type = b2_staticBody;
+	tempDef.position.Set(float32(pos.x), float32(pos.y));
+
+	tempBody = m_physicsWorld->CreateBody(&tempDef);
+
+	tempPhsBody = PhysicsBody(tempBody, width, height, vec2(0, 0), false, CollisionIDs::Bombable());
+
+	tempBody->SetUserData((void*)entity);
+
+	unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
+	ECS::SetUpIdentifier(entity, bitHolder, "destructible wall");
+
+	walls.push_back(entity);
+}
+
+void Bullets::setDamage(int newDamage)
+{
+	if (newDamage >= 0) {
+		damage = newDamage;
+	}
+}
+
+int Bullets::getDamage()
+{
+	return damage;
 }
 
 void Bullets::updateAllBullets(entt::registry* m_register)
@@ -98,9 +141,20 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 
 			//if not an environment
 			if (contact->contact->GetFixtureA()->GetFilterData().categoryBits != CollisionIDs::Environment()) {
+				//testing if destructibe wall
+				for (int x(0); x < walls.size(); x++) {
+					if (contact->contact->GetFixtureA()->GetBody()->GetUserData() == (void*)walls[x]) {
+						ECS::DestroyEntity(walls[x]);
+						walls.erase(walls.begin() + x, walls.begin() + x + 1);
+						break;
+					}
+				}
+
+
+				/*
 				printf("A-[c: %u, m: %u]	B-[c: %u, m: %u]\n", contact->contact->GetFixtureA()->GetFilterData().categoryBits, contact->contact->GetFixtureA()->GetFilterData().maskBits,
 					contact->contact->GetFixtureB()->GetFilterData().categoryBits, contact->contact->GetFixtureB()->GetFilterData().maskBits);
-
+				*/
 			}
 
 			contacted = true;

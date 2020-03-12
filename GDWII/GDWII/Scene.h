@@ -18,6 +18,8 @@ public:
 	//Saves the scene
 	void SaveScene();
 
+	virtual int ChangeScene() { return -1; }
+
 	//Each scene will need to have a different
 	//init, as each scene's contents will be different
 	virtual void InitScene(float windowWidth, float windowHeight);

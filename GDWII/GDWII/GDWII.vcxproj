@@ -158,6 +158,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="collectibles.h" />
     <ClInclude Include="MainMenu.h" />
     <ClInclude Include="AnimationController.h" />
     <ClInclude Include="AnimationSystem.h" />
@@ -217,6 +218,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bullet.cpp" />
+    <ClCompile Include="collectibles.cpp" />
     <ClCompile Include="MainMenu.cpp" />
     <ClCompile Include="AnimationController.cpp" />
     <ClCompile Include="AnimationSystem.cpp" />

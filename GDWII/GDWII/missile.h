@@ -1,7 +1,7 @@
 #ifndef __MSSLE__
 #define __MSSLE__
 
-#include "EntityManager.h"
+#include "bullet.h"
 
 class Missiles
 {
@@ -12,8 +12,10 @@ public:
 	static void isBombable(unsigned int entity);
 
 	//change data
-	static void changeRadius(int newRadius);
-	static void changeDamage(int newDamage);
+	static void setRadius(float newRadius);
+	static float getRadius();
+	static void setDamage(int newDamage);
+	static int getDamage();
 
 	//update all existing missiles
 	static void updateAllMissiles(entt::registry* m_register);
@@ -22,7 +24,7 @@ private:
 	static std::vector<unsigned int> bombable;
 	static int maxMissiles;
 	static int explosionRadius;
-	static float damage;
+	static int damage;
 	static float screenShake;
 };
 

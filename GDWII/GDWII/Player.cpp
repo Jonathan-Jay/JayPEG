@@ -16,7 +16,8 @@ Player::Player(int maxHealth, int maxEnergy, float energyRegen)
 	this->currentEnergy = maxEnergy;
 	this->energyRegen = energyRegen;
 
-	this->missileStat = 0;
+	this->hasMissile = 0;
+	this->bulletUpgrade = 0;
 }
 
 Player::~Player()
@@ -34,7 +35,8 @@ void Player::reset(int maxHealth, int maxEnergy, float energyRegen)
 	this->currentEnergy = maxEnergy;
 	this->energyRegen = energyRegen;
 
-	this->missileStat = 0;
+	this->hasMissile = 0;
+	this->bulletUpgrade = 0;
 }
 
 int Player::getMaxHealth() const
@@ -46,6 +48,9 @@ void Player::setMaxHealth(int maxHealth)
 {
 	if (maxHealth > 0) {
 		this->maxHealth = maxHealth;
+		if (currentHealth > maxHealth) {
+			currentHealth = maxHealth;
+		}
 	}
 }
 
@@ -58,16 +63,25 @@ void Player::setMaxEnergy(int maxEnergy)
 {
 	if (maxEnergy > 0) {
 		this->maxEnergy = maxEnergy;
+		if (currentEnergy > maxEnergy) {
+			currentEnergy = maxEnergy;
+		}
 	}
 }
 
-int Player::getMissile(bool change)
+bool Player::getMissile(bool gotIt)
 {
-	if (change) {
-		this->missileStat++;
-	}
+	if (gotIt)
+		this->hasMissile = true;
 	
-	return missileStat;
+	return hasMissile;
+}
+
+int Player::getUpgrade(bool change)
+{
+	this->bulletUpgrade += change;
+	
+	return bulletUpgrade;
 }
 
 //set the Energy regen speed
@@ -76,6 +90,11 @@ void Player::setEnergyRegen(float energyRegen)
 	if (energyRegen > 0) {
 		this->energyRegen = energyRegen;
 	}
+}
+
+float Player::getEnergyRegen()
+{
+	return energyRegen;
 }
 
 int Player::getCurrentHealth() const

@@ -37,7 +37,7 @@ void Game::InitGame()
 	//Replace this with your own scene.
 	//m_scenes.push_back(new MainMenu("MainMenu")); //actual Main Menu
 	m_scenes.push_back(new Level1("Main Scene")); //Main Scene
-	m_scenes.push_back(new Scene("Main Scene")); //Main Scene
+	m_scenes.push_back(new Level1("test"));
 
 	//Sets active scene reference to our scene
 	m_activeScene = m_scenes[0];
@@ -85,6 +85,15 @@ bool Game::Run()
 			//Accept all input
 			AcceptInput();
 		}
+
+		unsigned int index = m_activeScene->ChangeScene();
+		if (index != -1) {
+			m_activeScene->Unload();
+			m_activeScene = m_scenes[index];
+			m_activeScene->Unload();
+			m_activeScene->InitScene(BackEnd::GetWindowWidth(), BackEnd::GetWindowHeight());
+			m_register = m_activeScene->GetScene();
+		}
 	}
 
 	return true;
@@ -105,7 +114,6 @@ void Game::Update()
 
 	//Update Physics System
 	PhysicsSystem::Update(m_register, m_activeScene->GetPhysicsWorld());
-
 }
 
 void Game::GUI()

@@ -4,6 +4,7 @@
 #include "EntityManager.h"
 #include "CreatePlatform.h"
 #include "missile.h"
+#include "collectibles.h"
 #include <iomanip>
 
 class Level1 : public Scene
@@ -16,6 +17,8 @@ public:
 	void KeyboardDown() override;
 	void Update() override;
 
+	int ChangeScene() override;
+
 private:
 	//tests if player is grounded
 	bool Grounded();
@@ -24,7 +27,6 @@ private:
 	//UI elements
 	void UpdateUI();
 	void CreateUI();
-
 	vec3 uiOffset = {53, -22, 50}; // from top left corner
 	std::vector<unsigned int> uiElements = {};
 
@@ -45,31 +47,31 @@ private:
 	float recoilDelay = 0;
 
 	//bullet variables
+	int bulletDamage = 2;
 	float bulletRadius = 5.f;
 	float gunCooldown = 0.25f;
 
 	//missile variables
 	int missileCost = 5;
-	int maxMissileLevel = 2;
+	int missileDamage = 5;
 	float missileRadius = 5.f;
 	float missileCooldown = 1.0f;
-	float missileDamage = 2.f;
 
 	//general projectile variables
-	float projectileSpeed = 0.f;
+	float projectileSpeed = 50.f;
 	float recoilCooldown = 0.5f;
 
 	//player related variables (max 99 for HP and NRG please)
 	int itemCount = 1;		//how many do you start with (increase when you spawn a item)
-	int totalItems = 3;		//how many in total (including starting amount)
+	int totalItems = 5;		//how many in total (including starting amount)
 	int maxHP = 10;
 	int maxNRG = 10;
 	float EnergyRegenPerSec = 1.f;
 	float playerHeight = 40.f;
 	float playerWidth = 22.f;
 	float playerSpeed = 25.f;
-	float minJumpStrength = 25.f;
-	float maxJumpStrength = 50.f;
+	float minJumpStrength = 50.f;
+	float maxJumpStrength = 75.f;
 	float jumpIncrementPerSec = 125.f;
 };
 

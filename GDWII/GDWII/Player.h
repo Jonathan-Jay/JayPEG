@@ -9,7 +9,7 @@ public:
 	~Player();
 
 	void reset(int maxHealth, int maxEnergy, float energyRegen);
-	
+
 	//Getters and setters for health and energy
 	int getMaxHealth() const;
 	void setMaxHealth(int maxHealth);
@@ -17,9 +17,11 @@ public:
 	int getMaxEnergy() const;
 	void setMaxEnergy(int maxEnergy);
 
-	int getMissile(bool change = false);
+	bool getMissile(bool gotIt = false);
+	int getUpgrade(bool change = false);
 
 	void setEnergyRegen(float energyRegen);
+	float getEnergyRegen();
 
 	int getCurrentHealth() const;
 	float getCurrentEnergy() const;
@@ -46,7 +48,8 @@ private:
 	float currentEnergy = 0;
 	float energyRegen = 0.f;
 
-	int missileStat = 0;
+	bool hasMissile = false;
+	int bulletUpgrade = 0;
 };
 
 inline void to_json(nlohmann::json& j, const Player& player) 

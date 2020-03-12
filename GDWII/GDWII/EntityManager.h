@@ -1,7 +1,8 @@
 #ifndef __ENTMANA__
 #define __ENTMANA__
 
-#include "bullet.h"
+#include "Scene.h"
+#include "BackEnd.h"
 #include <string>
 
 class EntityStorage
