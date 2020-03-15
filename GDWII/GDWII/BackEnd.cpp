@@ -20,7 +20,7 @@ void BackEnd::InitBackEnd(float windowWidth, float windowHeight)
 	m_windowHeight = (GLsizei)windowHeight;
 	m_aspectRatio = float(m_windowWidth) / float(m_windowHeight);
 	//Creates new window with name of the scene as a caption
-	m_window = new Window("", BackEnd::GetWindowWidth(), BackEnd::GetWindowHeight());
+	m_window = new Window("", BackEnd::GetWindowWidth(), BackEnd::GetWindowHeight(), true);
 
 	//Initializes GLEW
 	InitGLEW();

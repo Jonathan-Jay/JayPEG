@@ -84,6 +84,8 @@ private:
 	bool m_click = false;
 	bool m_wheel = false;
 
+	int m_width{ 640 }, m_height{ 480 };
+
 	XInputManager input;
 };
 
