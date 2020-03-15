@@ -27,15 +27,17 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 		ECS::GetComponent<HorizontalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<HorizontalScroll>(entity).SetOffset(15.f);
-		ECS::GetComponent<HorizontalScroll>(entity).SetLimits(-1980, 2000);
+		ECS::GetComponent<HorizontalScroll>(entity).SetLimits(-1740, 1680);
 
 		ECS::GetComponent<VerticalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<VerticalScroll>(entity).SetOffset(15.f);
-		ECS::GetComponent<VerticalScroll>(entity).SetLimits(-1545, 1579);
+		ECS::GetComponent<VerticalScroll>(entity).SetLimits(-1715, 1254);
 
 		vec4 temp = ECS::GetComponent<Camera>(entity).GetOrthoSize();
 		ECS::GetComponent<Camera>(entity).SetWindowSize(vec2(float(windowWidth), float(windowHeight)));
 		ECS::GetComponent<Camera>(entity).Orthographic(aspectRatio, temp.x, temp.y, temp.z, temp.w, -100.f, 100.f);
+
+		ECS::GetComponent<Camera>(entity).SetOrthoSize(vec4(-200, 200, -200, 200));
 
 		unsigned int bitHolder = EntityIdentifier::CameraBit() | EntityIdentifier::HoriScrollCameraBit() | EntityIdentifier::VertScrollCameraBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "Camera");
@@ -244,14 +246,6 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 
-		/*
-		std::vector<float> x = {
-			132, 1060, 1060, 1085, 1085, 822, 822, 784, 784, 738, 738, 698, 698, 328, 328, 280, 280, 218, 218, 132, 132
-		};
-		std::vector<float> y = {
-			187, 187, 226, 226, 445, 445, 412, 412, 387, 387, 356, 356, 327, 327, 283, 283, 245, 245, 214, 214, 187
-		};
-		*/
 		std::vector<float> x = {
 			-247, -299, -299, -968, -968, -905, -905, -947, -947, -904, -904, 150, 150, -247, -247
 		};
@@ -471,7 +465,15 @@ void Level1::MouseClick(SDL_MouseButtonEvent evnt)
 
 void Level1::MouseWheel(SDL_MouseWheelEvent evnt)
 {
-	m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(evnt.y * 10.f);
+	auto& cam = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera());
+	if (evnt.y < 0) {
+		if (cam.GetOrthoSize().w < 400)
+			cam.Zoom(evnt.y * 10.f);
+	}
+	else {
+		if (cam.GetOrthoSize().w > 100)
+			cam.Zoom(evnt.y * 10.f);
+	}
 }
 
 void Level1::KeyboardDown()
@@ -570,7 +572,7 @@ void Level1::Update()
 			b2Body* playerBody = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody();
 
 			b2PolygonShape tempBox;
-			tempBox.SetAsBox(playerWidth / 2.f, playerHeight * 1.f / 3.f, b2Vec2(0, -playerHeight * 1.f / 6.f), 0);
+			tempBox.SetAsBox(playerWidth / 2.f, playerHeight / 3.f, b2Vec2(0, -playerHeight / 6.f), 0);
 				
 			b2FixtureDef crouchingBox;
 			crouchingBox.shape = &tempBox;
@@ -863,8 +865,10 @@ void Level1::UpdateUI()
 	unsigned int playerMaxEnergy = playerData.getMaxEnergy();
 
 	float ortho = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize().y;
+	float scale = ortho / 100;
 	vec3 uiPos = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPosition()
-		+ vec3((-ortho * m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetAspect()), ortho, 0) + uiOffset;
+		+ vec3((-ortho * m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetAspect()), ortho, 0) + uiOffset * scale;
+	uiPos.z = uiOffset.z;
 
 	for (unsigned int x(0); x < 4; x++) {
 		vec3 temp = { 0, 0, 0 };
@@ -875,9 +879,10 @@ void Level1::UpdateUI()
 			m_sceneReg->get<AnimationController>(uiElements[x]).SetActiveAnim(playerData.getMissile());
 		}
 		else if (x > 0) {		//HP and NRG bar
-			temp.x = ((x == 1) ? (float(playerHealth) / playerMaxHealth) : (playerEnergy / playerMaxEnergy)) * 42.75f - 42.75f;
+			temp.x = (((x == 1) ? (float(playerHealth) / playerMaxHealth) : (playerEnergy / playerMaxEnergy)) * 42.75f - 42.75f) * scale;
 		}
 		m_sceneReg->get<Transform>(uiElements[x]).SetPosition(uiPos + temp);
+		m_sceneReg->get<Sprite>(uiElements[x]).SetSizeScale(scale);
 		uiPos.z++;
 	}
 
@@ -885,19 +890,21 @@ void Level1::UpdateUI()
 	for (unsigned int x(0); x < 3; x++) {
 		m_sceneReg->get<AnimationController>(uiElements[x + 4]).SetActiveAnim(
 			floor(itemPercent / pow(10, 2 - x)) - floor(itemPercent / pow(10, 3 - x)) * 10);
-		m_sceneReg->get<Transform>(uiElements[x + 4]).SetPosition(uiPos + vec3(3 + x * 6, -12.5, 0));
+		m_sceneReg->get<Transform>(uiElements[x + 4]).SetPosition(uiPos + vec3(3 + x * 6, -12.5, 0) * scale);
+		m_sceneReg->get<Sprite>(uiElements[x + 4]).SetSizeScale(scale);
 	}
 	//HP and NRG
 	for (unsigned int x(0); x < 2; x++) {
 		uiPos.z++;
 		unsigned int current = ((x == 0) ? playerHealth : playerEnergy);
 		unsigned int limit = ((x == 0) ? playerMaxHealth : playerMaxEnergy);
-		vec3 temp = uiPos + vec3(0, ((x == 0) ? 11.8 : 1), 0);
+		vec3 temp = uiPos + (vec3(0, ((x == 0) ? 11.8 : 1), 0) * scale);
 		for (unsigned int y(0); y < 4; y++) {
 			m_sceneReg->get<AnimationController>(uiElements[x * 4 + 7 + y]).SetActiveAnim( (y < 2) ?
 				(floor(current / pow(10, 1 - y)) - ((y == 0) ? 0 : floor(current / 10) * 10)) :
 				(floor(limit / pow(10, 3 - y)) - ((y == 2) ? 0 : floor(limit / 10) * 10)) );
-			m_sceneReg->get<Transform>(uiElements[x * 4 + 7 + y]).SetPosition(temp + vec3(1 + (6 * y) + ((y > 1) ? 5 : 0), 0, 0));
+			m_sceneReg->get<Transform>(uiElements[x * 4 + 7 + y]).SetPosition(temp + vec3(1 + (6 * y) + ((y > 1) ? 5 : 0), 0, 0) * scale);
+			m_sceneReg->get<Sprite>(uiElements[x * 4 + 7 + y]).SetSizeScale(scale);
 		}
 	}
 

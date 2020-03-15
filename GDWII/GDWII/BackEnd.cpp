@@ -169,6 +169,8 @@ void BackEnd::ReshapeWindow(int w, int h, entt::registry * mainReg)
 	glViewport(0, 0, GLsizei(w), GLsizei(h));
 	//Resize all framebuffers here
 
+	m_window->SetWindowSize(w, h);
+
 	m_windowWidth = w;
 	m_windowHeight = h;
 	m_aspectRatio = float(w) / float(h);

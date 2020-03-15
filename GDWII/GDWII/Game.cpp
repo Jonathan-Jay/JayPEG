@@ -46,7 +46,6 @@ void Game::InitGame()
 
 
 
-
 	//PhysicsBody::SetDraw(true);
 
 
@@ -239,12 +238,12 @@ void Game::KeyboardDown()
 
 	if (Input::GetKeyDown(Key::F11)) {
 		if (m_window->GetFullscreen()) {
-			m_window->SetWindowSize(1152, 648);
+			BackEnd::ReshapeWindow(1152, 648, m_register);
 			m_window->SetFullscreen(0);
 			m_window->SetWindowResizable(false);
 		}
 		else {
-			m_window->SetWindowSize(1500, 450);
+			BackEnd::ReshapeWindow(1500, 450, m_register);
 			m_window->SetFullscreen(1);
 		}
 	}

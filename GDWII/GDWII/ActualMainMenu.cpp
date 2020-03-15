@@ -285,13 +285,20 @@ void ActualMainMenu::GamepadStick(XInputController* con)
 int ActualMainMenu::ChangeScene()
 {
 	if (clickedPlay) {
-		m_sceneReg->get<Sprite>(3).SetSizeScale(1.f * wait);
-		m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f * wait);
-		m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f * wait);
 		if (wait < 0) {
 			wait = 1.f;
 			clickedPlay = false;
 			return 1;
+		}
+		if (wait < 0.05) {
+			m_sceneReg->get<Sprite>(3).SetSizeScale(0);
+			m_sceneReg->get<Sprite>(4).SetSizeScale(0);
+			m_sceneReg->get<Sprite>(5).SetSizeScale(0);
+		}
+		else {
+			m_sceneReg->get<Sprite>(3).SetSizeScale(1.f * wait);
+			m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f * wait);
+			m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f * wait);
 		}
 		wait -= Timer::deltaTime;
 	}
