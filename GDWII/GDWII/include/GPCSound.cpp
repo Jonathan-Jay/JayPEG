@@ -137,6 +137,20 @@ void SoundManager::stop2DSound(unsigned channelIndex)
 	checkFmodErrors(_result, "Stopping Sound");
 }
 
+void SoundManager::stopChannelGroup(unsigned groupIndex)
+{
+	_result = _channelGroups[groupIndex]->stop();
+	checkFmodErrors(_result, "Stopping Channel Group");
+}
+
+void SoundManager::stopEverything()
+{
+	for (unsigned x(0); x < _channelGroups.size(); x++) {
+		_result = _channelGroups[x]->stop();
+		checkFmodErrors(_result, "Stopping EVerything (via groups)");
+	}
+}
+
 void SoundManager::loopSound(unsigned index, unsigned loopCount)
 {
 	_channels[index]->setLoopCount(loopCount);
@@ -168,14 +182,21 @@ void Sound2D::play()
 void Sound2D::stop()
 {
 	SoundManager::stop2DSound(_channel);
-	_channel = -1;
+}
+
+void Sound2D::loop()
+{
+	if (!isPlaying())
+		play();
+}
+
+void Sound2D::stopGroup()
+{
+	SoundManager::stopChannelGroup(_group);
 }
 
 bool Sound2D::isPlaying()
 {
-	if (_channel == -1)
-		return false;
-
 	bool playing = false;
 	SoundManager::_channels[_channel]->isPlaying(&playing);
 	return playing;

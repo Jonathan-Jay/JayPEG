@@ -36,7 +36,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 		ECS::GetComponent<VerticalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<VerticalScroll>(entity).SetOffset(15.f);
-		ECS::GetComponent<VerticalScroll>(entity).SetLimits(-1715, 1254);
+		ECS::GetComponent<VerticalScroll>(entity).SetLimits(-1200, 1254);
 
 		vec4 temp = ECS::GetComponent<Camera>(entity).GetOrthoSize();
 		ECS::GetComponent<Camera>(entity).SetWindowSize(vec2(float(windowWidth), float(windowHeight)));
@@ -313,7 +313,6 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Bullets::CreateWall(m_physicsWorld, vec3(-500, -205, 50.f), 105, 20, "tempmap.png");
 	Bullets::CreateWall(m_physicsWorld, vec3(-1060, 1260, 50.f), 40, 115, "tempmap.png");
 	Bullets::CreateWall(m_physicsWorld, vec3(1430, 1230, 50.f), 45, 100, "tempmap.png");
-	Bullets::CreateWall(m_physicsWorld, vec3(-1730, 1175, 50.f), 90, 25, "tempmap.png");
 	Bullets::CreateWall(m_physicsWorld, vec3(1310, 1035, 50.f), 125, 45, "tempmap.png");
 	Bullets::CreateWall(m_physicsWorld, vec3(1510, -210, 50.f), 100, 25, "tempmap.png");
 	Bullets::CreateWall(m_physicsWorld, vec3(-253, -805, 50.f), 25, 90, "tempmap.png");
@@ -571,8 +570,7 @@ void Level1::KeyboardDown()
 
 void Level1::Update()
 {
-	if (!m_soundEffects[0].isPlaying())
-		m_soundEffects[0].play();
+	m_soundEffects[0].loop();
 
 	//update scene Data
 	UpdateCounters();

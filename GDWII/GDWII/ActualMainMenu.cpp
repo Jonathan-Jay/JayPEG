@@ -120,8 +120,7 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 void ActualMainMenu::Update()
 {
-	if (!m_soundEffects[0].isPlaying())
-		m_soundEffects[0].play();
+	m_soundEffects[0].loop();
 
 	if (wait == 1) {
 		if (Input::GetKeyDown(Key::LeftArrow))
@@ -295,7 +294,7 @@ int ActualMainMenu::ChangeScene()
 		if (wait < 0) {
 			wait = 1.f;
 			clickedPlay = false;
-			m_soundEffects[0].stop();
+			m_soundEffects[0].setLoopCount(2);
 			return 1;
 		}
 		if (wait < 0.05) {

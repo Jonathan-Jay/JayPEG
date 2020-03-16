@@ -50,6 +50,8 @@ public:
 	static unsigned play2DSound(unsigned soundIndex, unsigned groupIndex);
 
 	static void stop2DSound(unsigned channelIndex);
+	static void stopChannelGroup(unsigned groupIndex);
+	static void stopEverything();
 
 	//set index to loop n times
 	static void loopSound(unsigned index, unsigned loopCount);
@@ -79,6 +81,8 @@ public:
 
 	void play();
 	void stop();
+	void loop();
+	void stopGroup();
 
 	void setSoundHandle(unsigned soundHandle) { _sound = soundHandle; }
 	void setGroupHandle(unsigned groupHandle) { _group = groupHandle; }

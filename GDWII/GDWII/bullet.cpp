@@ -137,6 +137,7 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 			//testing if destructibe wall
 			switch (contact->contact->GetFixtureA()->GetFilterData().categoryBits) {
 			case CollisionIDs::Breakable:
+				Sound2D("nep.wav", "sounds").play();
 				ECS::DestroyEntity((unsigned int)contact->contact->GetFixtureA()->GetBody()->GetUserData());
 				break;
 			default:

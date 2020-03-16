@@ -41,7 +41,7 @@ void Game::InitGame()
 		SDL_Log("SDL_GetDesktopDisplayMode failed: %s", SDL_GetError());
 	}
 
-	SoundManager::init("./assets/sounds/", 10);
+	SoundManager::init("./assets/sounds/", 25);
 	//Creates a new scene.
 	//Replace this with your own scene.
 	m_scenes.push_back(new ActualMainMenu("Main Menu")); //actual Main Menu
@@ -107,6 +107,7 @@ bool Game::Run()
 			m_activeScene->InitScene(BackEnd::GetWindowWidth(), BackEnd::GetWindowHeight());
 			m_register = m_activeScene->GetScene();
 			m_window->SetWindowName(m_activeScene->GetName());
+			SoundManager::stopEverything();
 		}
 	}
 

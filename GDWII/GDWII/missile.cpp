@@ -225,6 +225,8 @@ void Missiles::updateAllMissiles(entt::registry* m_register)
 					}
 				}
 
+				Sound2D("nep.wav", "sounds").play();
+
 				ECS::RemoveComponent<PhysicsBody>(missiles[x]);
 				m_register->get<Sprite>(missiles[x]).SetWidth(explosionRadius * 2);
 				m_register->get<Sprite>(missiles[x]).SetHeight(explosionRadius * 2);
