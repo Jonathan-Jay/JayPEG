@@ -32,13 +32,15 @@ public:
 	//send entity it needs to check. don't do a second time
 	void isEntityTrigger(int entity) {
 		m_list[m_index].type = 2;
-		m_list[m_index].otherData.push_back(std::vector<int>({ (entity) }));
+		m_list[m_index].otherData.resize(1);
+		m_list[m_index].otherData[0] = std::vector<int>({ (entity) });
 	}
 	//checks region given and when true, is open, when false, is closed
 	void isAABB(vec2 BL, vec2 TR) {
 		m_list[m_index].type = 3;
-		m_list[m_index].otherData.push_back(std::vector<int>({ int(BL.x), int(TR.x) }));
-		m_list[m_index].otherData.push_back(std::vector<int>({ int(BL.y), int(TR.y) }));
+		m_list[m_index].otherData.resize(2);
+		m_list[m_index].otherData[0] = std::vector<int>({ int(BL.x), int(TR.x) });
+		m_list[m_index].otherData[1] = std::vector<int>({ int(BL.y), int(TR.y) });
 	}
 
 	void SetOpened(bool isOpen) { m_list[m_index].opened = isOpen; }

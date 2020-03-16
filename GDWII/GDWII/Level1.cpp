@@ -561,10 +561,6 @@ void Level1::KeyboardDown()
 		std::exit(NULL);
 	}
 
-	if (Input::GetKeyDown(Key::U)) {
-		bossDoor.changeState();
-	}
-
 	/*
 	b2Vec2 velo = { 0,0 };
 	if (Input::GetKey(Key::W)) {

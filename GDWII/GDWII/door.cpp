@@ -39,17 +39,20 @@ void Door::update(entt::registry *reg)
 
 		vec3 playerPos = reg->get<Transform>(EntityIdentifier::MainPlayer()).GetPosition();
 		switch (current->type) {
+			//bouncy: switches when done changing
 		case 1:
 			if (!current->changing) {
 				current->opened = !current->opened;
 			}
 			break;
+			//does entity exist
 		case 2:
 			if (!reg->valid(current->otherData[0][0])) {
 				current->opened = !current->opened;
 				current->type = 0;
 			}
 			break;
+			//is player touching AABB
 		case 3:
 			if (playerPos.x + m_halfPlayerWidth < current->otherData[0][1] &&
 				playerPos.x - m_halfPlayerWidth > current->otherData[0][0] &&
@@ -71,24 +74,31 @@ void Door::update(entt::registry *reg)
 		}
 		if (current->changing) {
 			vec3 currentPos = reg->get<Transform>(current->entity).GetPosition();
-			vec3 change = (current->opened ? current->endPos : current->startPos) - currentPos;
-			if (change.GetMagnitude2D() > 1) {
-				change = change.Normalize2D() * ((Timer::deltaTime < 1 ? Timer::deltaTime : 1) * current->speed);
-				currentPos = currentPos + change;
-				for (b2ContactEdge* edge = reg->get<PhysicsBody>(m_list[x].entity).GetBody()->GetContactList(); edge; edge = edge->next) {
-					if ((unsigned int)edge->contact->GetFixtureA()->GetBody()->GetUserData() == EntityIdentifier::MainPlayer()) {
-						reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetAwake(true);
-						reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetTransform(
-							b2Vec2(change.x + playerPos.x, (change.y < 0 ? change.y : 0) + playerPos.y), 0);
+			//only update when close
+			if (currentPos.y < playerPos.y + 750 &&
+				currentPos.y > playerPos.y - 750 &&
+				currentPos.x < playerPos.x + 750 &&
+				currentPos.x > playerPos.x - 750) {
+
+				vec3 change = (current->opened ? current->endPos : current->startPos) - currentPos;
+				if (change.GetMagnitude2D() > 1) {
+					change = change.Normalize2D() * ((Timer::deltaTime < 1 ? Timer::deltaTime : 1) * current->speed);
+					currentPos = currentPos + change;
+					for (b2ContactEdge* edge = reg->get<PhysicsBody>(m_list[x].entity).GetBody()->GetContactList(); edge; edge = edge->next) {
+						if ((unsigned int)edge->contact->GetFixtureA()->GetBody()->GetUserData() == EntityIdentifier::MainPlayer()) {
+							reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetAwake(true);
+							reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetTransform(
+								b2Vec2(change.x + playerPos.x, (change.y < 0 ? change.y : 0) + playerPos.y), 0);
+						}
 					}
 				}
+				else {
+					reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetAwake(true);
+					currentPos = (current->opened ? current->endPos : current->startPos);
+					current->changing = false;
+				}
+				reg->get<PhysicsBody>(current->entity).GetBody()->SetTransform(b2Vec2(currentPos.x, currentPos.y), 0);
 			}
-			else {
-				reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetAwake(true);
-				currentPos = (current->opened ? current->endPos : current->startPos);
-				current->changing = false;
-			}
-			reg->get<PhysicsBody>(current->entity).GetBody()->SetTransform(b2Vec2(currentPos.x, currentPos.y), 0);
 		}
 	}
 }
