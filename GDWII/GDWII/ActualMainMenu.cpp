@@ -115,6 +115,7 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 	}
 
 }
+bool cameraSpan = false;
 
 void ActualMainMenu::Update()
 {
@@ -154,6 +155,13 @@ void ActualMainMenu::Update()
 		m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
 		break;
 	}
+	//update for camera movement.
+	if (cameraSpan)
+	{
+		lerpCamera();
+	}
+
+
 }
 
 //Mouse click on menu buttons
@@ -323,17 +331,7 @@ void ActualMainMenu::menuSelected()
 	if (index == 1)
 	{
 		std::cout << "lol\n";
-
-
-		float posX = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPositionX();
-		while (m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPositionX() < 1251)
-		{
-			posX++;
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetPositionX(posX);
-		}
-
-
-
+		cameraSpan = true;
 	}
 	else if (index == 2)
 	{
@@ -347,6 +345,25 @@ void ActualMainMenu::menuSelected()
 		index = 2;
 	}
 	reset = false;
+}
+
+//Camera spanning code, required for camera movement on credits button click
+float speed = 100.f;
+void ActualMainMenu::lerpCamera()
+{
+	float acceleration = 25.f;
+	float currentPos = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPositionX() + speed;
+	float finalPos = 1250.f;
+	if (m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPositionX() < finalPos)
+	{
+		speed += (currentPos < (finalPos / 2) ? acceleration * Timer::deltaTime : -acceleration * Timer::deltaTime);
+		m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetPosition(currentPos, 0, 0);
+		if (currentPos > finalPos)
+		{
+			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetPosition(finalPos, 0, 0);
+			cameraSpan = false;
+		}
+	}
 }
 //Tests if mouse is on button
 bool ActualMainMenu::positionTesting(int entity, vec2 otherPos)
