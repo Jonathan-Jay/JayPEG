@@ -28,7 +28,7 @@ Game::~Game()
 void Game::InitGame()
 {
 	//Initializes the backend with window width and height values
-	BackEnd::InitBackEnd(1500.f, 450.f);
+	BackEnd::InitBackEnd(800.f, 450.f);
 
 	//Grabs the initialized window
 	m_window = BackEnd::GetWindow();
@@ -42,7 +42,7 @@ void Game::InitGame()
 	m_activeScene = m_scenes[0];
 
 	m_activeScene->InitScene(float(BackEnd::GetWindowWidth()), float(BackEnd::GetWindowHeight()));
-	m_window->SetFullscreen(1);
+	//m_window->SetFullscreen(1);
 
 
 
@@ -239,7 +239,7 @@ void Game::KeyboardDown()
 
 	if (Input::GetKeyDown(Key::F)) {
 		if (m_window->GetFullscreen()) {
-			m_window->SetWindowSize(1152, 648);
+			m_window->SetWindowSize(1366, 768);
 			m_window->SetFullscreen(0);
 			m_window->SetWindowResizable(false);
 		}

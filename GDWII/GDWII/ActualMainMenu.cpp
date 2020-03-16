@@ -267,6 +267,7 @@ void ActualMainMenu::GamepadStick(XInputController* con)
 	}
 	else 
 	{
+		//makes sure that the analog stick is reset before setting reset to true (which then allows for another change)
 		if (sticks[0].x > -0.75f && sticks[0].x < 0.75f  && sticks[1].x > -0.75f && sticks[1].x < 0.75f && 
 			con->IsButtonReleased(Buttons::DPAD_LEFT) && con->IsButtonReleased(Buttons::DPAD_RIGHT) &&
 			con->IsButtonReleased(Buttons::A) && con->IsButtonReleased(Buttons::B))
@@ -322,6 +323,17 @@ void ActualMainMenu::menuSelected()
 	if (index == 1)
 	{
 		std::cout << "lol\n";
+
+
+		float posX = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPositionX();
+		while (m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPositionX() < 1251)
+		{
+			posX++;
+			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetPositionX(posX);
+		}
+
+
+
 	}
 	else if (index == 2)
 	{
