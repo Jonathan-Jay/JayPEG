@@ -156,6 +156,18 @@ float vec3::GetMagnitude()
 	return float(sqrt((x * x) + (y * y) + (z * z)));
 }
 
+float vec3::GetMagnitude2D()
+{
+	return vec2(x, y).GetMagnitude();
+}
+
+vec3 vec3::Normalize2D()
+{
+	vec2 temp(x, y);
+	temp = temp.Normalize();
+	return vec3(temp.x, temp.y, z);
+}
+
 float vec3::operator[](int i)
 {
 	//Indexes the variables at i

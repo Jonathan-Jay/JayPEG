@@ -3,6 +3,7 @@
 
 #include "missile.h"
 #include "collectibles.h"
+#include "door.h"
 #include <iomanip>
 
 class Level1 : public Scene
@@ -37,7 +38,6 @@ private:
 	std::vector<unsigned int> uiElements = {};
 
 	//variables used by the engine
-
 	bool onGround = false;
 	bool canJump = true;
 	bool controllerInput = false;
@@ -80,6 +80,9 @@ private:
 	float minJumpStrength = 50.f;
 	float maxJumpStrength = 75.f;
 	float jumpIncrementPerSec = 125.f;
+
+	//doors
+	Door bossDoor;
 };
 
 #endif // !__LVL1__

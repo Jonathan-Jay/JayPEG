@@ -12,6 +12,7 @@ unsigned int EntityIdentifier::m_horiScrollCameraBit= 0x100000;
 unsigned int EntityIdentifier::m_vertScrollCameraBit= 0x1000000;
 unsigned int EntityIdentifier::m_enemyBit			= 0x2;
 unsigned int EntityIdentifier::m_playerBit			= 0x20;
+unsigned int EntityIdentifier::m_doorBit			= 0x200;
 
 //(having just camera means the bit = 1)
 //(having sprite, animation and transform)
@@ -121,6 +122,11 @@ unsigned int EntityIdentifier::EnemyBit() {
 unsigned int EntityIdentifier::PlayerBit()
 {
 	return m_playerBit;
+}
+
+unsigned int EntityIdentifier::DoorBit()
+{
+	return m_doorBit;
 }
 
 void EntityIdentifier::MainPlayer(unsigned int entity)

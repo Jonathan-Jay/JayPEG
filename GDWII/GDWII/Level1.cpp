@@ -334,6 +334,8 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 
+	bossDoor.Init(m_physicsWorld, vec3(-1035, -785, 50), vec3(-1038, -560, 50), 50, 230, "png.jpg", 100);
+
 }
 
 void Level1::GamepadStick(XInputController* con)
@@ -550,6 +552,10 @@ void Level1::KeyboardDown()
 		std::exit(NULL);
 	}
 
+	if (Input::GetKeyDown(Key::U)) {
+		bossDoor.changeState();
+	}
+
 	/*
 	b2Vec2 velo = { 0,0 };
 	if (Input::GetKey(Key::W)) {
@@ -729,6 +735,7 @@ void Level1::Update()
 	Bullets::updateAllBullets(m_sceneReg);
 	Enemies::UpdateEnemies(m_sceneReg);
 	itemCount += Collectibles::testAllCollectibles(m_sceneReg, playerWidth / 2.f, playerHeight / 2.f);
+	Door::update(m_sceneReg);
 
 	//has to run after everything since camera can move in other updates
 	UpdateUI();
