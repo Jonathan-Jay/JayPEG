@@ -260,7 +260,7 @@ b2Vec2 Enemy::EnemyRaycast(b2Vec2 p1, b2Vec2 p2, bool onlyStatic) {
 	return p1 + closestFraction * (p2 - p1);
 }
 
-void Enemies::CreateEnemy(b2World* m_physicsWorld, EnemyTypes m_type, float x, float y) {
+unsigned int Enemies::CreateEnemy(b2World* m_physicsWorld, EnemyTypes m_type, float x, float y) {
 	if (m_phyWorld == nullptr)
 		m_phyWorld = m_physicsWorld;
 
@@ -332,6 +332,8 @@ void Enemies::CreateEnemy(b2World* m_physicsWorld, EnemyTypes m_type, float x, f
 	ECS::SetUpIdentifier(entity, bitHolder, "enemy");
 
 	enemies.push_back(enemyList{entity});
+
+	return entity;
 }
 
 void Enemies::UpdateEnemies(entt::registry* m_reg) {

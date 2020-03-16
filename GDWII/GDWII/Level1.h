@@ -83,6 +83,8 @@ private:
 
 	//doors
 	Door bossDoor;
+	Door bossRoomDoor;
+	Door tempPlatform;
 };
 
 #endif // !__LVL1__

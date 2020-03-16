@@ -160,6 +160,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		tempPhsBody = PhysicsBody(tempBody, playerWidth, playerHeight, vec2(0, 0), true, CollisionIDs::Player, 0x999999);
 
 		tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
+		tempPhsBody.GetBody()->SetUserData((void*)entity);
 
 		ECS::GetComponent<Player>(entity).reset(maxHP, maxNRG, EnergyRegenPerSec);
 
@@ -295,6 +296,16 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 	CreateUI();
 
+	tempPlatform.Init(m_physicsWorld, vec3(-135, 183, 50), vec3(584, 209, 50), 100, 10, "png.jpg", 200);
+	tempPlatform.isBouncy();
+
+	bossRoomDoor.Init(m_physicsWorld, vec3(-1038, -560, 50), vec3(-1035, -785, 50), 50, 230, "png.jpg", 100);
+	bossRoomDoor.isAABB(vec2(-1900, -1220), vec2(-1046, -646));
+
+	bossDoor.Init(m_physicsWorld, vec3(-1890, -1150, 50), vec3(-1890, -1050, 50), 30, 100, "png.jpg", 100);
+	bossDoor.isEntityTrigger(
+		Collectibles::CreateCollectible(vec3(-1815, -1170, 50.f), 30, 30, CollectiblesType::RegenUp)
+	);
 	for (size_t i = 0; i < 2; i++) {	
 		Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 270, -280);
 		Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 270, -280);
@@ -333,8 +344,6 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Missiles::setDamage(missileDamage);
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
-
-	bossDoor.Init(m_physicsWorld, vec3(-1035, -785, 50), vec3(-1038, -560, 50), 50, 230, "png.jpg", 100);
 
 }
 

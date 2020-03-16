@@ -4,7 +4,7 @@ std::vector<std::vector<CollectiblesData>> Collectibles::list = { };
 float Collectibles::regenStationCounter = 0;
 float Collectibles::regenDelay = 0.25f;
 
-void Collectibles::CreateCollectible(vec3 position, float width, float height, CollectiblesType type)
+unsigned int Collectibles::CreateCollectible(vec3 position, float width, float height, CollectiblesType type)
 {
 	auto entity = ECS::CreateEntity();
 
@@ -79,6 +79,8 @@ void Collectibles::CreateCollectible(vec3 position, float width, float height, C
 	//fix camera focus (focus breaks when entities are spawned)
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
+
+	return entity;
 }
 
 int Collectibles::testAllCollectibles(entt::registry* reg, float halfOfPlayerWidth, float halfOfPlayerHeight)
