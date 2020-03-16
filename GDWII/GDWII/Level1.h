@@ -37,6 +37,7 @@ private:
 	std::vector<unsigned int> uiElements = {};
 
 	//variables used by the engine
+
 	bool onGround = false;
 	bool canJump = true;
 	bool controllerInput = false;

@@ -18,8 +18,10 @@ public:
 private:
 	void rightOnMenu();
 	void leftOnMenu();
-	void menuSelected();
+	//returns true if nothing selected
+	bool menuSelected();
 	bool positionTesting(int entity, vec2 otherPos);
+
 	int index = 2;
 	bool clickedPlay = false;
 	//so it only moves one at a time, instead of an entire section

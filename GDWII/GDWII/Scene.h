@@ -4,8 +4,8 @@
 #include "JSON.h"
 #include "ECS.h"
 #include "Xinput.h"
+#include "GPCSound.h"
 #include <SDL2/SDL.h>
-
 
 class Scene
 {
@@ -76,6 +76,8 @@ protected:
 
 	entt::registry* m_sceneReg = nullptr;	
 	std::string m_name = "Default Name";
+
+	std::vector<Sound2D> m_soundEffects = {};
 };
 
 #ifndef __SCENEJSON_H__

@@ -115,6 +115,8 @@ int Collectibles::testAllCollectibles(entt::registry* reg, float halfOfPlayerWid
 					if ((playerPos.x < itemPos.x + halfOfWidth - halfOfPlayerWidth) && (playerPos.x > itemPos.x - halfOfWidth + halfOfPlayerWidth) &&
 						(playerPos.y < itemPos.y + halfOfHeight + halfOfPlayerHeight) && (playerPos.y > itemPos.y - halfOfHeight - halfOfPlayerHeight)) {
 
+						Sound2D("snake.mp3", "sounds").play();
+
 						//regen health and reset timer
 						reg->get<Player>(EntityIdentifier::MainPlayer()).addCurrentHealth(1);
 						regenStationCounter = regenDelay;
@@ -126,6 +128,9 @@ int Collectibles::testAllCollectibles(entt::registry* reg, float halfOfPlayerWid
 
 				//give player item
 				auto& playerData = reg->get<Player>(EntityIdentifier::MainPlayer());
+
+				Sound2D("snake.mp3", "sounds").play();
+
 				switch (list[yList][x].type) {
 				case CollectiblesType::Missile:
 					playerData.getMissile(true);

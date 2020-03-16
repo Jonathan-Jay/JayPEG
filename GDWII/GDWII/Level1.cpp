@@ -5,6 +5,11 @@ Level1::Level1(std::string name)
 {
 	m_gravity = b2Vec2(float32(0.f), float32(-20.f));
 	m_physicsWorld->SetGravity(m_gravity);
+
+	//sounds
+	m_soundEffects.push_back({ "Rabi-Ribi.mp3", "sounds" });	//0
+	m_soundEffects.push_back({ "nep.wav", "sounds" });			//1
+	m_soundEffects.push_back({ "snake.mp3", "sounds" });		//2
 }
 
 void Level1::InitScene(float windowWidth, float windowHeight)
@@ -329,6 +334,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Missiles::setDamage(missileDamage);
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
+
 }
 
 void Level1::GamepadStick(XInputController* con)
@@ -565,6 +571,9 @@ void Level1::KeyboardDown()
 
 void Level1::Update()
 {
+	if (!m_soundEffects[0].isPlaying())
+		m_soundEffects[0].play();
+
 	//update scene Data
 	UpdateCounters();
 	if (onGround = Grounded())	canJump = true;
@@ -613,6 +622,7 @@ void Level1::Update()
 	//only shoot when both weapons are ready
 	if (gunActive) {
 		if (gunDelay == 0.f) {
+			m_soundEffects[1].play();
 			if (crouching) {
 				//remove tag to make force horizontal
 				facingUp = false;
@@ -657,6 +667,7 @@ void Level1::Update()
 		//missiles only spawn when delay is 1 (ready to use) and you have enough NRG
 		if (gunDelay == 0.f && missileDelay == 0.f && m_sceneReg->get<Player>(EntityIdentifier::MainPlayer()).getMissile()) {
 			if (m_sceneReg->get<Player>(EntityIdentifier::MainPlayer()).subCurrentEnergy(missileCost)) {
+				m_soundEffects[2].play();
 				if (crouching) {
 					//remove tag to make force horizontal
 					facingUp = false;

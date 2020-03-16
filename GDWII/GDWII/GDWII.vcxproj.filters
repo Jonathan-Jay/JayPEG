@@ -186,6 +186,9 @@
     <ClInclude Include="ActualMainMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\GPCSound.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AnimationController.cpp">
@@ -354,6 +357,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ActualMainMenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\GPCSound.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

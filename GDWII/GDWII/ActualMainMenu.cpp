@@ -3,7 +3,9 @@
 ActualMainMenu::ActualMainMenu(std::string name)
 	:Scene(name)
 {
-
+	//sounds
+	m_soundEffects.push_back({ "Megaman.wav", "sounds" });
+	m_soundEffects.push_back({ "nep.wav", "sounds" });
 }
 
 void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
@@ -118,6 +120,9 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 void ActualMainMenu::Update()
 {
+	if (!m_soundEffects[0].isPlaying())
+		m_soundEffects[0].play();
+
 	if (wait == 1) {
 		if (Input::GetKeyDown(Key::LeftArrow))
 		{
@@ -129,7 +134,8 @@ void ActualMainMenu::Update()
 		}
 		if (Input::GetKeyDown(Key::Z) || Input::GetKeyDown(Key::Space) || Input::GetKeyDown(Key::Enter))
 		{
-			menuSelected();
+			if (menuSelected())
+				index = 2;
 		}
 
 		switch (index) {
@@ -263,7 +269,8 @@ void ActualMainMenu::GamepadStick(XInputController* con)
 		//BUTTON PRESSES
 		if (con->IsButtonPressed(Buttons::A))
 		{
-			menuSelected();
+			if (menuSelected())
+				index = 2;
 		}
 		if (con->IsButtonPressed(Buttons::B))
 		{
@@ -288,6 +295,7 @@ int ActualMainMenu::ChangeScene()
 		if (wait < 0) {
 			wait = 1.f;
 			clickedPlay = false;
+			m_soundEffects[0].stop();
 			return 1;
 		}
 		if (wait < 0.05) {
@@ -329,8 +337,10 @@ void ActualMainMenu::leftOnMenu()
 	}
 	reset = false;															
 }
-void ActualMainMenu::menuSelected()
+bool ActualMainMenu::menuSelected()
 {
+	bool temp = false;
+	m_soundEffects[1].play();
 	if (index == 1)
 	{
 		std::cout << "lol\n";
@@ -344,9 +354,11 @@ void ActualMainMenu::menuSelected()
 		std::exit(NULL);
 	}
 	else {
-		index = 2;
+		temp = true;
 	}
 	reset = false;
+
+	return temp;
 }
 //Tests if mouse is on button
 bool ActualMainMenu::positionTesting(int entity, vec2 otherPos)
