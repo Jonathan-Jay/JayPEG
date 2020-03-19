@@ -78,7 +78,7 @@ public:
 	static float GetSightRefreshTime() { return sightRefreshTime; }
 	static b2World* GetPhysicsWorld() { return m_phyWorld; }
 
-	static void reset() { enemies.resize(0); }
+	static void reset(b2World* physWorld) { m_phyWorld = physWorld;	enemies.resize(0); }
 	
 private:
 	static std::vector<enemyList> enemies;

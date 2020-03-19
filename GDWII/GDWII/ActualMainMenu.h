@@ -24,11 +24,15 @@ private:
 	bool menuSelected();
 	void lerpCamera();
 	bool positionTesting(int entity, vec2 otherPos);
+	bool cameraSpan = false;
+	bool onCredits = false;
 
-	int index = 2;
+	int index = 0;
 	bool clickedPlay = false;
 	//so it only moves one at a time, instead of an entire section
 	bool reset = true;
+	bool bouncingRight = false;
+	float counter = 0;
 	float wait = 1.f;
 	vec2 mousePos = { 0, 0 };
 };

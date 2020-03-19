@@ -298,7 +298,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 	Door::reset();
 	Collectibles::reset();
-	Enemies::reset();
+	Enemies::reset(m_physicsWorld);
 	Missiles::reset();
 	Bullets::reset();
 
@@ -447,6 +447,10 @@ void Level1::GamepadStick(XInputController* con)
 		if (con->IsButtonReleased(Buttons::B))
 			missileShot = false;
 	}
+
+	if (con->IsButtonPressed(Buttons::SELECT)) {
+		exiting = true;
+	}
 }
 
 void Level1::MouseClick(SDL_MouseButtonEvent evnt)
@@ -580,6 +584,10 @@ void Level1::KeyboardDown()
 	}
 	m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(velo);
 	*/
+
+	if (Input::GetKeyDown(Key::Escape)) {
+		exiting = true;
+	}
 }
 
 void Level1::Update()
@@ -781,7 +789,8 @@ void Level1::Update()
 }
 int Level1::ChangeScene()
 {
-	if (Input::GetKeyDown(Key::Escape)) {
+	if (exiting) {
+		exiting = false;
 		return 0;
 	}
 	return -1;

@@ -48,6 +48,7 @@ private:
 	bool facingUp = false;
 	bool facingDown = false;
 	bool crouching = false;
+	bool exiting = false;
 	float jumpHeight = 0;
 	float gunDelay = 0;
 	float missileDelay = 0;

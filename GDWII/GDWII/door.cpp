@@ -81,7 +81,7 @@ void Door::update(entt::registry *reg)
 				currentPos.x > playerPos.x - 750) {
 
 				vec3 change = (current->opened ? current->endPos : current->startPos) - currentPos;
-				if (change.GetMagnitude2D() > 1) {
+				if (change.GetMagnitude2D() > 3) {
 					change = change.Normalize2D() * ((Timer::deltaTime < 1 ? Timer::deltaTime : 1) * current->speed);
 					currentPos = currentPos + change;
 					for (b2ContactEdge* edge = reg->get<PhysicsBody>(m_list[x].entity).GetBody()->GetContactList(); edge; edge = edge->next) {

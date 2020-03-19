@@ -261,8 +261,6 @@ b2Vec2 Enemy::EnemyRaycast(b2Vec2 p1, b2Vec2 p2, bool onlyStatic) {
 }
 
 unsigned int Enemies::CreateEnemy(b2World* m_physicsWorld, EnemyTypes m_type, float x, float y) {
-	if (m_phyWorld == nullptr)
-		m_phyWorld = m_physicsWorld;
 
 	auto entity = ECS::CreateEntity();
 
