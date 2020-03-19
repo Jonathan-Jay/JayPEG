@@ -2,6 +2,8 @@
 #define __ACTUALMM__
 
 #include "EntityManager.h"
+#include <cmath>
+
 
 class ActualMainMenu : public Scene 
 {
@@ -20,6 +22,7 @@ private:
 	void leftOnMenu();
 	//returns true if nothing selected
 	bool menuSelected();
+	void lerpCamera();
 	bool positionTesting(int entity, vec2 otherPos);
 
 	int index = 2;
