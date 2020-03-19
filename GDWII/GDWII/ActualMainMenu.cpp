@@ -11,6 +11,7 @@ ActualMainMenu::ActualMainMenu(std::string name)
 void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 {
 	m_sceneReg = new entt::registry;
+	m_physicsWorld = new b2World(m_gravity);
 
 	ECS::AttachRegister(m_sceneReg);
 
@@ -55,7 +56,7 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 		std::string filename = "TitleCard.png";
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 615*1.5, 85*1.5, false);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 1220 * 0.75, 170 * 0.75, false);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 50.f, 2.f));
 
@@ -72,7 +73,7 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 		std::string filename = "StartText.png";
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 560/2, 130/2, false);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 610 / 2, 170 / 2, false);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, -133.f, 2.f));
 
@@ -89,7 +90,7 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 		std::string filename = "CreditsText.png";
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 740/2, 130/2, false);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 780 / 2, 170 / 2, false);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(-325.f, -133.f, 2.f));
 
@@ -106,7 +107,7 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 		std::string filename = "QuitText.png";
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 430/2, 150/2, false);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 470 / 2, 170 / 2, false);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(325.f, -133.f, 2.f));
 

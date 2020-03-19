@@ -58,11 +58,11 @@ unsigned int Collectibles::CreateCollectible(vec3 position, float width, float h
 
 	animController.AddAnimation(Animation());
 	auto& anim = animController.GetAnimation(0);
-	for (int x(0); x < 2; x++) {
-		anim.AddFrame(vec2((x == 0 ? 0 : 2000), 2000), vec2((x == 0 ? 2000 : 0), 0));
+	for (int x(0); x < 4; x++) {
+		anim.AddFrame(vec2(0, 80 * (x + 1) - 1), vec2(79, 80 * x));
 	}
 	anim.SetRepeating(true);
-	anim.SetSecPerFrame(0.5f);
+	anim.SetSecPerFrame(0.1f);
 	animController.SetActiveAnim(0);
 
 	ECS::GetComponent<Sprite>(entity).LoadSprite(filename, width, height, true, &animController);

@@ -53,6 +53,8 @@ public:
 
 	static void update(entt::registry *reg);
 
+	static void reset() { m_list.resize(0); }
+
 private:
 	static std::vector<doorData> m_list;
 	static float m_halfPlayerWidth;

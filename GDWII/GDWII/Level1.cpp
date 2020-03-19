@@ -4,7 +4,6 @@ Level1::Level1(std::string name)
 	: Scene(name)
 {
 	m_gravity = b2Vec2(float32(0.f), float32(-20.f));
-	m_physicsWorld->SetGravity(m_gravity);
 
 	//sounds
 	m_soundEffects.push_back({ "Rabi-Ribi.mp3", "sounds" });	//0
@@ -15,6 +14,7 @@ Level1::Level1(std::string name)
 void Level1::InitScene(float windowWidth, float windowHeight)
 {
 	m_sceneReg = new entt::registry;
+	m_physicsWorld = new b2World(m_gravity);
 
 	ECS::AttachRegister(m_sceneReg);
 
@@ -92,7 +92,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 
 		//all animations will be equally seperated in the y, their opposite direction is done by flipping corner x values
-		for (int y(1); y <= 2; y++) {
+		for (int y(1); y <= 1; y++) {
 			animController.AddAnimation(Animation());
 			animController.AddAnimation(Animation());
 
@@ -100,7 +100,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 			bool pingPong = false;
 			switch (y) {
 			case 1:
-				frameCount = 12;
+				frameCount = 20;
 				pingPong = true;
 				break;
 			case 2:
@@ -115,14 +115,14 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 				for (int x(1); x <= frameCount; x++) {
 					if (pingPong) {
 						if ((frameCount / 2 + 2) <= x) {
-							anim.AddFrame(vec2(250 * (frameCount - x + 2), 250 * y), vec2(250 * (frameCount - x + 1), 250 * (y - 1)));
+							anim.AddFrame(vec2(250 * (frameCount - x + 2), 250 * y - 1), vec2(250 * (frameCount - x + 1) - 1, 250 * (y - 1)));
 							continue;
 						}
 					}
-					anim.AddFrame(vec2(250 * x, 250 * y), vec2(250 * (x - 1), 250 * (y - 1)));
+					anim.AddFrame(vec2(250 * x, 250 * y - 1), vec2(250 * (x - 1) - 1, 250 * (y - 1)));
 				}
 				anim.SetRepeating(true);
-				anim.SetSecPerFrame(0.1f);
+				anim.SetSecPerFrame(0.04f);
 			}
 
 			{	//animation for right facing
@@ -130,19 +130,19 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 				for (int x(1); x <= frameCount; x++) {
 					if (pingPong) {
 						if ((frameCount / 2 + 2) <= x) {
-							anim.AddFrame(vec2(250 * (frameCount - x + 1 ), 250 * y), vec2(250 * (frameCount - x + 2), 250 * (y - 1)));
+							anim.AddFrame(vec2(250 * (frameCount - x + 1 ), 250 * y - 1), vec2(250 * (frameCount - x + 2) - 1, 250 * (y - 1)));
 							continue;
 						}
 					}
-					anim.AddFrame(vec2(250 * (x - 1), 250 * y), vec2(250 * x, 250 * (y - 1)));
+					anim.AddFrame(vec2(250 * (x - 1), 250 * y - 1), vec2(250 * x - 1, 250 * (y - 1)));
 				}
 				anim.SetRepeating(true);
-				anim.SetSecPerFrame(0.1f);
+				anim.SetSecPerFrame(0.04f);
 			}
 		}
 		animController.SetActiveAnim(0);
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, playerHeight + 1, playerHeight + 1, true, &animController);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, playerHeight + 2, playerHeight + 2, true, &animController);
 
 		//-1243, -186
 		ECS::GetComponent<Transform>(entity).SetPosition(playerPos);
@@ -296,6 +296,12 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 	CreateUI();
 
+	Door::reset();
+	Collectibles::reset();
+	Enemies::reset();
+	Missiles::reset();
+	Bullets::reset();
+
 	tempPlatform.Init(m_physicsWorld, vec3(-135, 183, 50), vec3(584, 209, 50), 100, 10, "png.jpg", 200);
 	tempPlatform.isBouncy();
 
@@ -306,6 +312,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	bossDoor.isEntityTrigger(
 		Collectibles::CreateCollectible(vec3(-1815, -1170, 50.f), 30, 30, CollectiblesType::RegenUp)
 	);
+
 	for (size_t i = 0; i < 2; i++) {	
 		Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 270, -280);
 		Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 270, -280);
@@ -557,10 +564,6 @@ void Level1::KeyboardDown()
 		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
 	}
 
-	if (Input::GetKeyDown(Key::Escape)) {
-		std::exit(NULL);
-	}
-
 	/*
 	b2Vec2 velo = { 0,0 };
 	if (Input::GetKey(Key::W)) {
@@ -748,13 +751,11 @@ void Level1::Update()
 	/*Animations:
 	0: left
 	1: right
-	2: crouching left
-	3: crouching right
 	first check if grounded*/
 
 	if (onGround) {	//ground/standing animation
 		//check if crouching, then moving, then idle (crouch won't change if you move)
-		if (crouching)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(2 + movingRight);
+		if (crouching)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
 		//if moving
 		else if (m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity().x != 0) {
 			//walking while aiming up
@@ -777,6 +778,13 @@ void Level1::Update()
 		//aiing left-right
 		else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
 	}
+}
+int Level1::ChangeScene()
+{
+	if (Input::GetKeyDown(Key::Escape)) {
+		return 0;
+	}
+	return -1;
 }
 
 bool Level1::Grounded()
@@ -973,6 +981,7 @@ void Level1::UpdateUI()
 
 void Level1::CreateUI()
 {
+	uiElements.resize(0);
 	/*summon all ui elements here
 	ui Elements according to index in vector:
 	0: background

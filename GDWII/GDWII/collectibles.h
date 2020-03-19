@@ -29,6 +29,8 @@ public:
 	//update function
 	static int testAllCollectibles(entt::registry* reg, float halfOfPlayerWidth, float halfOfPlayerHeight);
 
+	static void reset() { list.resize(0); }
+
 private:
 	static std::vector<std::vector<CollectiblesData>> list;
 	static float regenStationCounter;

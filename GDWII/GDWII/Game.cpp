@@ -51,6 +51,7 @@ void Game::InitGame()
 	m_activeScene = m_scenes[0];
 
 	m_activeScene->InitScene(float(BackEnd::GetWindowWidth()), float(BackEnd::GetWindowHeight()));
+	m_scenes[1]->InitScene(float(BackEnd::GetWindowWidth()), float(BackEnd::GetWindowHeight()));
 
 
 
@@ -101,7 +102,6 @@ bool Game::Run()
 
 		unsigned int index = m_activeScene->ChangeScene();
 		if (index != -1) {
-			m_activeScene->Unload();
 			m_activeScene = m_scenes[index];
 			m_activeScene->Unload();
 			m_activeScene->InitScene(BackEnd::GetWindowWidth(), BackEnd::GetWindowHeight());

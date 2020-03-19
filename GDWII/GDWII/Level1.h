@@ -16,7 +16,7 @@ public:
 	void KeyboardDown() override;
 	void Update() override;
 
-
+	int ChangeScene() override;
 
 	//delete
 	std::vector<float> xPos = {};
@@ -69,8 +69,8 @@ private:
 	float recoilCooldown = 0.5f;
 
 	//player related variables (max 99 for HP and NRG please)
-	int itemCount = 1;		//how many do you start with (increase when you spawn a item)
-	int totalItems = 5;		//how many in total (including starting amount)
+	int itemCount = 0;		//how many do you start with (increase when you spawn a item)
+	int totalItems = 4;		//how many in total (including starting amount)
 	int maxHP = 10;
 	int maxNRG = 10;
 	float EnergyRegenPerSec = 1.f;
