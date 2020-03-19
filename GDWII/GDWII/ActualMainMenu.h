@@ -21,7 +21,7 @@ private:
 	void rightOnMenu();
 	void leftOnMenu();
 	void menuSelected();
-	void lerpCamera();
+	void lerpCamera(float, float);
 	bool positionTesting(int entity, vec2 otherPos);
 	int index = 2;
 	bool clickedPlay = false;

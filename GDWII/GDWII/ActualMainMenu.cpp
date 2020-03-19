@@ -116,6 +116,8 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 }
 bool cameraSpan = false;
+float moveAmount = 0;
+float accell = 0;
 
 void ActualMainMenu::Update()
 {
@@ -158,7 +160,12 @@ void ActualMainMenu::Update()
 	//update for camera movement.
 	if (cameraSpan)
 	{
-		lerpCamera();
+		lerpCamera(moveAmount, accell);
+	}
+	//if the button to start has been pressed
+	if (m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPositionX() <= -1250)
+	{
+		clickedPlay = true;
 	}
 
 
@@ -331,11 +338,16 @@ void ActualMainMenu::menuSelected()
 	if (index == 1)
 	{
 		std::cout << "lol\n";
+		moveAmount = 1250.f;
+		accell = 25.f;
 		cameraSpan = true;
 	}
 	else if (index == 2)
 	{
-		clickedPlay = true;
+		moveAmount = -1250.f;
+		accell = 25.f;
+		cameraSpan = true;
+
 	}
 	else if (index == 3)
 	{
@@ -349,19 +361,31 @@ void ActualMainMenu::menuSelected()
 
 //Camera spanning code, required for camera movement on credits button click
 float speed = 100.f;
-void ActualMainMenu::lerpCamera()
+void ActualMainMenu::lerpCamera(float endPosition, float accel)
 {
-	float acceleration = 25.f;
+	float acceleration = accel;
 	float currentPos = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPositionX() + speed;
-	float finalPos = 1250.f;
-	if (m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPositionX() < finalPos)
+	float finalPos = endPosition;
+	if (m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPositionX() != finalPos)
 	{
-		speed += (currentPos < (finalPos / 2) ? acceleration * Timer::deltaTime : -acceleration * Timer::deltaTime);
 		m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetPosition(currentPos, 0, 0);
-		if (currentPos > finalPos)
+		//so that the camera can go in either direction
+		if (finalPos > 0)
 		{
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetPosition(finalPos, 0, 0);
-			cameraSpan = false;
+			speed += (currentPos < (finalPos / 2) ? acceleration * Timer::deltaTime : -acceleration * Timer::deltaTime);
+			if (currentPos > finalPos)
+			{
+				m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetPosition(finalPos, 0, 0);
+				cameraSpan = false;
+			}
+		}
+		else 
+		{
+			if (currentPos < finalPos)
+			{
+				m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetPosition(finalPos, 0, 0);
+				cameraSpan = false;
+			}
 		}
 	}
 }
