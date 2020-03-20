@@ -27,7 +27,7 @@ unsigned int Collectibles::CreateCollectible(vec3 position, float width, float h
 		itemType = "HPUp";
 		break;
 	case CollectiblesType::RegenStation:
-		itemType = "HPRegen";
+		itemType = "RegenStation";
 		break;
 	}
 
@@ -58,8 +58,11 @@ unsigned int Collectibles::CreateCollectible(vec3 position, float width, float h
 
 	animController.AddAnimation(Animation());
 	auto& anim = animController.GetAnimation(0);
-	for (int x(0); x < 4; x++) {
-		anim.AddFrame(vec2(0, 80 * (x + 1) - 1), vec2(79, 80 * x));
+	for (int x(0); x < 8; x++) {
+		if (type == CollectiblesType::RegenStation)
+			anim.AddFrame(vec2(0, 80 * (x + 1) - 1), vec2(319, 80 * x));
+		else
+			anim.AddFrame(vec2(0, 80 * (x + 1) - 1), vec2(79, 80 * x));
 	}
 	anim.SetRepeating(true);
 	anim.SetSecPerFrame(0.1f);

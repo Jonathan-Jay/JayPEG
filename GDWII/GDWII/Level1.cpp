@@ -163,6 +163,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		tempPhsBody.GetBody()->SetUserData((void*)entity);
 
 		ECS::GetComponent<Player>(entity).reset(maxHP, maxNRG, EnergyRegenPerSec);
+		itemCount = 0;
 
 		unsigned int bitHolder = EntityIdentifier::AnimationBit() | EntityIdentifier::SpriteBit()
 			| EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit() | EntityIdentifier::PlayerBit();
@@ -337,18 +338,18 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 	Collectibles::CreateCollectible(vec3(-1286, 1233, 50.f), 30, 30, CollectiblesType::RegenUp);
 	Collectibles::CreateCollectible(vec3(212, 870, 50.f), 30, 30, CollectiblesType::BulletStrengthUp);
-	Collectibles::CreateCollectible(vec3(1011, 290, 50), 30, 30, CollectiblesType::Missile);
+	Collectibles::CreateCollectible(vec3(1011, 290, 50), 20, 20, CollectiblesType::Missile);
 	Collectibles::CreateCollectible(vec3(1502, -1325, 50), 30, 30, CollectiblesType::HPUp);
 
-	Collectibles::CreateCollectible(vec3(-1415, 270, 50.f), 60, 15, CollectiblesType::RegenStation);
-	Collectibles::CreateCollectible(vec3(-116, -842, 50.f), 60, 15, CollectiblesType::RegenStation);
-	Collectibles::CreateCollectible(vec3(1710, 1170, 50.f), 60, 15, CollectiblesType::RegenStation);
+	Collectibles::CreateCollectible(vec3(-1415, 270, 25.f), 60, 15, CollectiblesType::RegenStation);
+	Collectibles::CreateCollectible(vec3(-116, -842, 25.f), 60, 15, CollectiblesType::RegenStation);
+	Collectibles::CreateCollectible(vec3(1710, 1170, 25.f), 60, 15, CollectiblesType::RegenStation);
 
 	//summon bullets to load sprite
-	Bullets::CreateBullet(m_sceneReg, m_physicsWorld, b2Vec2(playerPos.x - 1000, playerPos.y), b2Vec2(0, 0), 0, CollisionIDs::Player);
-	Missiles::CreateMissile(m_sceneReg, m_physicsWorld, b2Vec2(playerPos.x - 1000, playerPos.y), b2Vec2(0, 0), 0);
 	Bullets::setDamage(bulletDamage);
 	Missiles::setDamage(missileDamage);
+	Bullets::CreateBullet(m_sceneReg, m_physicsWorld, b2Vec2(playerPos.x - 1000, playerPos.y), b2Vec2(0, 0), 0, CollisionIDs::Player);
+	Missiles::CreateMissile(m_sceneReg, m_physicsWorld, b2Vec2(playerPos.x - 1000, playerPos.y), b2Vec2(0, 0), 0);
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 
@@ -1067,7 +1068,10 @@ void Level1::CreateUI()
 				for (unsigned int x(0); x < frameCount; x++) {
 					animController.AddAnimation(Animation());
 					auto& anim = animController.GetAnimation(x);
-					anim.AddFrame(vec2(0, 30 * (x + 1) - 1), vec2(28, 30 * x));
+					if (x == 0 && frameCount == 2)
+						anim.AddFrame(vec2(0, 0), vec2(0, 0));
+					else
+						anim.AddFrame(vec2(0, 30 * (x + 1) - 1), vec2(28, 30 * x));
 					anim.SetRepeating(false);
 					anim.SetSecPerFrame(0.1f);
 				}
