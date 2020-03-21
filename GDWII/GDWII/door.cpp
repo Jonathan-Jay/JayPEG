@@ -69,6 +69,8 @@ void Door::update(entt::registry *reg)
 		}
 
 		if (current->previousState != current->opened) {
+			if (current->type != 1)
+				Sound2D("snake.mp3", "sounds").play();
 			current->changing = true;
 			current->previousState = current->opened;
 		}

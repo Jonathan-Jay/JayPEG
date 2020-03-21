@@ -306,7 +306,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	tempPlatform.Init(m_physicsWorld, vec3(-135, 183, 50), vec3(584, 209, 50), 100, 10, "png.jpg", 200);
 	tempPlatform.isBouncy();
 
-	bossRoomDoor.Init(m_physicsWorld, vec3(-1038, -560, 50), vec3(-1035, -785, 50), 50, 230, "png.jpg", 100);
+	bossRoomDoor.Init(m_physicsWorld, vec3(-1038, -560, 50), vec3(-1035, -785, 50), 50, 230, "png.jpg", 300);
 	bossRoomDoor.isAABB(vec2(-1900, -1220), vec2(-1046, -646));
 
 	bossDoor.Init(m_physicsWorld, vec3(-1890, -1150, 50), vec3(-1890, -1050, 50), 30, 100, "png.jpg", 100);
@@ -688,7 +688,7 @@ void Level1::Update()
 		//missiles only spawn when delay is 1 (ready to use) and you have enough NRG
 		if (gunDelay == 0.f && missileDelay == 0.f && m_sceneReg->get<Player>(EntityIdentifier::MainPlayer()).getMissile()) {
 			if (m_sceneReg->get<Player>(EntityIdentifier::MainPlayer()).subCurrentEnergy(missileCost)) {
-				m_soundEffects[2].play();
+				m_soundEffects[1].play();
 				if (crouching) {
 					//remove tag to make force horizontal
 					facingUp = false;

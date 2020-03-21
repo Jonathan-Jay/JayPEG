@@ -1,5 +1,6 @@
 #pragma once
 #include "JSON.h"
+#include "GPCSound.h"
 
 class Player
 {
@@ -26,15 +27,12 @@ public:
 	int getCurrentHealth() const;
 	float getCurrentEnergy() const;
 
-	//adds an amount to the current health
-	void addCurrentHealth(unsigned int addHealth);
-	//adds an amount to the current energy
-	void addCurrentEnergy(float addEnergy);
+	//adds an amount to the current amount, returns true if successful
+	bool addCurrentHealth(unsigned int addHealth);
+	bool addCurrentEnergy(float addEnergy);
 
-	//substracts an amount of the current Health
-	void subCurrentHealth(unsigned int subHealth);
-
-	//Substracts an amount of the current Energy
+	//substracts an amount of the current amount, returns true if successful
+	bool subCurrentHealth(unsigned int subHealth);
 	bool subCurrentEnergy(float subEnergy);
 
 	//returns true if player is dead, false when alive

@@ -107,40 +107,40 @@ float Player::getCurrentEnergy() const
     return currentEnergy;
 }
 
-void Player::addCurrentHealth(unsigned int addHealth)
+bool Player::addCurrentHealth(unsigned int addHealth)
 {
-	if (currentHealth + addHealth >= maxHealth) //player cannot have more health than the maxhealth
-	{
-		currentHealth = maxHealth;
-	}
-	else //simply adds morehealth
+	if (currentHealth != maxHealth) //change if not at max health
 	{
 		currentHealth += addHealth;
+		if (currentHealth > maxHealth)
+			currentHealth = maxHealth;
+		return true;
 	}
+	return false;
 }
 
-void Player::addCurrentEnergy(float addEnergy)
+bool Player::addCurrentEnergy(float addEnergy)
 {
-	if (currentEnergy + addEnergy >= maxEnergy) //cannot have more energy then max energy
-	{
-		currentEnergy = maxEnergy;
-	}
-	else //adds more energy
+	if (currentEnergy != maxEnergy) //change if not at max energy
 	{
 		currentEnergy += addEnergy;
+		if (currentEnergy > maxEnergy)
+			currentEnergy = maxEnergy;
+		return true;
 	}
+	return false;
 }
 
-void Player::subCurrentHealth(unsigned int subHealth)
+bool Player::subCurrentHealth(unsigned int subHealth)
 {
-	if (currentHealth >= subHealth) //You cannot have 0 health and continue to play
-	{
-		currentHealth -= subHealth;
-	}
-	else
-	{
+	if (currentHealth == 0)
+		return false;
+
+	currentHealth -= subHealth;		//always reduce health
+	if (currentHealth < 0) {		//if negative, set to zero
 		currentHealth = 0;
 	}
+	return true;
 }
 
 bool Player::subCurrentEnergy(float subEnergy)
@@ -157,6 +157,8 @@ bool Player::updatePlayer()
 {
 	if (currentEnergy != maxEnergy) {
 		addCurrentEnergy(Timer::deltaTime * energyRegen);
+		if (currentEnergy == maxEnergy)
+			Sound2D("nep.wav", "sounds").play();
 	}
 
 	return ((currentHealth == 0) ? true : false);
