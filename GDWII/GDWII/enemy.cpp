@@ -44,7 +44,10 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 	b2Vec2 jumpTestPoint;
 	switch (state) {
 	case EnemyState::Follow:
-		tempCalc = targetPos.x - enemyPos.x;
+		if (type == EnemyTypes::SHOOTER && abs(playerPos.y - enemyPos.y) >= 15) {
+			tempCalc = targetPos2.x - enemyPos.x;
+		} else
+			tempCalc = targetPos.x - enemyPos.x;
 
 		//is close to targetPos
 		if (abs(tempCalc) < moveSpeed / 2) {
