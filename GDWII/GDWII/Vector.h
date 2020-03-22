@@ -71,6 +71,9 @@ public:
 	float* hold[3] = { &x, &y, &z };
 
 	float GetMagnitude();
+	float GetMagnitude2D();
+
+	vec3 Normalize2D();
 
 	//Operator overload for indexing using []
 	float operator[](int i);

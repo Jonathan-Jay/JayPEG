@@ -75,8 +75,8 @@ protected:
 	std::string m_fileName;
 
 	//The width and height
-	int m_width = 0;
-	int m_height = 0;
+	float m_width = 0;
+	float m_height = 0;
 	
 	vec2 m_bottomLeft = vec2(0.f, 0.f);
 	vec2 m_topRight = vec2(1.f, 1.f);

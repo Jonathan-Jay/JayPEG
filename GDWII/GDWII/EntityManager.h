@@ -3,7 +3,6 @@
 
 #include "Scene.h"
 #include "BackEnd.h"
-#include <string>
 
 class EntityStorage
 {

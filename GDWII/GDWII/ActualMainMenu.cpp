@@ -3,12 +3,15 @@
 ActualMainMenu::ActualMainMenu(std::string name)
 	:Scene(name)
 {
-
+	//sounds
+	m_soundEffects.push_back({ "Megaman.wav", "sounds" });
+	m_soundEffects.push_back({ "nep.wav", "sounds" });
 }
 
 void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 {
 	m_sceneReg = new entt::registry;
+	m_physicsWorld = new b2World(m_gravity);
 
 	ECS::AttachRegister(m_sceneReg);
 
@@ -53,7 +56,7 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 		std::string filename = "TitleCard.png";
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 615*1.5, 85*1.5, false);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 1220 * 0.75, 170 * 0.75, false);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 50.f, 2.f));
 
@@ -68,26 +71,9 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 		ECS::AttachComponent<Sprite>(entity);
 		ECS::AttachComponent<Transform>(entity);
 
-		std::string filename = "StartText.png";
-
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 560/2, 130/2, false);
-
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, -133.f, 2.f));
-
-
-		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "StartButton");
-	
-	}
-	{
-		auto entity = ECS::CreateEntity();
-
-		ECS::AttachComponent<Sprite>(entity);
-		ECS::AttachComponent<Transform>(entity);
-
 		std::string filename = "CreditsText.png";
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 740/2, 130/2, false);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 780 / 2, 170 / 2, false);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(-325.f, -133.f, 2.f));
 
@@ -102,9 +88,26 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 		ECS::AttachComponent<Sprite>(entity);
 		ECS::AttachComponent<Transform>(entity);
 
+		std::string filename = "StartText.png";
+
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 610 / 2, 170 / 2, false);
+
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, -133.f, 2.f));
+
+
+		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
+		ECS::SetUpIdentifier(entity, bitHolder, "StartButton");
+	
+	}
+	{
+		auto entity = ECS::CreateEntity();
+
+		ECS::AttachComponent<Sprite>(entity);
+		ECS::AttachComponent<Transform>(entity);
+
 		std::string filename = "QuitText.png";
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 430/2, 150/2, false);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 470 / 2, 170 / 2, false);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(325.f, -133.f, 2.f));
 
@@ -118,7 +121,9 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 void ActualMainMenu::Update()
 {
-	if (wait == 1) {
+	m_soundEffects[0].loop();
+
+	if (wait == 1 && !onCredits) {
 		if (Input::GetKeyDown(Key::LeftArrow))
 		{
 			leftOnMenu();
@@ -129,18 +134,19 @@ void ActualMainMenu::Update()
 		}
 		if (Input::GetKeyDown(Key::Z) || Input::GetKeyDown(Key::Space) || Input::GetKeyDown(Key::Enter))
 		{
-			menuSelected();
+			if (menuSelected())
+				index = 2;
 		}
 
 		switch (index) {
 		case 1:
-			m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
-			m_sceneReg->get<Sprite>(4).SetSizeScale(1.f);
+			m_sceneReg->get<Sprite>(3).SetSizeScale(1.f);
+			m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
 			m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
 			break;
 		case 2:
-			m_sceneReg->get<Sprite>(3).SetSizeScale(1.f);
-			m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
+			m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
+			m_sceneReg->get<Sprite>(4).SetSizeScale(1.f);
 			m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
 			break;
 		case 3:
@@ -154,6 +160,49 @@ void ActualMainMenu::Update()
 			m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
 			break;
 		}
+	}
+
+	if (counter > 0) {
+		switch (index) {
+		case 1:
+			m_sceneReg->get<Transform>(3).SetPositionX(-325 + (bouncingRight ?
+				((counter < 0.1 ? counter : 0.2 - counter) * 150) :
+				-((counter < 0.1 ? counter : 0.2 - counter) * 150)) );
+			m_sceneReg->get<Transform>(4).SetPositionX(0);
+			m_sceneReg->get<Transform>(5).SetPositionX(325);
+			break;
+		case 2:
+			m_sceneReg->get<Transform>(3).SetPositionX(-325);
+			m_sceneReg->get<Transform>(4).SetPositionX(bouncingRight ?
+				((counter < 0.1 ? counter : 0.2 - counter) * 150) :
+				-((counter < 0.1 ? counter : 0.2 - counter) * 150) );
+			m_sceneReg->get<Transform>(5).SetPositionX(325);
+			break;
+		case 3:
+			m_sceneReg->get<Transform>(3).SetPositionX(-325);
+			m_sceneReg->get<Transform>(4).SetPositionX(0);
+			m_sceneReg->get<Transform>(5).SetPositionX(325 + (bouncingRight ?
+				((counter < 0.1 ? counter : 0.2 - counter) * 150) :
+				-((counter < 0.1 ? counter : 0.2 - counter) * 150)) );
+			break;
+		default:
+			m_sceneReg->get<Transform>(3).SetPositionX(-325);
+			m_sceneReg->get<Transform>(4).SetPositionX(0);
+			m_sceneReg->get<Transform>(5).SetPositionX(325);
+			counter = 0;
+			break;
+		}
+
+		counter -= Timer::deltaTime;
+		if (counter < 0) {
+			counter = 0;
+		}
+	}
+
+	//update for camera movement.
+	if (cameraSpan)
+	{
+		lerpCamera();
 	}
 }
 
@@ -173,14 +222,14 @@ void ActualMainMenu::MouseClick(SDL_MouseButtonEvent evnt)
 			m_sceneReg->get<Camera>(maincamera).GetPositionY());
 		mousePos = pos;
 
-		if (wait == 1) {
+		if (wait == 1 && !onCredits) {
 			if (positionTesting(3, mousePos))
 			{
-				index = 2;
+				index = 1;
 			}
 			else if (positionTesting(4, mousePos))
 			{
-				index = 1;
+				index = 2;
 			}
 			else if (positionTesting(5, mousePos))
 			{
@@ -213,11 +262,11 @@ void ActualMainMenu::MouseMotion(SDL_MouseMotionEvent evnt)
 	if (wait == 1.f) {
 		if (positionTesting(3, mousePos))
 		{
-			index = 2;
+			index = 1;
 		}
 		else if (positionTesting(4, mousePos))
 		{
-			index = 1;
+			index = 2;
 		}
 		else if (positionTesting(5, mousePos))
 		{
@@ -234,49 +283,53 @@ void ActualMainMenu::GamepadStick(XInputController* con)
 	Stick sticks[2];
 	con->GetSticks(sticks);
 	//ANALOG STICK MOVEMENTS FOR MAIN MENU (LEFT AND RIGHT DPAD AS WELL)
-	if (reset && wait == 1) {
-		if (sticks[0].x < -0.75f)
-		{
-			leftOnMenu();
-		}
-		else if (sticks[0].x > 0.75f)
-		{
-			rightOnMenu();
-		}
-		else if (sticks[1].x < -0.75f)
-		{
-			leftOnMenu();
-		}
-		else if (sticks[1].x > 0.75f)
-		{
-			rightOnMenu();
-		}
-		else if (con->IsButtonPressed(Buttons::DPAD_LEFT))
-		{
-			leftOnMenu();
-		}
-		else if (con->IsButtonPressed(Buttons::DPAD_RIGHT))
-		{
-			rightOnMenu();
-		}
+	if (!onCredits) {
+		if (reset && wait == 1) {
+			if (sticks[0].x < -0.75f)
+			{
+				leftOnMenu();
+			}
+			else if (sticks[0].x > 0.75f)
+			{
+				rightOnMenu();
+			}
+			else if (sticks[1].x < -0.75f)
+			{
+				leftOnMenu();
+			}
+			else if (sticks[1].x > 0.75f)
+			{
+				rightOnMenu();
+			}
+			else if (con->IsButtonPressed(Buttons::DPAD_LEFT))
+			{
+				leftOnMenu();
+			}
+			else if (con->IsButtonPressed(Buttons::DPAD_RIGHT))
+			{
+				rightOnMenu();
+			}
 
-		//BUTTON PRESSES
-		if (con->IsButtonPressed(Buttons::A))
-		{
-			menuSelected();
+			//BUTTON PRESSES
+			if (con->IsButtonPressed(Buttons::A))
+			{
+				if (menuSelected())
+					index = 2;
+			}
+			if (con->IsButtonPressed(Buttons::B))
+			{
+				printf("B pressed\n");
+			}
 		}
-		if (con->IsButtonPressed(Buttons::B))
+		else
 		{
-			printf("B pressed\n");
-		}
-	}
-	else 
-	{
-		if (sticks[0].x > -0.75f && sticks[0].x < 0.75f  && sticks[1].x > -0.75f && sticks[1].x < 0.75f && 
-			con->IsButtonReleased(Buttons::DPAD_LEFT) && con->IsButtonReleased(Buttons::DPAD_RIGHT) &&
-			con->IsButtonReleased(Buttons::A) && con->IsButtonReleased(Buttons::B))
-		{
-			reset = true;
+			//makes sure that the analog stick is reset before setting reset to true (which then allows for another change)
+			if (sticks[0].x > -0.75f && sticks[0].x < 0.75f && sticks[1].x > -0.75f && sticks[1].x < 0.75f &&
+				con->IsButtonReleased(Buttons::DPAD_LEFT) && con->IsButtonReleased(Buttons::DPAD_RIGHT) &&
+				con->IsButtonReleased(Buttons::A) && con->IsButtonReleased(Buttons::B))
+			{
+				reset = true;
+			}
 		}
 	}
 
@@ -285,13 +338,23 @@ void ActualMainMenu::GamepadStick(XInputController* con)
 int ActualMainMenu::ChangeScene()
 {
 	if (clickedPlay) {
-		m_sceneReg->get<Sprite>(3).SetSizeScale(1.f * wait);
-		m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f * wait);
-		m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f * wait);
 		if (wait < 0) {
 			wait = 1.f;
 			clickedPlay = false;
+			onCredits = false;
+			index = 0;
+			m_soundEffects[0].setLoopCount(2);
 			return 1;
+		}
+		if (wait < 0.1) {
+			m_sceneReg->get<Sprite>(3).SetSizeScale(0);
+			m_sceneReg->get<Sprite>(4).SetSizeScale(0);
+			m_sceneReg->get<Sprite>(5).SetSizeScale(0);
+		}
+		else {
+			m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f * wait);
+			m_sceneReg->get<Sprite>(4).SetSizeScale(1.f * wait);
+			m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f * wait);
 		}
 		wait -= Timer::deltaTime;
 	}
@@ -300,6 +363,8 @@ int ActualMainMenu::ChangeScene()
 }
 void ActualMainMenu::rightOnMenu()
 {
+	bouncingRight = true;
+	counter = 0.2f;
 	if (index < 3 && index > 0)
 	{
 		index++;
@@ -312,6 +377,8 @@ void ActualMainMenu::rightOnMenu()
 }
 void ActualMainMenu::leftOnMenu()
 {
+	bouncingRight = false;
+	counter = 0.2f;
 	if (index > 1 && index < 4)
 	{
 		index--;
@@ -322,11 +389,15 @@ void ActualMainMenu::leftOnMenu()
 	}
 	reset = false;															
 }
-void ActualMainMenu::menuSelected()
+bool ActualMainMenu::menuSelected()
 {
+	bool temp = false;
+	m_soundEffects[1].play();
 	if (index == 1)
 	{
 		std::cout << "lol\n";
+		cameraSpan = true;
+		onCredits = true;
 	}
 	else if (index == 2)
 	{
@@ -337,9 +408,30 @@ void ActualMainMenu::menuSelected()
 		std::exit(NULL);
 	}
 	else {
-		index = 2;
+		temp = true;
 	}
 	reset = false;
+
+	return temp;
+}
+
+//Camera spanning code, required for camera movement on credits button click
+float speed = 100.f;
+void ActualMainMenu::lerpCamera()
+{
+	float acceleration = 25.f;
+	float currentPos = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPositionX() + speed;
+	float finalPos = 1250.f;
+	if (m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPositionX() < finalPos)
+	{
+		speed += (currentPos < (finalPos / 2) ? acceleration * Timer::deltaTime : -acceleration * Timer::deltaTime);
+		m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetPosition(currentPos, 0, 0);
+		if (currentPos > finalPos)
+		{
+			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetPosition(finalPos, 0, 0);
+			cameraSpan = false;
+		}
+	}
 }
 //Tests if mouse is on button
 bool ActualMainMenu::positionTesting(int entity, vec2 otherPos)

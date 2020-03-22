@@ -28,7 +28,7 @@ Game::~Game()
 void Game::InitGame()
 {
 	//Initializes the backend with window width and height values
-	BackEnd::InitBackEnd(640.f, 480.f);
+	BackEnd::InitBackEnd(800.f, 450.f);
 
 	//Grabs the initialized window
 	m_window = BackEnd::GetWindow();
@@ -41,6 +41,7 @@ void Game::InitGame()
 		SDL_Log("SDL_GetDesktopDisplayMode failed: %s", SDL_GetError());
 	}
 
+	SoundManager::init("./assets/sounds/", 25);
 	//Creates a new scene.
 	//Replace this with your own scene.
 	m_scenes.push_back(new ActualMainMenu("Main Menu")); //actual Main Menu
@@ -50,8 +51,7 @@ void Game::InitGame()
 	m_activeScene = m_scenes[0];
 
 	m_activeScene->InitScene(float(BackEnd::GetWindowWidth()), float(BackEnd::GetWindowHeight()));
-	//m_window->SetFullscreen(1);
-
+	m_scenes[1]->InitScene(float(BackEnd::GetWindowWidth()), float(BackEnd::GetWindowHeight()));
 
 
 
@@ -63,7 +63,7 @@ void Game::InitGame()
 	//Sets m_register to point to the register in the active scene
 	m_register = m_activeScene->GetScene();
 
-	BackEnd::ReshapeWindow(m_width / 2, m_height / 2, m_register);
+	BackEnd::ReshapeWindow(m_width * 0.9f, m_height * 0.9f, m_register);
 	BackEnd::SetWindowName(m_activeScene->GetName());
 
 	PhysicsSystem::Init();
@@ -102,12 +102,12 @@ bool Game::Run()
 
 		unsigned int index = m_activeScene->ChangeScene();
 		if (index != -1) {
-			m_activeScene->Unload();
 			m_activeScene = m_scenes[index];
 			m_activeScene->Unload();
 			m_activeScene->InitScene(BackEnd::GetWindowWidth(), BackEnd::GetWindowHeight());
 			m_register = m_activeScene->GetScene();
 			m_window->SetWindowName(m_activeScene->GetName());
+			SoundManager::stopEverything();
 		}
 	}
 
@@ -249,12 +249,11 @@ void Game::KeyboardDown()
 	if (Input::GetKeyDown(Key::F11)) {
 		if (m_window->GetFullscreen()) {
 			m_window->SetFullscreen(0);
-			m_window->SetWindowResizable(true);
-			BackEnd::ReshapeWindow(m_width / 2, m_height / 2, m_register);
+			m_window->SetWindowResizable(false);
+			BackEnd::ReshapeWindow(m_width * 0.9f, m_height * 0.9f, m_register);
 		}
 		else {
 			m_window->SetFullscreen(1);
-			m_window->SetWindowResizable(false);
 			BackEnd::ReshapeWindow(m_width, m_height, m_register);
 		}
 	}

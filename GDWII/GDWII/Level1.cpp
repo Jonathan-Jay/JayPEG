@@ -4,12 +4,17 @@ Level1::Level1(std::string name)
 	: Scene(name)
 {
 	m_gravity = b2Vec2(float32(0.f), float32(-20.f));
-	m_physicsWorld->SetGravity(m_gravity);
+
+	//sounds
+	m_soundEffects.push_back({ "Rabi-Ribi.mp3", "sounds" });	//0
+	m_soundEffects.push_back({ "nep.wav", "sounds" });			//1
+	m_soundEffects.push_back({ "snake.mp3", "sounds" });		//2
 }
 
 void Level1::InitScene(float windowWidth, float windowHeight)
 {
 	m_sceneReg = new entt::registry;
+	m_physicsWorld = new b2World(m_gravity);
 
 	ECS::AttachRegister(m_sceneReg);
 
@@ -27,15 +32,17 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 		ECS::GetComponent<HorizontalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<HorizontalScroll>(entity).SetOffset(15.f);
-		ECS::GetComponent<HorizontalScroll>(entity).SetLimits(-1980, 2000);
+		ECS::GetComponent<HorizontalScroll>(entity).SetLimits(-1740, 1680);
 
 		ECS::GetComponent<VerticalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<VerticalScroll>(entity).SetOffset(15.f);
-		ECS::GetComponent<VerticalScroll>(entity).SetLimits(-1545, 1579);
+		ECS::GetComponent<VerticalScroll>(entity).SetLimits(-1200, 1254);
 
 		vec4 temp = ECS::GetComponent<Camera>(entity).GetOrthoSize();
 		ECS::GetComponent<Camera>(entity).SetWindowSize(vec2(float(windowWidth), float(windowHeight)));
 		ECS::GetComponent<Camera>(entity).Orthographic(aspectRatio, temp.x, temp.y, temp.z, temp.w, -100.f, 100.f);
+
+		ECS::GetComponent<Camera>(entity).SetOrthoSize(vec4(-200, 200, -200, 200));
 
 		unsigned int bitHolder = EntityIdentifier::CameraBit() | EntityIdentifier::HoriScrollCameraBit() | EntityIdentifier::VertScrollCameraBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "Camera");
@@ -85,7 +92,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 
 		//all animations will be equally seperated in the y, their opposite direction is done by flipping corner x values
-		for (int y(1); y <= 2; y++) {
+		for (int y(1); y <= 1; y++) {
 			animController.AddAnimation(Animation());
 			animController.AddAnimation(Animation());
 
@@ -93,7 +100,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 			bool pingPong = false;
 			switch (y) {
 			case 1:
-				frameCount = 12;
+				frameCount = 20;
 				pingPong = true;
 				break;
 			case 2:
@@ -108,14 +115,14 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 				for (int x(1); x <= frameCount; x++) {
 					if (pingPong) {
 						if ((frameCount / 2 + 2) <= x) {
-							anim.AddFrame(vec2(250 * (frameCount - x + 2), 250 * y), vec2(250 * (frameCount - x + 1), 250 * (y - 1)));
+							anim.AddFrame(vec2(250 * (frameCount - x + 2), 250 * y - 1), vec2(250 * (frameCount - x + 1) - 1, 250 * (y - 1)));
 							continue;
 						}
 					}
-					anim.AddFrame(vec2(250 * x, 250 * y), vec2(250 * (x - 1), 250 * (y - 1)));
+					anim.AddFrame(vec2(250 * x, 250 * y - 1), vec2(250 * (x - 1) - 1, 250 * (y - 1)));
 				}
 				anim.SetRepeating(true);
-				anim.SetSecPerFrame(0.1f);
+				anim.SetSecPerFrame(0.04f);
 			}
 
 			{	//animation for right facing
@@ -123,19 +130,19 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 				for (int x(1); x <= frameCount; x++) {
 					if (pingPong) {
 						if ((frameCount / 2 + 2) <= x) {
-							anim.AddFrame(vec2(250 * (frameCount - x + 1 ), 250 * y), vec2(250 * (frameCount - x + 2), 250 * (y - 1)));
+							anim.AddFrame(vec2(250 * (frameCount - x + 1 ), 250 * y - 1), vec2(250 * (frameCount - x + 2) - 1, 250 * (y - 1)));
 							continue;
 						}
 					}
-					anim.AddFrame(vec2(250 * (x - 1), 250 * y), vec2(250 * x, 250 * (y - 1)));
+					anim.AddFrame(vec2(250 * (x - 1), 250 * y - 1), vec2(250 * x - 1, 250 * (y - 1)));
 				}
 				anim.SetRepeating(true);
-				anim.SetSecPerFrame(0.1f);
+				anim.SetSecPerFrame(0.04f);
 			}
 		}
 		animController.SetActiveAnim(0);
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, playerHeight + 1, playerHeight + 1, true, &animController);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, playerHeight + 2, playerHeight + 2, true, &animController);
 
 		//-1243, -186
 		ECS::GetComponent<Transform>(entity).SetPosition(playerPos);
@@ -153,8 +160,10 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		tempPhsBody = PhysicsBody(tempBody, playerWidth, playerHeight, vec2(0, 0), true, CollisionIDs::Player, 0x999999);
 
 		tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
+		tempPhsBody.GetBody()->SetUserData((void*)entity);
 
 		ECS::GetComponent<Player>(entity).reset(maxHP, maxNRG, EnergyRegenPerSec);
+		itemCount = 0;
 
 		unsigned int bitHolder = EntityIdentifier::AnimationBit() | EntityIdentifier::SpriteBit()
 			| EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit() | EntityIdentifier::PlayerBit();
@@ -244,14 +253,6 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 
-		/*
-		std::vector<float> x = {
-			132, 1060, 1060, 1085, 1085, 822, 822, 784, 784, 738, 738, 698, 698, 328, 328, 280, 280, 218, 218, 132, 132
-		};
-		std::vector<float> y = {
-			187, 187, 226, 226, 445, 445, 412, 412, 387, 387, 356, 356, 327, 327, 283, 283, 245, 245, 214, 214, 187
-		};
-		*/
 		std::vector<float> x = {
 			-247, -299, -299, -968, -968, -905, -905, -947, -947, -904, -904, 150, 150, -247, -247
 		};
@@ -296,6 +297,23 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 	CreateUI();
 
+	Door::reset();
+	Collectibles::reset();
+	Enemies::reset(m_physicsWorld);
+	Missiles::reset();
+	Bullets::reset();
+
+	tempPlatform.Init(m_physicsWorld, vec3(-135, 183, 50), vec3(584, 209, 50), 100, 10, "png.jpg", 200);
+	tempPlatform.isBouncy();
+
+	bossRoomDoor.Init(m_physicsWorld, vec3(-1038, -560, 50), vec3(-1035, -785, 50), 50, 230, "png.jpg", 300);
+	bossRoomDoor.isAABB(vec2(-1900, -1220), vec2(-1046, -646));
+
+	bossDoor.Init(m_physicsWorld, vec3(-1890, -1150, 50), vec3(-1890, -1050, 50), 30, 100, "png.jpg", 100);
+	bossDoor.isEntityTrigger(
+		Collectibles::CreateCollectible(vec3(-1815, -1170, 50.f), 30, 30, CollectiblesType::RegenUp)
+	);
+
 	for (size_t i = 0; i < 2; i++) {	
 		Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 270, -280);
 		Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 270, -280);
@@ -314,27 +332,27 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Bullets::CreateWall(m_physicsWorld, vec3(-500, -205, 50.f), 105, 20, "tempmap.png");
 	Bullets::CreateWall(m_physicsWorld, vec3(-1060, 1260, 50.f), 40, 115, "tempmap.png");
 	Bullets::CreateWall(m_physicsWorld, vec3(1430, 1230, 50.f), 45, 100, "tempmap.png");
-	Bullets::CreateWall(m_physicsWorld, vec3(-1730, 1175, 50.f), 90, 25, "tempmap.png");
 	Bullets::CreateWall(m_physicsWorld, vec3(1310, 1035, 50.f), 125, 45, "tempmap.png");
 	Bullets::CreateWall(m_physicsWorld, vec3(1510, -210, 50.f), 100, 25, "tempmap.png");
 	Bullets::CreateWall(m_physicsWorld, vec3(-253, -805, 50.f), 25, 90, "tempmap.png");
 
 	Collectibles::CreateCollectible(vec3(-1286, 1233, 50.f), 30, 30, CollectiblesType::RegenUp);
 	Collectibles::CreateCollectible(vec3(212, 870, 50.f), 30, 30, CollectiblesType::BulletStrengthUp);
-	Collectibles::CreateCollectible(vec3(1011, 290, 50), 30, 30, CollectiblesType::Missile);
+	Collectibles::CreateCollectible(vec3(1011, 290, 50), 20, 20, CollectiblesType::Missile);
 	Collectibles::CreateCollectible(vec3(1502, -1325, 50), 30, 30, CollectiblesType::HPUp);
 
-	Collectibles::CreateCollectible(vec3(-1415, 270, 50.f), 60, 15, CollectiblesType::RegenStation);
-	Collectibles::CreateCollectible(vec3(-116, -842, 50.f), 60, 15, CollectiblesType::RegenStation);
-	Collectibles::CreateCollectible(vec3(1710, 1170, 50.f), 60, 15, CollectiblesType::RegenStation);
+	Collectibles::CreateCollectible(vec3(-1415, 270, 25.f), 60, 15, CollectiblesType::RegenStation);
+	Collectibles::CreateCollectible(vec3(-116, -842, 25.f), 60, 15, CollectiblesType::RegenStation);
+	Collectibles::CreateCollectible(vec3(1710, 1170, 25.f), 60, 15, CollectiblesType::RegenStation);
 
 	//summon bullets to load sprite
-	Bullets::CreateBullet(m_sceneReg, m_physicsWorld, b2Vec2(playerPos.x - 1000, playerPos.y), b2Vec2(0, 0), 0, CollisionIDs::Player);
-	Missiles::CreateMissile(m_sceneReg, m_physicsWorld, b2Vec2(playerPos.x - 1000, playerPos.y), b2Vec2(0, 0), 0);
 	Bullets::setDamage(bulletDamage);
 	Missiles::setDamage(missileDamage);
+	Bullets::CreateBullet(m_sceneReg, m_physicsWorld, b2Vec2(playerPos.x - 1000, playerPos.y), b2Vec2(0, 0), 0, CollisionIDs::Player);
+	Missiles::CreateMissile(m_sceneReg, m_physicsWorld, b2Vec2(playerPos.x - 1000, playerPos.y), b2Vec2(0, 0), 0);
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
+
 }
 
 void Level1::GamepadStick(XInputController* con)
@@ -430,6 +448,10 @@ void Level1::GamepadStick(XInputController* con)
 		if (con->IsButtonReleased(Buttons::B))
 			missileShot = false;
 	}
+
+	if (con->IsButtonPressed(Buttons::SELECT)) {
+		exiting = true;
+	}
 }
 
 void Level1::MouseClick(SDL_MouseButtonEvent evnt)
@@ -474,7 +496,15 @@ void Level1::MouseClick(SDL_MouseButtonEvent evnt)
 
 void Level1::MouseWheel(SDL_MouseWheelEvent evnt)
 {
-	m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(evnt.y * 10.f);
+	auto& cam = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera());
+	if (evnt.y < 0) {
+		if (cam.GetOrthoSize().w < 400)
+			cam.Zoom(evnt.y * 10.f);
+	}
+	else {
+		if (cam.GetOrthoSize().w > 100)
+			cam.Zoom(evnt.y * 10.f);
+	}
 }
 
 void Level1::KeyboardDown()
@@ -539,10 +569,6 @@ void Level1::KeyboardDown()
 		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
 	}
 
-	if (Input::GetKeyDown(Key::Escape)) {
-		std::exit(NULL);
-	}
-
 	/*
 	b2Vec2 velo = { 0,0 };
 	if (Input::GetKey(Key::W)) {
@@ -559,10 +585,16 @@ void Level1::KeyboardDown()
 	}
 	m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(velo);
 	*/
+
+	if (Input::GetKeyDown(Key::Escape)) {
+		exiting = true;
+	}
 }
 
 void Level1::Update()
 {
+	m_soundEffects[0].loop();
+
 	//update scene Data
 	UpdateCounters();
 	if (onGround = Grounded())	canJump = true;
@@ -573,7 +605,7 @@ void Level1::Update()
 			b2Body* playerBody = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody();
 
 			b2PolygonShape tempBox;
-			tempBox.SetAsBox(playerWidth / 2.f, playerHeight * 1.f / 3.f, b2Vec2(0, -playerHeight * 1.f / 6.f), 0);
+			tempBox.SetAsBox(playerWidth / 2.f, playerHeight / 3.f, b2Vec2(0, -playerHeight / 6.f), 0);
 				
 			b2FixtureDef crouchingBox;
 			crouchingBox.shape = &tempBox;
@@ -611,6 +643,7 @@ void Level1::Update()
 	//only shoot when both weapons are ready
 	if (gunActive) {
 		if (gunDelay == 0.f) {
+			m_soundEffects[1].play();
 			if (crouching) {
 				//remove tag to make force horizontal
 				facingUp = false;
@@ -655,6 +688,7 @@ void Level1::Update()
 		//missiles only spawn when delay is 1 (ready to use) and you have enough NRG
 		if (gunDelay == 0.f && missileDelay == 0.f && m_sceneReg->get<Player>(EntityIdentifier::MainPlayer()).getMissile()) {
 			if (m_sceneReg->get<Player>(EntityIdentifier::MainPlayer()).subCurrentEnergy(missileCost)) {
+				m_soundEffects[1].play();
 				if (crouching) {
 					//remove tag to make force horizontal
 					facingUp = false;
@@ -718,6 +752,7 @@ void Level1::Update()
 	Bullets::updateAllBullets(m_sceneReg);
 	Enemies::UpdateEnemies(m_sceneReg);
 	itemCount += Collectibles::testAllCollectibles(m_sceneReg, playerWidth / 2.f, playerHeight / 2.f);
+	Door::update(m_sceneReg);
 
 	//has to run after everything since camera can move in other updates
 	UpdateUI();
@@ -725,13 +760,11 @@ void Level1::Update()
 	/*Animations:
 	0: left
 	1: right
-	2: crouching left
-	3: crouching right
 	first check if grounded*/
 
 	if (onGround) {	//ground/standing animation
 		//check if crouching, then moving, then idle (crouch won't change if you move)
-		if (crouching)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(2 + movingRight);
+		if (crouching)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
 		//if moving
 		else if (m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity().x != 0) {
 			//walking while aiming up
@@ -754,6 +787,14 @@ void Level1::Update()
 		//aiing left-right
 		else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
 	}
+}
+int Level1::ChangeScene()
+{
+	if (exiting) {
+		exiting = false;
+		return 0;
+	}
+	return -1;
 }
 
 bool Level1::Grounded()
@@ -866,8 +907,10 @@ void Level1::UpdateUI()
 	unsigned int playerMaxEnergy = playerData.getMaxEnergy();
 
 	float ortho = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize().y;
+	float scale = ortho / 100;
 	vec3 uiPos = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPosition()
-		+ vec3((-ortho * m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetAspect()), ortho, 0) + uiOffset;
+		+ vec3((-ortho * m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetAspect()), ortho, 0) + uiOffset * scale;
+	uiPos.z = uiOffset.z;
 
 	for (unsigned int x(0); x < 4; x++) {
 		vec3 temp = { 0, 0, 0 };
@@ -878,9 +921,10 @@ void Level1::UpdateUI()
 			m_sceneReg->get<AnimationController>(uiElements[x]).SetActiveAnim(playerData.getMissile());
 		}
 		else if (x > 0) {		//HP and NRG bar
-			temp.x = ((x == 1) ? (float(playerHealth) / playerMaxHealth) : (playerEnergy / playerMaxEnergy)) * 42.75f - 42.75f;
+			temp.x = (((x == 1) ? (float(playerHealth) / playerMaxHealth) : (playerEnergy / playerMaxEnergy)) * 42.75f - 42.75f) * scale;
 		}
 		m_sceneReg->get<Transform>(uiElements[x]).SetPosition(uiPos + temp);
+		m_sceneReg->get<Sprite>(uiElements[x]).SetSizeScale(scale);
 		uiPos.z++;
 	}
 
@@ -888,19 +932,21 @@ void Level1::UpdateUI()
 	for (unsigned int x(0); x < 3; x++) {
 		m_sceneReg->get<AnimationController>(uiElements[x + 4]).SetActiveAnim(
 			floor(itemPercent / pow(10, 2 - x)) - floor(itemPercent / pow(10, 3 - x)) * 10);
-		m_sceneReg->get<Transform>(uiElements[x + 4]).SetPosition(uiPos + vec3(3 + x * 6, -12.5, 0));
+		m_sceneReg->get<Transform>(uiElements[x + 4]).SetPosition(uiPos + vec3(3 + x * 6, -12.5, 0) * scale);
+		m_sceneReg->get<Sprite>(uiElements[x + 4]).SetSizeScale(scale);
 	}
 	//HP and NRG
 	for (unsigned int x(0); x < 2; x++) {
 		uiPos.z++;
 		unsigned int current = ((x == 0) ? playerHealth : playerEnergy);
 		unsigned int limit = ((x == 0) ? playerMaxHealth : playerMaxEnergy);
-		vec3 temp = uiPos + vec3(0, ((x == 0) ? 11.8 : 1), 0);
+		vec3 temp = uiPos + (vec3(0, ((x == 0) ? 11.8 : 1), 0) * scale);
 		for (unsigned int y(0); y < 4; y++) {
 			m_sceneReg->get<AnimationController>(uiElements[x * 4 + 7 + y]).SetActiveAnim( (y < 2) ?
 				(floor(current / pow(10, 1 - y)) - ((y == 0) ? 0 : floor(current / 10) * 10)) :
 				(floor(limit / pow(10, 3 - y)) - ((y == 2) ? 0 : floor(limit / 10) * 10)) );
-			m_sceneReg->get<Transform>(uiElements[x * 4 + 7 + y]).SetPosition(temp + vec3(1 + (6 * y) + ((y > 1) ? 5 : 0), 0, 0));
+			m_sceneReg->get<Transform>(uiElements[x * 4 + 7 + y]).SetPosition(temp + vec3(1 + (6 * y) + ((y > 1) ? 5 : 0), 0, 0) * scale);
+			m_sceneReg->get<Sprite>(uiElements[x * 4 + 7 + y]).SetSizeScale(scale);
 		}
 	}
 
@@ -945,6 +991,7 @@ void Level1::UpdateUI()
 
 void Level1::CreateUI()
 {
+	uiElements.resize(0);
 	/*summon all ui elements here
 	ui Elements according to index in vector:
 	0: background
@@ -1021,7 +1068,10 @@ void Level1::CreateUI()
 				for (unsigned int x(0); x < frameCount; x++) {
 					animController.AddAnimation(Animation());
 					auto& anim = animController.GetAnimation(x);
-					anim.AddFrame(vec2(0, 30 * (x + 1) - 1), vec2(28, 30 * x));
+					if (x == 0 && frameCount == 2)
+						anim.AddFrame(vec2(0, 0), vec2(0, 0));
+					else
+						anim.AddFrame(vec2(0, 30 * (x + 1) - 1), vec2(28, 30 * x));
 					anim.SetRepeating(false);
 					anim.SetSecPerFrame(0.1f);
 				}

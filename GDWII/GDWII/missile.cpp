@@ -25,17 +25,18 @@ void Missiles::CreateMissile(entt::registry* m_sceneReg, b2World* m_physicsWorld
 
 	{	//animation for shot
 		auto& anim = animController.GetAnimation(0);
-		anim.AddFrame(vec2(0, 127), vec2(127, 0));
-		anim.AddFrame(vec2(128, 127), vec2(255, 0));
+		for (int x(0); x < 4; x++) {
+			anim.AddFrame(vec2(128 * x, 127), vec2(128 * (x + 1) - 1, 0));
+		}
 		anim.SetRepeating(true);
-		anim.SetSecPerFrame(0.2f);
+		anim.SetSecPerFrame(0.1f);
 	}
 
 	{	//aniamtion for explosion
 		auto& anim = animController.GetAnimation(1);
-		anim.AddFrame(vec2(0, 255), vec2(127, 128));
-		anim.AddFrame(vec2(128, 255), vec2(255, 128));
-		anim.AddFrame(vec2(256, 255), vec2(383, 128));
+		for (int x(0); x < 3; x++) {
+			anim.AddFrame(vec2(128 * x, 255), vec2(128 * (x + 1) - 1, 128));
+		}
 		anim.SetRepeating(false);
 		anim.SetSecPerFrame(0.1f);
 	}
@@ -46,7 +47,7 @@ void Missiles::CreateMissile(entt::registry* m_sceneReg, b2World* m_physicsWorld
 		auto& anim = animController.GetAnimation(2);
 		anim.AddFrame(vec2(383, 0), vec2(383, 0));
 		anim.SetRepeating(false);
-		anim.SetSecPerFrame(0.05f);
+		anim.SetSecPerFrame(0.01f);
 		animController.SetActiveAnim(2);
 	}
 
@@ -224,6 +225,8 @@ void Missiles::updateAllMissiles(entt::registry* m_register)
 						break;
 					}
 				}
+
+				Sound2D("snake.mp3", "sounds").play();
 
 				ECS::RemoveComponent<PhysicsBody>(missiles[x]);
 				m_register->get<Sprite>(missiles[x]).SetWidth(explosionRadius * 2);

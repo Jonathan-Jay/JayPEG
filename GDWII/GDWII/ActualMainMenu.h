@@ -2,6 +2,8 @@
 #define __ACTUALMM__
 
 #include "EntityManager.h"
+#include <cmath>
+
 
 class ActualMainMenu : public Scene 
 {
@@ -18,12 +20,19 @@ public:
 private:
 	void rightOnMenu();
 	void leftOnMenu();
-	void menuSelected();
+	//returns true if nothing selected
+	bool menuSelected();
+	void lerpCamera();
 	bool positionTesting(int entity, vec2 otherPos);
-	int index = 2;
+	bool cameraSpan = false;
+	bool onCredits = false;
+
+	int index = 0;
 	bool clickedPlay = false;
 	//so it only moves one at a time, instead of an entire section
 	bool reset = true;
+	bool bouncingRight = false;
+	float counter = 0;
 	float wait = 1.f;
 	vec2 mousePos = { 0, 0 };
 };

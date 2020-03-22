@@ -15,6 +15,9 @@ public:
 
 	//update all existing bullets
 	static void updateAllBullets(entt::registry* m_register);
+
+	static void reset() { bullets.resize(0); }
+
 private:
 	static std::vector<unsigned int> bullets;
 	static int maxBullets;
