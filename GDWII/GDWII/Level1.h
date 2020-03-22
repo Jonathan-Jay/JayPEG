@@ -24,8 +24,6 @@ public:
 	void MouseClick(SDL_MouseButtonEvent evnt) override;
 	void MouseWheel(SDL_MouseWheelEvent evnt) override;
 
-
-
 private:
 	//tests if player is grounded
 	bool Grounded();

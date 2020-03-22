@@ -1,7 +1,6 @@
 #include "Level1.h"
 
-Level1::Level1(std::string name)
-	: Scene(name)
+Level1::Level1(std::string name) : Scene(name)
 {
 	m_gravity = b2Vec2(float32(0.f), float32(-20.f));
 
@@ -788,6 +787,7 @@ void Level1::Update()
 		else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
 	}
 }
+
 int Level1::ChangeScene()
 {
 	if (exiting) {
