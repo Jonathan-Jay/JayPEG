@@ -32,8 +32,9 @@ private:
 	//UI elements
 	void UpdateUI();
 	void CreateUI();
-	vec3 uiOffset = {53, -22, 50}; // from top left corner
 	std::vector<unsigned int> uiElements = {};
+
+	vec3 tempOffSet = vec3(0, -50, 0);
 
 	//variables used by the engine
 	bool onGround = false;

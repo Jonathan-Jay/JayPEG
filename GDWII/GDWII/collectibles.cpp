@@ -109,7 +109,7 @@ int Collectibles::testAllCollectibles(entt::registry* reg, float halfOfPlayerWid
 		yList = 5;
 	}
 
-	int pickUpCount = 0;
+	int pickUp = 0;
 	if (list.size() > yList) {
 		for (int x(0); x < list[yList].size();) {
 			vec3 itemPos = reg->get<Transform>(list[yList][x].entity).GetPosition();
@@ -139,23 +139,26 @@ int Collectibles::testAllCollectibles(entt::registry* reg, float halfOfPlayerWid
 				switch (list[yList][x].type) {
 				case CollectiblesType::Missile:
 					playerData.getMissile(true);
+					pickUp = 1;
 					break;
 				case CollectiblesType::BulletStrengthUp:
 					Bullets::setDamage(Bullets::getDamage() + 1);
 					playerData.getUpgrade(true);
+					pickUp = 2;
 					break;
 				case CollectiblesType::RegenUp:
 					playerData.setEnergyRegen(playerData.getEnergyRegen() * 1.25f);
+					pickUp = 3;
 					break;
 				case CollectiblesType::HPUp:
 					playerData.setMaxHealth(playerData.getMaxHealth() + 2);
+					pickUp = 4;
 					break;
 				}
 
 				//kill entity
 				ECS::DestroyEntity(list[yList][x].entity);
 				list[yList].erase(list[yList].begin() + x, list[yList].begin() + x + 1);
-				pickUpCount++;
 				continue;
 			}
 			x++;
@@ -169,5 +172,5 @@ int Collectibles::testAllCollectibles(entt::registry* reg, float halfOfPlayerWid
 		}
 	}
 
-	return pickUpCount;
+	return pickUp;
 }

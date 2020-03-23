@@ -750,8 +750,12 @@ void Level1::Update()
 	Missiles::updateAllMissiles(m_sceneReg);
 	Bullets::updateAllBullets(m_sceneReg);
 	Enemies::UpdateEnemies(m_sceneReg);
-	itemCount += Collectibles::testAllCollectibles(m_sceneReg, playerWidth / 2.f, playerHeight / 2.f);
 	Door::update(m_sceneReg);
+	int item = Collectibles::testAllCollectibles(m_sceneReg, playerWidth / 2.f, playerHeight / 2.f);
+	if (item) {
+		itemCount++;
+		m_sceneReg->get<AnimationController>(uiElements[15]).SetActiveAnim(item);
+	}
 
 	//has to run after everything since camera can move in other updates
 	UpdateUI();
@@ -838,42 +842,40 @@ void Level1::UpdateCounters()
 
 void Level1::UpdateUI()
 {
-	//to do
-	//player data
-
-	/*
-	std::cout << std::setfill(' ') << "\rHP: " << std::setw(2) << playerData.getCurrentHealth() << '/' << playerData.getMaxHealth()
-		<< "\tNRG: " << std::setw(2) << playerData.getCurrentEnergy() << '/' << playerData.getMaxEnergy();
-	*/
+	vec3 uiOffset = { 53, -22, 50 }; // from top left corner
 
 	auto& playerData = m_sceneReg->get<Player>(EntityIdentifier::MainPlayer());
 	if (playerData.updatePlayer()) {
+
+
 		std::cout << "you died\n";
 		playerData.setMaxHealth(playerData.getMaxHealth());
 		playerData.addCurrentHealth(maxHP);
+
+
 	}
 	/*
+	*/
 	bool offsetchanged = false;
-	if (Input::GetKey(Key::W)) {
+	if (Input::GetKeyDown(Key::W)) {
 		offsetchanged = true;
-		uiOffset.y += 1;
+		tempOffSet.y += 1;
 	}
-	if (Input::GetKey(Key::S)) {
+	if (Input::GetKeyDown(Key::S)) {
 		offsetchanged = true;
-		uiOffset.y -= 1;
+		tempOffSet.y -= 1;
 	}
-	if (Input::GetKey(Key::D)) {
+	if (Input::GetKeyDown(Key::D)) {
 		offsetchanged = true;
-		uiOffset.x += 1;
+		tempOffSet.x += 1;
 	}
-	if (Input::GetKey(Key::A)) {
+	if (Input::GetKeyDown(Key::A)) {
 		offsetchanged = true;
-		uiOffset.x -= 1;
+		tempOffSet.x -= 1;
 	}
 	if (offsetchanged) {
-		std::cout << "offset: (" << uiOffset.x << ", " << uiOffset.y << ")\n";
+		std::cout << "offset: (" << tempOffSet.x << ", " << tempOffSet.y << ")\n";
 	}
-	*/
 	if (Input::GetKey(Key::E)) {
 		playerData.subCurrentHealth(1);
 	}
@@ -881,14 +883,14 @@ void Level1::UpdateUI()
 		playerData.getMissile(true);
 	}
 
-	/*
+	/*summon all ui elements here
 	ui Elements according to index in vector:
-	0: background
+	0: back + bullet
 	1: HP bar
 	2: NRG bar
 	3: Front + missile
 
-	//numbers
+	numbers
 	4: item% 1
 	5: item% 2
 	6: item% 3
@@ -899,7 +901,10 @@ void Level1::UpdateUI()
 	11: NRG 1
 	12: NRG 2
 	13: max NRG 1
-	14: max NRG 2	*/
+	14: max NRG 2
+
+	others
+	15: text boxes	*/
 
 	unsigned int playerHealth = playerData.getCurrentHealth();
 	unsigned int playerMaxHealth = playerData.getMaxHealth();
@@ -908,9 +913,12 @@ void Level1::UpdateUI()
 
 	float ortho = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize().y;
 	float scale = ortho / 100;
-	vec3 uiPos = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPosition()
-		+ vec3((-ortho * m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetAspect()), ortho, 0) + uiOffset * scale;
+	vec3 camPos = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPosition();
+	vec3 uiPos = camPos	+ vec3((-ortho * m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetAspect()), ortho, 0) + uiOffset * scale;
 	uiPos.z = uiOffset.z;
+
+	m_sceneReg->get<Transform>(uiElements[15]).SetPosition(camPos + tempOffSet * scale + vec3(0, 0, 80));
+	m_sceneReg->get<Sprite>(uiElements[15]).SetSizeScale(scale);
 
 	for (unsigned int x(0); x < 4; x++) {
 		vec3 temp = { 0, 0, 0 };
@@ -994,12 +1002,12 @@ void Level1::CreateUI()
 	uiElements.resize(0);
 	/*summon all ui elements here
 	ui Elements according to index in vector:
-	0: background
+	0: back + bullet
 	1: HP bar
 	2: NRG bar
 	3: Front + missile
 
-	//numbers
+	numbers
 	4: item% 1
 	5: item% 2
 	6: item% 3
@@ -1010,7 +1018,10 @@ void Level1::CreateUI()
 	11: NRG 1
 	12: NRG 2
 	13: max NRG 1
-	14: max NRG 2	*/
+	14: max NRG 2
+
+	others
+	15: text boxes	*/
 
 	float width = 100;
 	float height = 37;
@@ -1086,5 +1097,35 @@ void Level1::CreateUI()
 		}
 		uiElements.push_back(entity);
 	}
+
+	{
+		auto entity = ECS::CreateEntity();
+
+		ECS::AttachComponent<Sprite>(entity);
+		ECS::AttachComponent<Transform>(entity);
+		ECS::AttachComponent<AnimationController>(entity);
+
+		std::string filename = "UI/textboxes.png";
+
+		auto& animController = ECS::GetComponent<AnimationController>(entity);
+
+		animController.InitUVs(filename);
+		for (unsigned int x(0); x < 5; x++) {
+			animController.AddAnimation(Animation());
+			auto& anim = animController.GetAnimation(x);
+			anim.AddFrame(vec2(0, 3 * (x + 1) - 1), vec2(2, 3 * x));
+			anim.SetRepeating(false);
+			anim.SetSecPerFrame(10.f);
+		}
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 10, 10, true, &animController);
+		animController.SetActiveAnim(0);
+
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 200.f, 80.f));
+
+		unsigned int bitHolder = EntityIdentifier::AnimationBit() | EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
+		ECS::SetUpIdentifier(entity, bitHolder, "dialogue boxes");
+		uiElements.push_back(entity);
+	}
+
 }
 
