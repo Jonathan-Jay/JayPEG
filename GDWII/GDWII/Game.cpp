@@ -35,7 +35,7 @@ void Game::InitGame()
 		SDL_Log("SDL_GetDesktopDisplayMode failed: %s", SDL_GetError());
 	}
 
-	BackEnd::ReshapeWindow(m_width * 0.25f, m_height * 0.25f);
+	BackEnd::ReshapeWindow(m_width * 0.5f, m_height * 0.5f);
 
 	//Grabs the initialized window
 	m_window = BackEnd::GetWindow();
