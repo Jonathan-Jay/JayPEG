@@ -132,6 +132,7 @@ void RenderingSystem::Draw(entt::registry* reg)
 	for (auto pair : sortedSprites)
 	{
 		drawShader.SendUniform("uModel", pair.first->GetLocalToWorldMatrix());
+		drawShader.SendUniform("uTransparency", pair.second.GetTransparency());
 
 		pair.second.Draw();
 	}

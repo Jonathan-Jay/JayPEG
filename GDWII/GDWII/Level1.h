@@ -54,6 +54,7 @@ private:
 	float gunDelay = 0;
 	float missileDelay = 0;
 	float recoilDelay = 0;
+	float counter = 0;
 
 	//bullet variables
 	int bulletDamage = 2;

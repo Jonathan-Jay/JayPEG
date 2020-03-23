@@ -756,6 +756,7 @@ void Level1::Update()
 	if (item) {
 		itemCount++;
 		m_sceneReg->get<AnimationController>(uiElements[15]).SetActiveAnim(item);
+		counter = 5;
 	}
 
 	//has to run after everything since camera can move in other updates
@@ -837,6 +838,13 @@ void Level1::UpdateCounters()
 		recoilDelay -= (onGround ? 3 : 1) * Timer::deltaTime;
 		if (recoilDelay < 0)
 			recoilDelay = 0;
+	}
+
+	if (counter > 0) {
+		counter -= Timer::deltaTime;
+		if (counter < 0)
+			counter = 0;
+		m_sceneReg->get<Sprite>(uiElements[15]).SetTransparency((counter > 1 ? 1 : counter));
 	}
 }
 
@@ -1113,11 +1121,11 @@ void Level1::CreateUI()
 		for (unsigned int x(0); x < 5; x++) {
 			animController.AddAnimation(Animation());
 			auto& anim = animController.GetAnimation(x);
-			anim.AddFrame(vec2(0, 3 * (x + 1) - 1), vec2(2, 3 * x));
+			anim.AddFrame(vec2(0, 3 * (x + 1) - 1), vec2(2, 3 * x + 1));
 			anim.SetRepeating(false);
-			anim.SetSecPerFrame(10.f);
+			anim.SetSecPerFrame(1.f);
 		}
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 10, 10, true, &animController);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 100, 50, true, &animController);
 		animController.SetActiveAnim(0);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 200.f, 80.f));
