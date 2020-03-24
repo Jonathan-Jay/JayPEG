@@ -248,6 +248,7 @@ void ActualMainMenu::GamepadStick(XInputController* con)
 		if (sticks[0].x < -0.75f)
 		{
 			leftOnMenu();
+			
 		}
 		else if (sticks[0].x > 0.75f)
 		{
@@ -344,10 +345,7 @@ void ActualMainMenu::menuSelected()
 	}
 	else if (index == 2)
 	{
-		moveAmount = -1250.f;
-		accell = 25.f;
-		cameraSpan = true;
-
+		clickedPlay = true;
 	}
 	else if (index == 3)
 	{
@@ -369,7 +367,7 @@ void ActualMainMenu::lerpCamera(float endPosition, float accel)
 	if (m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPositionX() != finalPos)
 	{
 		m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetPosition(currentPos, 0, 0);
-		//so that the camera can go in either direction
+		//so that the camera can go in either direction ////REALLY DOESNT WORK
 		if (finalPos > 0)
 		{
 			speed += (currentPos < (finalPos / 2) ? acceleration * Timer::deltaTime : -acceleration * Timer::deltaTime);
