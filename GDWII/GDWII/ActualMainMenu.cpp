@@ -6,6 +6,7 @@ ActualMainMenu::ActualMainMenu(std::string name)
 	//sounds
 	m_soundEffects.push_back({ "Megaman.wav", "sounds" });
 	m_soundEffects.push_back({ "nep.wav", "sounds" });
+	m_soundEffects.push_back({"RolloverSound1.wav", "sounds"});
 }
 
 void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
@@ -115,6 +116,22 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "QuitButton");
 
+	}
+	{
+		auto entity = ECS::CreateEntity();
+
+		ECS::AttachComponent<Sprite>(entity);
+		ECS::AttachComponent<Transform>(entity);
+
+		std::string filename = "TitleBack.png";
+
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 1500, 750, false);
+
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(1250.f, 1.f, 0.f));
+
+
+		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
+		ECS::SetUpIdentifier(entity, bitHolder, "Background 2");
 	}
 
 }
@@ -247,7 +264,7 @@ void ActualMainMenu::MouseClick(SDL_MouseButtonEvent evnt)
 	}
 
 }
-
+bool playHoverSound = true;
 void ActualMainMenu::MouseMotion(SDL_MouseMotionEvent evnt)
 {
 	float windowHeight = BackEnd::GetWindowHeight();
@@ -265,19 +282,33 @@ void ActualMainMenu::MouseMotion(SDL_MouseMotionEvent evnt)
 	if (wait == 1.f) {
 		if (positionTesting(3, mousePos))
 		{
+			HoverSound();
 			index = 1;
 		}
 		else if (positionTesting(4, mousePos))
 		{
+			HoverSound();
 			index = 2;
 		}
 		else if (positionTesting(5, mousePos))
 		{
+			HoverSound();
 			index = 3;
 		}
-		else {
+		else 
+		{
+			playHoverSound = true;
 			index = 0;
 		}
+	}
+}
+
+void ActualMainMenu::HoverSound()
+{
+	if (playHoverSound)
+	{
+		playHoverSound = false;
+		m_soundEffects[2].play();
 	}
 }
 
@@ -371,12 +402,14 @@ void ActualMainMenu::rightOnMenu()
 	if (index < 3 && index > 0)
 	{
 		index++;
+		HoverSound();
 	}
 	else
 	{
 		index = 3;
 	}
 	reset = false;
+	playHoverSound = true;
 }
 void ActualMainMenu::leftOnMenu()
 {
@@ -385,12 +418,14 @@ void ActualMainMenu::leftOnMenu()
 	if (index > 1 && index < 4)
 	{
 		index--;
+		HoverSound();
 	}
 	else
 	{
 		index = 1;
 	}
-	reset = false;															
+	reset = false;	
+	playHoverSound = true;
 }
 bool ActualMainMenu::menuSelected()
 {

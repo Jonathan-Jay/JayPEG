@@ -13,6 +13,7 @@ public:
 	void InitScene(float windowWidth, float windowHeight);
 	void MouseClick(SDL_MouseButtonEvent evnt) override;
 	void MouseMotion(SDL_MouseMotionEvent evnt) override;
+	void HoverSound();
 	void GamepadStick(XInputController* con) override;
 	void Update() override;
 	int ChangeScene() override;
