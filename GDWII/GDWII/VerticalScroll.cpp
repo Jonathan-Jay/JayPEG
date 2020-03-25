@@ -12,8 +12,11 @@ void VerticalScroll::Update()
 		{
 			float difference = m_focus->GetPosition().y - (m_cam->m_localPosition.y + m_offset);
 
-			m_cam->SetPosition(vec3(m_cam->GetPosition().x, m_cam->GetPosition().y + difference, m_cam->GetPosition().z));
+ 			m_cam->SetPosition(vec3(m_cam->GetPositionX(), m_cam->GetPositionY() + difference, m_cam->GetPositionZ()));
 		}
+	}
+	else {
+		m_cam->SetPosition(vec3(m_cam->GetPositionX(), m_topLimit, m_cam->GetPositionZ()));
 	}
 
 	//Below focus
@@ -22,8 +25,11 @@ void VerticalScroll::Update()
 		{
 			float difference = m_focus->GetPosition().y - (m_cam->m_localPosition.y - m_offset);
 
-			m_cam->SetPosition(vec3(m_cam->GetPosition().x, m_cam->GetPosition().y + difference, m_cam->GetPosition().z));
+			m_cam->SetPosition(vec3(m_cam->GetPositionX(), m_cam->GetPositionY() + difference, m_cam->GetPositionZ()));
 		}
+	}
+	else {
+		m_cam->SetPosition(vec3(m_cam->GetPositionX(), m_bottomLimit, m_cam->GetPositionZ()));
 	}
 }
 

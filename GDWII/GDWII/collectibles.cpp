@@ -4,7 +4,7 @@ std::vector<std::vector<CollectiblesData>> Collectibles::list = { };
 float Collectibles::regenStationCounter = 0;
 float Collectibles::regenDelay = 0.25f;
 
-void Collectibles::CreateCollectible(vec3 position, float width, float height, CollectiblesType type)
+unsigned int Collectibles::CreateCollectible(vec3 position, float width, float height, CollectiblesType type)
 {
 	auto entity = ECS::CreateEntity();
 
@@ -27,7 +27,7 @@ void Collectibles::CreateCollectible(vec3 position, float width, float height, C
 		itemType = "HPUp";
 		break;
 	case CollectiblesType::RegenStation:
-		itemType = "HPRegen";
+		itemType = "RegenStation";
 		break;
 	}
 
@@ -58,11 +58,14 @@ void Collectibles::CreateCollectible(vec3 position, float width, float height, C
 
 	animController.AddAnimation(Animation());
 	auto& anim = animController.GetAnimation(0);
-	for (int x(0); x < 2; x++) {
-		anim.AddFrame(vec2((x == 0 ? 0 : 2000), 2000), vec2((x == 0 ? 2000 : 0), 0));
+	for (int x(0); x < 8; x++) {
+		if (type == CollectiblesType::RegenStation)
+			anim.AddFrame(vec2(0, 80 * (x + 1) - 1), vec2(319, 80 * x));
+		else
+			anim.AddFrame(vec2(0, 80 * (x + 1) - 1), vec2(79, 80 * x));
 	}
 	anim.SetRepeating(true);
-	anim.SetSecPerFrame(0.5f);
+	anim.SetSecPerFrame(0.1f);
 	animController.SetActiveAnim(0);
 
 	ECS::GetComponent<Sprite>(entity).LoadSprite(filename, width, height, true, &animController);
@@ -79,6 +82,8 @@ void Collectibles::CreateCollectible(vec3 position, float width, float height, C
 	//fix camera focus (focus breaks when entities are spawned)
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
+
+	return entity;
 }
 
 int Collectibles::testAllCollectibles(entt::registry* reg, float halfOfPlayerWidth, float halfOfPlayerHeight)
@@ -104,7 +109,7 @@ int Collectibles::testAllCollectibles(entt::registry* reg, float halfOfPlayerWid
 		yList = 5;
 	}
 
-	int pickUpCount = 0;
+	int pickUp = 0;
 	if (list.size() > yList) {
 		for (int x(0); x < list[yList].size();) {
 			vec3 itemPos = reg->get<Transform>(list[yList][x].entity).GetPosition();
@@ -116,8 +121,10 @@ int Collectibles::testAllCollectibles(entt::registry* reg, float halfOfPlayerWid
 						(playerPos.y < itemPos.y + halfOfHeight + halfOfPlayerHeight) && (playerPos.y > itemPos.y - halfOfHeight - halfOfPlayerHeight)) {
 
 						//regen health and reset timer
-						reg->get<Player>(EntityIdentifier::MainPlayer()).addCurrentHealth(1);
-						regenStationCounter = regenDelay;
+						if (reg->get<Player>(EntityIdentifier::MainPlayer()).addCurrentHealth(1)) {
+							Sound2D("nep.wav", "sounds").play();
+							regenStationCounter = regenDelay;
+						}
 					}
 				}
 			}
@@ -126,26 +133,32 @@ int Collectibles::testAllCollectibles(entt::registry* reg, float halfOfPlayerWid
 
 				//give player item
 				auto& playerData = reg->get<Player>(EntityIdentifier::MainPlayer());
+
+				Sound2D("nep.wav", "sounds").play();
+
 				switch (list[yList][x].type) {
 				case CollectiblesType::Missile:
 					playerData.getMissile(true);
+					pickUp = 1;
 					break;
 				case CollectiblesType::BulletStrengthUp:
 					Bullets::setDamage(Bullets::getDamage() + 1);
 					playerData.getUpgrade(true);
+					pickUp = 2;
 					break;
 				case CollectiblesType::RegenUp:
 					playerData.setEnergyRegen(playerData.getEnergyRegen() * 1.25f);
+					pickUp = 3;
 					break;
 				case CollectiblesType::HPUp:
 					playerData.setMaxHealth(playerData.getMaxHealth() + 2);
+					pickUp = 4;
 					break;
 				}
 
 				//kill entity
 				ECS::DestroyEntity(list[yList][x].entity);
 				list[yList].erase(list[yList].begin() + x, list[yList].begin() + x + 1);
-				pickUpCount++;
 				continue;
 			}
 			x++;
@@ -159,5 +172,5 @@ int Collectibles::testAllCollectibles(entt::registry* reg, float halfOfPlayerWid
 		}
 	}
 
-	return pickUpCount;
+	return pickUp;
 }

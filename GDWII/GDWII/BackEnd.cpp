@@ -20,7 +20,7 @@ void BackEnd::InitBackEnd(float windowWidth, float windowHeight)
 	m_windowHeight = (GLsizei)windowHeight;
 	m_aspectRatio = float(m_windowWidth) / float(m_windowHeight);
 	//Creates new window with name of the scene as a caption
-	m_window = new Window("", BackEnd::GetWindowWidth(), BackEnd::GetWindowHeight());
+	m_window = new Window("", BackEnd::GetWindowWidth(), BackEnd::GetWindowHeight(), true);
 
 	//Initializes GLEW
 	InitGLEW();
@@ -168,6 +168,8 @@ void BackEnd::ReshapeWindow(int w, int h, entt::registry * mainReg)
 	//Reshapes the window when the window is resized
 	glViewport(0, 0, GLsizei(w), GLsizei(h));
 	//Resize all framebuffers here
+
+	m_window->SetWindowSize(w, h);
 
 	m_windowWidth = w;
 	m_windowHeight = h;

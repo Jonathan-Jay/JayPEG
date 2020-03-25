@@ -72,11 +72,13 @@ inline void from_json(const nlohmann::json& j, Enemy& enem) {
 
 class Enemies abstract {
 public:
-	static void CreateEnemy(b2World* m_physicsWorld, EnemyTypes type, float x, float y);
+	static unsigned int CreateEnemy(b2World* m_physicsWorld, EnemyTypes type, float x, float y);
 	static void UpdateEnemies(entt::registry* m_reg);
 	static std::vector<enemyList> GetEnemies() { return enemies; }
 	static float GetSightRefreshTime() { return sightRefreshTime; }
 	static b2World* GetPhysicsWorld() { return m_phyWorld; }
+
+	static void reset(b2World* physWorld) { m_phyWorld = physWorld;	enemies.resize(0); }
 	
 private:
 	static std::vector<enemyList> enemies;

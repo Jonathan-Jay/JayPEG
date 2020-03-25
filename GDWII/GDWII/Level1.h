@@ -3,6 +3,7 @@
 
 #include "missile.h"
 #include "collectibles.h"
+#include "door.h"
 #include <iomanip>
 
 class Level1 : public Scene
@@ -15,7 +16,7 @@ public:
 	void KeyboardDown() override;
 	void Update() override;
 
-
+	int ChangeScene() override;
 
 	//delete
 	std::vector<float> xPos = {};
@@ -33,8 +34,9 @@ private:
 	//UI elements
 	void UpdateUI();
 	void CreateUI();
-	vec3 uiOffset = {53, -22, 50}; // from top left corner
 	std::vector<unsigned int> uiElements = {};
+
+	vec3 tempOffSet = vec3(0, -50, 0);
 
 	//variables used by the engine
 	bool onGround = false;
@@ -47,10 +49,12 @@ private:
 	bool facingUp = false;
 	bool facingDown = false;
 	bool crouching = false;
+	bool exiting = false;
 	float jumpHeight = 0;
 	float gunDelay = 0;
 	float missileDelay = 0;
 	float recoilDelay = 0;
+	float counter = 0;
 
 	//bullet variables
 	int bulletDamage = 2;
@@ -68,8 +72,8 @@ private:
 	float recoilCooldown = 0.5f;
 
 	//player related variables (max 99 for HP and NRG please)
-	int itemCount = 1;		//how many do you start with (increase when you spawn a item)
-	int totalItems = 5;		//how many in total (including starting amount)
+	int itemCount = 0;		//how many do you start with (increase when you spawn a item)
+	int totalItems = 4;		//how many in total (including starting amount)
 	int maxHP = 10;
 	int maxNRG = 10;
 	float EnergyRegenPerSec = 1.f;
@@ -79,6 +83,11 @@ private:
 	float minJumpStrength = 50.f;
 	float maxJumpStrength = 75.f;
 	float jumpIncrementPerSec = 125.f;
+
+	//doors
+	Door bossDoor;
+	Door bossRoomDoor;
+	Door tempPlatform;
 };
 
 #endif // !__LVL1__

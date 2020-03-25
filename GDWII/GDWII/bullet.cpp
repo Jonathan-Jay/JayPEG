@@ -20,7 +20,7 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 	animController.AddAnimation(Animation());
 	auto& anim = animController.GetAnimation(0);
 	for (int x(0); x < 5; x++) {
-		anim.AddFrame(vec2(250 * x, 250), vec2(250 * (x + 1), 0));
+		anim.AddFrame(vec2(250 * x, 250), vec2(250 * (x + 1) - 1, 0));
 	}
 	anim.SetRepeating(true);
 	anim.SetSecPerFrame(0.04f);
@@ -31,7 +31,7 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 		auto& anim2 = animController.GetAnimation(1);
 		anim2.AddFrame(vec2(0, 0), vec2(0, 0));
 		anim2.SetRepeating(false);
-		anim2.SetSecPerFrame(0.04f);
+		anim2.SetSecPerFrame(0.01f);
 		animController.SetActiveAnim(1);
 	}
 
@@ -137,6 +137,7 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 			//testing if destructibe wall
 			switch (contact->contact->GetFixtureA()->GetFilterData().categoryBits) {
 			case CollisionIDs::Breakable:
+				Sound2D("nep.wav", "sounds").play();
 				ECS::DestroyEntity((unsigned int)contact->contact->GetFixtureA()->GetBody()->GetUserData());
 				break;
 			default:

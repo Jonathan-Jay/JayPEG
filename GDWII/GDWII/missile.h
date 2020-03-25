@@ -16,6 +16,8 @@ public:
 	static void setDamage(int newDamage);
 	static int getDamage();
 
+	static void reset() { missiles.resize(0); }
+
 	//update all existing missiles
 	static void updateAllMissiles(entt::registry* m_register);
 private:
