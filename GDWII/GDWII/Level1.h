@@ -50,6 +50,7 @@ private:
 	bool facingDown = false;
 	bool crouching = false;
 	bool exiting = false;
+	bool gameOver = false;
 	bool stunned = false;
 	float jumpHeight = 0;
 	float gunDelay = 0;

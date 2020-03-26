@@ -92,19 +92,34 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 
 		//all animations will be equally seperated in the y, their opposite direction is done by flipping corner x values
-		for (int y(1); y <= 1; y++) {
+		for (int y(1); y <= 6; y++) {
 			animController.AddAnimation(Animation());
 			animController.AddAnimation(Animation());
 
 			int frameCount = 0;
 			bool pingPong = false;
+			bool repeat = true;
 			switch (y) {
 			case 1:
 				frameCount = 20;
 				pingPong = true;
 				break;
 			case 2:
+				frameCount = 20;
+				pingPong = true;
+				break;
+			case 3:
 				frameCount = 1;
+				break;
+			case 4:
+				frameCount = 15;
+				break;
+			case 5:
+				frameCount = 15;
+				break;
+			case 6:
+				frameCount = 8;
+				repeat = false;
 				break;
 			default:
 				std::cout << "think you missed an animation...\n";
@@ -121,7 +136,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 					}
 					anim.AddFrame(vec2(250 * x, 250 * y - 1), vec2(250 * (x - 1) - 1, 250 * (y - 1)));
 				}
-				anim.SetRepeating(true);
+				anim.SetRepeating(repeat);
 				anim.SetSecPerFrame(0.04f);
 			}
 
@@ -136,7 +151,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 					}
 					anim.AddFrame(vec2(250 * (x - 1), 250 * y - 1), vec2(250 * x - 1, 250 * (y - 1)));
 				}
-				anim.SetRepeating(true);
+				anim.SetRepeating(repeat);
 				anim.SetSecPerFrame(0.04f);
 			}
 		}
@@ -569,6 +584,10 @@ void Level1::KeyboardDown()
 			jumpHeight = minJumpStrength;
 		}
 		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
+
+		if (Input::GetKeyDown(Key::Escape)) {
+			exiting = true;
+		}
 	}
 
 	/*
@@ -587,10 +606,6 @@ void Level1::KeyboardDown()
 	}
 	m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(velo);
 	*/
-
-	if (Input::GetKeyDown(Key::Escape)) {
-		exiting = true;
-	}
 }
 
 void Level1::Update()
@@ -622,7 +637,7 @@ void Level1::Update()
 		crouching = true;
 	}
 	else {
-		//if just exitign crouch
+		//if just exiting crouch
 		if (crouching) {
 			b2Body* playerBody = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody();
 
@@ -765,40 +780,53 @@ void Level1::Update()
 	UpdateUI();
 
 	/*Animations:
-	0: left
-	1: right
+	0 and 1: idle forwards
+	2 and 3: idle up
+	4 and 5: crouch
+	6 and 7: walk forwards
+	8 and 9: walk up
+	10 and 11: death
 	first check if grounded*/
-
-	if (onGround) {	//ground/standing animation
-		//check if crouching, then moving, then idle (crouch won't change if you move)
-		if (crouching)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
-		//if moving
-		else if (m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity().x != 0) {
-			//walking while aiming up
-			if (facingUp)		m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
-			//walking
-			else				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
-		}	//if idle
-		else {
+	if (deathCounter == 0) {
+		if (onGround) {	//ground/standing animation
+			//check if crouching, then moving, then idle (crouch won't change if you move)
+			if (crouching)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(4 + movingRight);
+			//if moving
+			else if (m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity().x != 0) {
+				//walking while aiming up
+				if (facingUp)		m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(8 + movingRight);
+				//walking
+				else				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(6 + movingRight);
+			}	//if idle
+			else {
+				//aiming up
+				if (facingUp) 		m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(2 + movingRight);
+				//standing
+				else				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(movingRight);
+			}
+		}
+		else {			//air animation
 			//aiming up
-			if (facingUp) 		m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
-			//standing
-			else				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
+			if (facingUp)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(8 + movingRight);
+			//aiming down
+			else if (facingDown)	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(2 + movingRight);
+			//aiing left-right
+			else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(6 + movingRight);
 		}
 	}
-	else {			//air animation
-		//aiming up
-		if (facingUp)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
-		//aiming down
-		else if (facingDown)	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
-		//aiing left-right
-		else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
+	else {		//death
+			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(10 + movingRight);
 	}
 }
 int Level1::ChangeScene()
 {
 	if (exiting) {
 		exiting = false;
+		return 0;
+	}
+	if (gameOver) {
+		std::cout << "you died -Dark souls\n";
+		gameOver = false;
 		return 0;
 	}
 	return -1;
@@ -861,16 +889,16 @@ void Level1::UpdateUI()
 		);
 		if (onGround) {
 			//m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(death + movingRight);
-			playerData.setStunned(5.f);
+			playerData.setStunned(10.f);
 			if (deathCounter > 0) {
 				deathCounter -= Timer::deltaTime;
 				if (deathCounter < 0) {
 					deathCounter = 0;
-					exiting = true;
+					gameOver = true;
 				}
 			}
 			else
-				deathCounter = 5.f;
+				deathCounter = 2.5f;
 		}
 	}
 
