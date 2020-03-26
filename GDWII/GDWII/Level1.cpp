@@ -589,7 +589,6 @@ void Level1::KeyboardDown()
 			exiting = true;
 		}
 	}
-
 	/*
 	b2Vec2 velo = { 0,0 };
 	if (Input::GetKey(Key::W)) {
@@ -788,11 +787,12 @@ void Level1::Update()
 	10 and 11: death
 	first check if grounded*/
 	if (deathCounter == 0) {
-		if (onGround) {	//ground/standing animation
+		b2Vec2 velo = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
+		if (onGround) {				//ground/standing animation
 			//check if crouching, then moving, then idle (crouch won't change if you move)
 			if (crouching)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(4 + movingRight);
 			//if moving
-			else if (m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity().x != 0) {
+			else if (velo.x != 0) {
 				//walking while aiming up
 				if (facingUp)		m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(8 + movingRight);
 				//walking
@@ -805,13 +805,21 @@ void Level1::Update()
 				else				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(movingRight);
 			}
 		}
-		else {			//air animation
+		else if (velo.y > 0) {		//air upwards
 			//aiming up
 			if (facingUp)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(8 + movingRight);
 			//aiming down
-			else if (facingDown)	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(2 + movingRight);
+			else if (facingDown)	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(4 + movingRight);
 			//aiing left-right
 			else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(6 + movingRight);
+		}
+		else {						//air downwards animation
+			//aiming up
+			if (facingUp)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(2 + movingRight);
+			//aiming down
+			else if (facingDown)	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(4 + movingRight);
+			//aiing left-right
+			else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
 		}
 	}
 	else {		//death
@@ -884,11 +892,8 @@ void Level1::UpdateUI()
 
 	auto& playerData = m_sceneReg->get<Player>(EntityIdentifier::MainPlayer());
 	if (playerData.updatePlayer()) {
-		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(
-			b2Vec2(0, m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity().y)
-		);
 		if (onGround) {
-			//m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(death + movingRight);
+			m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(b2Vec2(0, 0));
 			playerData.setStunned(10.f);
 			if (deathCounter > 0) {
 				deathCounter -= Timer::deltaTime;
@@ -902,8 +907,8 @@ void Level1::UpdateUI()
 		}
 	}
 
-	stunned = playerData.getStunned();
-
+	if (stunned = playerData.getStunned())
+		canJump = false;
 
 	/*
 	*/
