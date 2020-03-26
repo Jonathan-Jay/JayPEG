@@ -48,10 +48,13 @@ private:
 	bool facingDown = false;
 	bool crouching = false;
 	bool exiting = false;
+	bool stunned = false;
 	float jumpHeight = 0;
 	float gunDelay = 0;
 	float missileDelay = 0;
 	float recoilDelay = 0;
+	float counter = 0;
+	float deathCounter = 0;
 
 	//bullet variables
 	int bulletDamage = 2;

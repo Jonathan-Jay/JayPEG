@@ -2,8 +2,10 @@
 
 GLuint Sprite::m_spritePlaneVertVBO = GL_NONE;
 
-Sprite::Sprite(std::string& fileName, int width, int height)
+Sprite::Sprite(std::string& fileName, int width, int height, float transparency)
 {
+	m_transparency = transparency;
+
 	//Loads the sprite
 	LoadSprite(fileName, width, height);
 }
@@ -81,6 +83,16 @@ void Sprite::Unbind(int textureSlot) const
 	glActiveTexture(GL_TEXTURE0 + textureSlot);
 	//Unbinds texture
 	Unbind();
+}
+
+void Sprite::SetTransparency(float transparency)
+{
+	m_transparency = transparency;
+}
+
+float Sprite::GetTransparency()
+{
+	return m_transparency;
 }
 
 void Sprite::SetWidth(int width)

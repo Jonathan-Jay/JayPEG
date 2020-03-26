@@ -12,13 +12,13 @@ public:
 	//Honestly you won't use this constructor
 	//As when you add the Animated Sprite component
 	//You won't be able to give parameters to the component when you create it
-	Sprite(std::string& fileName, int width, int height);
+	Sprite(std::string& fileName, int width, int height, float transparency = 1.f);
 
 	//Loads sprite
 	//*Checks if uvs are setup
 	//*Initializes sprite plane
 	//*Grabs VertVBO from VertexManager
-	bool LoadSprite(std::string& fileName, int width, int height, bool Animated=false, AnimationController* anim=nullptr);
+	bool LoadSprite(std::string& fileName, int width, int height, bool Animated = false, AnimationController* anim = nullptr);
 	//Draws sprite
 	//*Just draws it
 	void Draw();
@@ -31,6 +31,10 @@ public:
 	void Unbind() const;
 	//Unbinds the texture of the sprite at textureSlot
 	void Unbind(int textureSlot) const;
+
+	void SetTransparency(float tranparency);
+
+	float GetTransparency();
 
 	//Sets the width of the sprite
 	void SetWidth(int width);
@@ -77,7 +81,8 @@ protected:
 	//The width and height
 	float m_width = 0;
 	float m_height = 0;
-	
+	float m_transparency = 1.f;
+
 	vec2 m_bottomLeft = vec2(0.f, 0.f);
 	vec2 m_topRight = vec2(1.f, 1.f);
 

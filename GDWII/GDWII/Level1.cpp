@@ -357,99 +357,101 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 void Level1::GamepadStick(XInputController* con)
 {
 	controllerInput = false;
-	if (con->IsButtonPressed(Buttons::X))
-	{
-		gunActive = true;
-		controllerInput = true;
-	}
-	else if (con->IsButtonPressed(Buttons::B))
-	{
-		controllerInput = true;
-		if (!missileShot)
-			missileActive = true;
-	}
-
-	Stick sticks[2];
-	con->GetSticks(sticks);
-	b2Vec2 temp = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
-	if (recoilDelay == 0)
-		temp.x = 0;
-	if (sticks[0].x > 0.5f)
-	{
-		if (!crouching && recoilDelay == 0)
-			temp.x += playerSpeed;
-		movingRight = true;
-		controllerInput = true;
-	}
-	else if (sticks[0].x < -0.5f)
-	{
-		if (!crouching && recoilDelay == 0)
-			temp.x -= playerSpeed;
-		movingRight = false;
-		controllerInput = true;
-	}
-	if (sticks[0].y > 0.7f || con->IsButtonPressed(Buttons::DPAD_UP)) {
-		facingUp = true;
-		controllerInput = true;
-	}
-	else {
-		facingUp = false;
-	}
-	if (!facingUp) {
-		if (sticks[0].y < -0.7f || con->IsButtonPressed(Buttons::DPAD_DOWN)) {
-			facingDown = true;
+	if (!stunned) {
+		if (con->IsButtonPressed(Buttons::X))
+		{
+			gunActive = true;
 			controllerInput = true;
 		}
-		else {
-			facingDown = false;
+		else if (con->IsButtonPressed(Buttons::B))
+		{
+			controllerInput = true;
+			if (!missileShot)
+				missileActive = true;
 		}
-	}
 
-	if (temp.x == 0) {
-		if (con->IsButtonPressed(Buttons::DPAD_RIGHT)) {
+		Stick sticks[2];
+		con->GetSticks(sticks);
+		b2Vec2 temp = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
+		if (recoilDelay == 0)
+			temp.x = 0;
+		if (sticks[0].x > 0.5f)
+		{
 			if (!crouching && recoilDelay == 0)
 				temp.x += playerSpeed;
 			movingRight = true;
 			controllerInput = true;
 		}
-		if (con->IsButtonPressed(Buttons::DPAD_LEFT)) {
+		else if (sticks[0].x < -0.5f)
+		{
 			if (!crouching && recoilDelay == 0)
 				temp.x -= playerSpeed;
 			movingRight = false;
 			controllerInput = true;
 		}
-	}
-
-	if (con->IsButtonPressed(Buttons::A)) {
-		if (canJump) {
-			if (jumpHeight < maxJumpStrength) {
-				temp.y = jumpHeight;
-				jumpHeight += jumpIncrementPerSec * Timer::deltaTime;
+		if (sticks[0].y > 0.7f || con->IsButtonPressed(Buttons::DPAD_UP)) {
+			facingUp = true;
+			controllerInput = true;
+		}
+		else {
+			facingUp = false;
+		}
+		if (!facingUp) {
+			if (sticks[0].y < -0.7f || con->IsButtonPressed(Buttons::DPAD_DOWN)) {
+				facingDown = true;
+				controllerInput = true;
 			}
 			else {
-				canJump = false;
-				jumpHeight = minJumpStrength;
+				facingDown = false;
 			}
 		}
-		controllerInput = true;
-	}
-	else if (controllerInput) {
-		canJump = false;
-		jumpHeight = minJumpStrength;
-	}
 
-	if (temp.y < -projectileSpeed * 1.5f) {
-		temp.y = -projectileSpeed * 1.5f;
-	}
-	m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
+		if (temp.x == 0) {
+			if (con->IsButtonPressed(Buttons::DPAD_RIGHT)) {
+				if (!crouching && recoilDelay == 0)
+					temp.x += playerSpeed;
+				movingRight = true;
+				controllerInput = true;
+			}
+			if (con->IsButtonPressed(Buttons::DPAD_LEFT)) {
+				if (!crouching && recoilDelay == 0)
+					temp.x -= playerSpeed;
+				movingRight = false;
+				controllerInput = true;
+			}
+		}
 
-	if (controllerInput && missileShot) {
-		if (con->IsButtonReleased(Buttons::B))
-			missileShot = false;
-	}
+		if (con->IsButtonPressed(Buttons::A)) {
+			if (canJump) {
+				if (jumpHeight < maxJumpStrength) {
+					temp.y = jumpHeight;
+					jumpHeight += jumpIncrementPerSec * Timer::deltaTime;
+				}
+				else {
+					canJump = false;
+					jumpHeight = minJumpStrength;
+				}
+			}
+			controllerInput = true;
+		}
+		else if (controllerInput) {
+			canJump = false;
+			jumpHeight = minJumpStrength;
+		}
 
-	if (con->IsButtonPressed(Buttons::SELECT)) {
-		exiting = true;
+		if (temp.y < -projectileSpeed * 1.5f) {
+			temp.y = -projectileSpeed * 1.5f;
+		}
+		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
+
+		if (controllerInput && missileShot) {
+			if (con->IsButtonReleased(Buttons::B))
+				missileShot = false;
+		}
+
+		if (con->IsButtonPressed(Buttons::SELECT)) {
+			exiting = true;
+		}
 	}
 }
 
@@ -509,7 +511,7 @@ void Level1::MouseWheel(SDL_MouseWheelEvent evnt)
 void Level1::KeyboardDown()
 {
 	//only update if no controller input
-	if (!controllerInput) {
+	if (!controllerInput && !stunned) {
 		if (Input::GetKey(Key::Z)) {
 			gunActive = true;
 		}
@@ -755,6 +757,7 @@ void Level1::Update()
 	if (item) {
 		itemCount++;
 		m_sceneReg->get<AnimationController>(uiElements[15]).SetActiveAnim(item);
+		counter = 5;
 	}
 
 	//has to run after everything since camera can move in other updates
@@ -838,6 +841,13 @@ void Level1::UpdateCounters()
 		if (recoilDelay < 0)
 			recoilDelay = 0;
 	}
+
+	if (counter > 0) {
+		counter -= Timer::deltaTime;
+		if (counter < 0)
+			counter = 0;
+		m_sceneReg->get<Sprite>(uiElements[15]).SetTransparency((counter > 1 ? 1 : counter));
+	}
 }
 
 void Level1::UpdateUI()
@@ -846,14 +856,27 @@ void Level1::UpdateUI()
 
 	auto& playerData = m_sceneReg->get<Player>(EntityIdentifier::MainPlayer());
 	if (playerData.updatePlayer()) {
-
-
-		std::cout << "you died\n";
-		playerData.setMaxHealth(playerData.getMaxHealth());
-		playerData.addCurrentHealth(maxHP);
-
-
+		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(
+			b2Vec2(0, m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity().y)
+		);
+		if (onGround) {
+			//m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(death + movingRight);
+			playerData.setStunned(5.f);
+			if (deathCounter > 0) {
+				deathCounter -= Timer::deltaTime;
+				if (deathCounter < 0) {
+					deathCounter = 0;
+					exiting = true;
+				}
+			}
+			else
+				deathCounter = 5.f;
+		}
 	}
+
+	stunned = playerData.getStunned();
+
+
 	/*
 	*/
 	bool offsetchanged = false;
@@ -876,8 +899,8 @@ void Level1::UpdateUI()
 	if (offsetchanged) {
 		std::cout << "offset: (" << tempOffSet.x << ", " << tempOffSet.y << ")\n";
 	}
-	if (Input::GetKey(Key::E)) {
-		playerData.subCurrentHealth(1);
+	if (Input::GetKeyDown(Key::E)) {
+		playerData.takeDamage(1);
 	}
 	if (Input::GetKeyDown(Key::Q)) {
 		playerData.getMissile(true);
@@ -1113,11 +1136,11 @@ void Level1::CreateUI()
 		for (unsigned int x(0); x < 5; x++) {
 			animController.AddAnimation(Animation());
 			auto& anim = animController.GetAnimation(x);
-			anim.AddFrame(vec2(0, 3 * (x + 1) - 1), vec2(2, 3 * x));
+			anim.AddFrame(vec2(0, 3 * (x + 1) - 1), vec2(2, 3 * x + 1));
 			anim.SetRepeating(false);
-			anim.SetSecPerFrame(10.f);
+			anim.SetSecPerFrame(1.f);
 		}
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 10, 10, true, &animController);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 100, 50, true, &animController);
 		animController.SetActiveAnim(0);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 200.f, 80.f));
