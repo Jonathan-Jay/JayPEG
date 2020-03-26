@@ -19,7 +19,12 @@ public:
 	void setMaxEnergy(int maxEnergy);
 
 	bool getMissile(bool gotIt = false);
-	int getUpgrade(bool change = false);
+	bool getUpgrade(bool gotIt = false);
+
+	void setStunned(float length);
+	bool getStunned();
+
+	void takeDamage(int amt);
 
 	void setEnergyRegen(float energyRegen);
 	float getEnergyRegen();
@@ -47,7 +52,8 @@ private:
 	float energyRegen = 0.f;
 
 	bool hasMissile = false;
-	int bulletUpgrade = 0;
+	bool hasBulletUpgrade = false;
+	float stunned = 0;
 };
 
 inline void to_json(nlohmann::json& j, const Player& player) 
