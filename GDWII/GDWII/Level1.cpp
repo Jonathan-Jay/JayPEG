@@ -92,7 +92,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 
 		//all animations will be equally seperated in the y, their opposite direction is done by flipping corner x values
-		for (int y(1); y <= 6; y++) {
+		for (int y(1); y <= 12; y++) {
 			animController.AddAnimation(Animation());
 			animController.AddAnimation(Animation());
 
@@ -110,6 +110,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 				break;
 			case 3:
 				frameCount = 1;
+				repeat = false;
 				break;
 			case 4:
 				frameCount = 15;
@@ -119,6 +120,30 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 				break;
 			case 6:
 				frameCount = 8;
+				repeat = false;
+				break;
+			case 7:
+				frameCount = 1;
+				repeat = false;
+				break;
+			case 8:
+				frameCount = 1;
+				repeat = false;
+				break;
+			case 9:
+				frameCount = 1;
+				repeat = false;
+				break;
+			case 10:
+				frameCount = 1;
+				repeat = false;
+				break;
+			case 11:
+				frameCount = 1;
+				repeat = false;
+				break;
+			case 12:
+				frameCount = 1;
 				repeat = false;
 				break;
 			default:
@@ -583,6 +608,9 @@ void Level1::KeyboardDown()
 			canJump = false;
 			jumpHeight = minJumpStrength;
 		}
+		if (temp.y < -projectileSpeed * 1.5f) {
+			temp.y = -projectileSpeed * 1.5f;
+		}
 		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
 
 		if (Input::GetKeyDown(Key::Escape)) {
@@ -658,7 +686,7 @@ void Level1::Update()
 
 	//only shoot when both weapons are ready
 	if (gunActive) {
-		if (gunDelay == 0.f) {
+		if (gunDelay == 0) {
 			m_soundEffects[1].play();
 			if (crouching) {
 				//remove tag to make force horizontal
@@ -679,7 +707,7 @@ void Level1::Update()
 					vel.y = projectileSpeed;
 				}
 				else if (facingDown) {
-					pos.y -= playerHeight / 2.f;
+					pos.y -= playerHeight / 2.f - 5.5f;
 					vel.y = -projectileSpeed * 2.f;
 				}
 				else {
@@ -728,7 +756,7 @@ void Level1::Update()
 					else if (facingDown) {
 						velo.y = maxJumpStrength;
 						pos.y -= playerHeight / 2.f;
-						vel.y = -projectileSpeed;
+						vel.y = -projectileSpeed * 2.f;
 					}
 					else {
 						if (crouching)
@@ -785,6 +813,12 @@ void Level1::Update()
 	6 and 7: walk forwards
 	8 and 9: walk up
 	10 and 11: death
+	12 and 13: up up
+	14 and 15: up down
+	16 and 17: up forwards
+	18 and 19: down up
+	20 and 21: down down
+	22 and 23: down forwards
 	first check if grounded*/
 	if (deathCounter == 0) {
 		b2Vec2 velo = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
@@ -807,19 +841,19 @@ void Level1::Update()
 		}
 		else if (velo.y > 0) {		//air upwards
 			//aiming up
-			if (facingUp)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(8 + movingRight);
+			if (facingUp)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(12 + movingRight);
 			//aiming down
-			else if (facingDown)	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(4 + movingRight);
+			else if (facingDown)	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(14 + movingRight);
 			//aiing left-right
-			else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(6 + movingRight);
+			else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(16 + movingRight);
 		}
 		else {						//air downwards animation
 			//aiming up
-			if (facingUp)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(2 + movingRight);
+			if (facingUp)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(18 + movingRight);
 			//aiming down
-			else if (facingDown)	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(4 + movingRight);
+			else if (facingDown)	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(20 + movingRight);
 			//aiing left-right
-			else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
+			else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(22 + movingRight);
 		}
 	}
 	else {		//death
