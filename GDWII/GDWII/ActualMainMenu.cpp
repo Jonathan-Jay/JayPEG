@@ -5,7 +5,7 @@ ActualMainMenu::ActualMainMenu(std::string name)
 {
 	//sounds
 	m_soundEffects.push_back({ "Megaman.wav", "sounds" });
-	m_soundEffects.push_back({ "nep.wav", "sounds" });
+	m_soundEffects.push_back({ "ClickBeat1.wav", "sounds" });
 	m_soundEffects.push_back({"RolloverSound1.wav", "sounds"});
 }
 
@@ -430,7 +430,6 @@ void ActualMainMenu::leftOnMenu()
 bool ActualMainMenu::menuSelected()
 {
 	bool temp = false;
-	m_soundEffects[1].play();
 	if (index == 1)
 	{
 		std::cout << "lol\n";
@@ -438,13 +437,16 @@ bool ActualMainMenu::menuSelected()
 		accell = 25.f;
 		cameraSpan = true;
 		onCredits = true;
+		m_soundEffects[1].play();
 	}
 	else if (index == 2)
 	{
 		clickedPlay = true;
+		m_soundEffects[1].play();
 	}
 	else if (index == 3)
 	{
+		m_soundEffects[1].play();
 		std::exit(NULL);
 	}
 	else {
