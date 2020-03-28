@@ -2,7 +2,8 @@
 #define __GAME_H__
 
 #include "BackEnd.h"
-
+#include <iomanip>
+#include <random>
 
 //Our main class for running our game
 class Game

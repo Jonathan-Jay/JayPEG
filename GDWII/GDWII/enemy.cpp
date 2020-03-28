@@ -3,6 +3,7 @@
 std::vector<enemyList> Enemies::enemies = {};
 int Enemies::deactivationLength = 600;
 float Enemies::sightRefreshTime = 0.125f;
+float Enemies::shootDelayTime = .5f;
 b2World* Enemies::m_phyWorld = nullptr;
 
 void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
@@ -11,25 +12,48 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 	b2Vec2 enemyb2Pos = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetPosition();
 	AnimationController& animCon = m_reg->get<AnimationController>(enemyID.enemyID);
 
+	grounded = false;
+	for (b2ContactEdge* edge = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetContactList(); edge; edge = edge->next)
+		if (edge->contact->GetManifold()->localNormal.y >= 0.9 && edge->contact->GetManifold()->pointCount == 2) {
+			grounded = true;
+			break;
+		}
+
 	b2Vec2 temp = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetLinearVelocity();
 	temp.x = 0;
 
+	shootDelay += Timer::deltaTime;
 	//detect if player is within sight
 	refreshSightTime += Timer::deltaTime;
-	if (refreshSightTime > Enemies::GetSightRefreshTime())
+	if (refreshSightTime >= Enemies::GetSightRefreshTime())
 		findPlayer(m_reg, enemyID);
 
-	if (canSeePlayer) {
+	float tempCalc{ 0 };
+	if (canSeePlayer && state != EnemyState::Flee) {
 		switch (type) {
 		case EnemyTypes::WALKER:	
 			targetPos = playerPos;
 			break;
 		case EnemyTypes::SHOOTER:
-			//just do same as walker and move this logic into different part
-			targetPos.x = playerPos.x - enemyPos.x;
-			targetPos.x = playerPos.x - targetPos.x / abs(targetPos.x) * 150;
-			targetPos.y = playerPos.y;
 			targetPos2 = playerPos;
+
+			if (abs(playerPos.y - enemyPos.y) < 15 && grounded) {
+				if (abs(playerPos.x - enemyPos.x) <= 60)
+					state = EnemyState::Flee;
+
+				targetPos.x = playerPos.x - enemyPos.x;
+				targetPos.x = playerPos.x - targetPos.x / abs(targetPos.x) * 150;
+				targetPos.y = playerPos.y;
+
+				tempCalc = targetPos2.x - enemyPos.x;
+				tempCalc = tempCalc / abs(tempCalc);
+				if (refreshSightTime == 0 && tempCalc == animCon.GetActiveAnim() * 2 - 1 && shootDelay >= Enemies::GetShootDelayTime()) {
+					Bullets::CreateBullet(m_reg, Enemies::GetPhysicsWorld(), enemyb2Pos, b2Vec2((animCon.GetActiveAnim() * 2 - 1) * 30, 0), 5, CollisionIDs::Enemy);
+					shootDelay = 0.f;
+				}
+			} else
+				targetPos = targetPos2;
+
 			break;
 		default:
 			break;
@@ -37,10 +61,11 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 
 		previousFixture = nullptr;
 		previousChildEndex = 0;
-		state = EnemyState::Follow;
+
+		if (state != EnemyState::Flee)
+			state = EnemyState::Follow;
 	}
 
-	float tempCalc{ 0 };
 	b2Vec2 jumpTestPoint;
 	switch (state) {
 	case EnemyState::Follow:
@@ -64,18 +89,12 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 		temp.x += tempCalc;
 
 		canJump = false;
-
-		if ( type == EnemyTypes::WALKER || type == EnemyTypes::SHOOTER && ( temp.x / abs(temp.x) == (targetPos2.x - enemyPos.x) / abs(targetPos2.x - enemyPos.x) || (targetPos2 - enemyPos).GetMagnitude() < 80 || !canSeePlayer ) )
-			for (b2ContactEdge* edge = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetContactList(); edge; edge = edge->next)
-				if (edge->contact->GetManifold()->localNormal.y >= 0.9 && edge->contact->GetManifold()->pointCount == 2) {
+		if (grounded)
+			if ( type == EnemyTypes::WALKER || type == EnemyTypes::SHOOTER && ( temp.x / abs(temp.x) == (targetPos2.x - enemyPos.x) / abs(targetPos2.x - enemyPos.x) || !canSeePlayer ) )
 				canJump = true;
-				break;
-			}
 
-		
-		//limit the jump check distance if enemyPos is too closer to targetPos
+		//limit the jump check distance if enemyPos is too close to targetPos
 		jumpTestPoint = b2Vec2(enemyb2Pos.x + temp.x * 3, enemyb2Pos.y);
-
 		if ( canSeePlayer && (temp.x > 0 ? targetPos.x < jumpTestPoint.x : targetPos.x > jumpTestPoint.x) )
 			jumpTestPoint.x = targetPos.x;
 
@@ -137,6 +156,50 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 		}
 
 		temp.x += (animCon.GetActiveAnim() * 2 - 1) * moveSpeed;
+		break;
+	case EnemyState::Flee:
+		tempCalc = targetPos.x - enemyPos.x;
+
+		//is close to targetPos
+		if (abs(tempCalc) < moveSpeed / 2) {
+			animCon.SetActiveAnim(targetPos2.x - enemyPos.x < 0 ? 0 : 1);
+
+			if (canSeePlayer)
+				state = EnemyState::Follow;
+			else
+				state = EnemyState::Idle;
+
+			break;
+		}
+
+		tempCalc = tempCalc / abs(tempCalc) * moveSpeed;
+		temp.x += tempCalc;
+
+		canJump = false;
+		if (grounded)
+			canJump = true;
+
+		//limit the jump check distance if enemyPos is too close to targetPos
+		jumpTestPoint.Set(enemyb2Pos.x + temp.x * 3, enemyb2Pos.y);
+		if (temp.x > 0 ? targetPos.x < jumpTestPoint.x : targetPos.x > jumpTestPoint.x)
+			jumpTestPoint.x = targetPos.x;
+
+		//jump by doing raycast to side and checking to see if intersection point is different then p2 for the raycast
+		if (canJump && EnemyRaycast(enemyb2Pos, jumpTestPoint, true).x != jumpTestPoint.x) {
+			//detect if enemy has jumped multiple times in same place, if so then wander as it is stuck jumping
+			if (jumpInfo.y == static_cast<int>(enemyb2Pos.x) && jumpInfo.z == static_cast<int>(enemyb2Pos.y)) {
+				jumpInfo.x++;
+				if (jumpInfo.x >= 2) {
+					jumpInfo.Set(0, 0, 0);
+					state = EnemyState::Idle;
+					break;
+				}
+			} else
+				jumpInfo.Set(0, static_cast<int>(enemyb2Pos.x), static_cast<int>(enemyb2Pos.y));
+
+			temp.y = jumpHeight;
+		}
+
 		break;
 	default:
 		break;

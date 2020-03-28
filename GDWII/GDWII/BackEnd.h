@@ -12,6 +12,7 @@
 #include "PhysicsSystem.h"
 #include "ActualMainMenu.h"
 #include "Level1.h"
+#include "LoadingScreen.h"
 
 //Mouse Motion event
 typedef SDL_MouseMotionEvent MotionEvent;
@@ -59,7 +60,7 @@ public:
 
 	//Reshapes the window
 	//*Happens then WINDOW_EVENT_RESHAPE event is polled
-	static void ReshapeWindow(int w, int h, entt::registry* mainReg);
+	static void ReshapeWindow(int w, int h, entt::registry* mainReg = nullptr);
 
 	static void SetWindowName(std::string name);
 
