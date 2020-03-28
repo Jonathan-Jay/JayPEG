@@ -1,9 +1,10 @@
-#pragma once
+#ifndef __ENEMY_H__
+#define __ENEMY_H__
+
+#include "bullet.h"
 #include "JSON.h"
 #include "PhysicsSystem.h"
 #include <entt/entity/registry.hpp>
-
-using std::clamp;
 
 enum class EnemyTypes {
 	WALKER,
@@ -12,7 +13,9 @@ enum class EnemyTypes {
 
 enum class EnemyState {
 	Follow,
-	Wander
+	Wander,
+	Flee,
+	Idle
 };
 
 struct enemyList {
@@ -32,12 +35,14 @@ public:
 	int moveSpeed{ 0 };
 	int jumpHeight{ 0 };
 	int attackDamage{ 0 };
-	float refreshSightTime = 0.f;
+	float refreshSightTime{ 0.f };
+	float shootDelay{ 0.f };
 	size_t enemyCheckingIndex{ 0 };
 	std::vector<unsigned int> insideEnemies;
 	bool canSeePlayer{ false };
 	bool facingRight{ false };
 	bool canJump{ false };
+	bool grounded{ false };
 	vec2 targetPos;
 	vec2 targetPos2;
 	b2Vec3 jumpInfo;	//times jumped, x pos at jump, y pos at jump
@@ -76,6 +81,7 @@ public:
 	static void UpdateEnemies(entt::registry* m_reg);
 	static std::vector<enemyList> GetEnemies() { return enemies; }
 	static float GetSightRefreshTime() { return sightRefreshTime; }
+	static float GetShootDelayTime() { return shootDelayTime; }
 	static b2World* GetPhysicsWorld() { return m_phyWorld; }
 
 	static void reset(b2World* physWorld) { m_phyWorld = physWorld;	enemies.resize(0); }
@@ -86,6 +92,9 @@ private:
 	static int deactivationLength;
 	//how long to wait to refresh the sight of the enemy
 	static float sightRefreshTime;
+	static float shootDelayTime;
 
 	static b2World* m_phyWorld;
 };
+
+#endif // !__ENEMY_H__

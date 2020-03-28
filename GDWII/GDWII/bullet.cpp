@@ -1,7 +1,7 @@
 #include "bullet.h"
 
 std::vector<unsigned int> Bullets::bullets = {};
-int Bullets::maxBullets = 5;
+int Bullets::maxBullets = 15;
 int Bullets::damage = 5;
 
 void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float bulletRadius, uint16 shooter) {
