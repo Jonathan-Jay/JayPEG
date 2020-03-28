@@ -276,7 +276,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "world");
 	}
-
+	/*
 	{
 		auto entity = ECS::CreateEntity();
 
@@ -334,6 +334,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		unsigned int bitHolder = EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "island 2");
 	}
+	*/
 
 	CreateUI();
 
@@ -755,7 +756,7 @@ void Level1::Update()
 					}
 					else if (facingDown) {
 						velo.y = maxJumpStrength;
-						pos.y -= playerHeight / 2.f;
+						pos.y -= playerHeight / 2.f - 5.5f;
 						vel.y = -projectileSpeed * 2.f;
 					}
 					else {
