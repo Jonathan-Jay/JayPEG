@@ -48,6 +48,7 @@ private:
 	bool facingDown = false;
 	bool crouching = false;
 	bool exiting = false;
+	bool gameOver = false;
 	bool stunned = false;
 	float jumpHeight = 0;
 	float gunDelay = 0;
@@ -80,14 +81,11 @@ private:
 	float playerHeight = 40.f;
 	float playerWidth = 22.f;
 	float playerSpeed = 25.f;
-	float minJumpStrength = 50.f;
-	float maxJumpStrength = 75.f;
+	float minJumpStrength = 25.f;
+	float maxJumpStrength = 50.f;
 	float jumpIncrementPerSec = 125.f;
 
 	//doors
-	Door bossDoor;
-	Door bossRoomDoor;
-	Door tempPlatform;
 };
 
 #endif // !__LVL1__

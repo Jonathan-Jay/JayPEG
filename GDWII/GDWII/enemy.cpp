@@ -3,7 +3,7 @@
 std::vector<enemyList> Enemies::enemies = {};
 int Enemies::deactivationLength = 600;
 float Enemies::sightRefreshTime = 0.125f;
-float Enemies::shootDelayTime = .5f;
+float Enemies::shootDelayTime = 1.5f;
 b2World* Enemies::m_phyWorld = nullptr;
 
 void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
@@ -48,7 +48,7 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 				tempCalc = targetPos2.x - enemyPos.x;
 				tempCalc = tempCalc / abs(tempCalc);
 				if (refreshSightTime == 0 && tempCalc == animCon.GetActiveAnim() * 2 - 1 && shootDelay >= Enemies::GetShootDelayTime()) {
-					Bullets::CreateBullet(m_reg, Enemies::GetPhysicsWorld(), enemyb2Pos, b2Vec2((animCon.GetActiveAnim() * 2 - 1) * 30, 0), 5, CollisionIDs::Enemy);
+					Bullets::CreateBullet(m_reg, Enemies::GetPhysicsWorld(), enemyb2Pos + b2Vec2((animCon.GetActiveAnim() ? 10 : -10), 0), b2Vec2((animCon.GetActiveAnim() * 2 - 1) * 30, 0), 5, CollisionIDs::Enemy);
 					shootDelay = 0.f;
 				}
 			} else
@@ -333,14 +333,14 @@ unsigned int Enemies::CreateEnemy(b2World* m_physicsWorld, EnemyTypes m_type, fl
 	ECS::AttachComponent<AnimationController>(entity);
 	ECS::AttachComponent<Enemy>(entity);
 
-	std::string filename{ "" };
+	std::string filename{ "Enemies/" };
 	switch (m_type) {
 	case EnemyTypes::WALKER:
-		filename = "directionEW.png";
+		filename += "walk.png";
 		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 10, 10, 50, 3);
 		break;
 	case EnemyTypes::SHOOTER:
-		filename = "directionES.png";
+		filename += "shoot.png";
 		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 8, 10, 50, 2);
 		break;
 	default:
@@ -353,25 +353,27 @@ unsigned int Enemies::CreateEnemy(b2World* m_physicsWorld, EnemyTypes m_type, fl
 	animController.AddAnimation(Animation());
 	animController.AddAnimation(Animation());
 
-	{	//aniamtion 1 is walking right
+	{	//aniamtion 0 is walking left
 		auto& anim = animController.GetAnimation(0);
-		anim.AddFrame(vec2(5, 5), vec2(0, 0));
-		anim.SetRepeating(false);
-		anim.SetSecPerFrame(1.f);
+		for (int x(0); x < 5; x++)
+			anim.AddFrame(vec2(150 * x, 150), vec2(150 * (x + 1), 0));
+		anim.SetRepeating(true);
+		anim.SetSecPerFrame(0.15f);
 	}
 	
-	{	//animation 0 is walking left
+	{	//animation 1 is walking right
 		auto& anim = animController.GetAnimation(1);
-		anim.AddFrame(vec2(0, 5), vec2(5, 0));
-		anim.SetRepeating(false);
-		anim.SetSecPerFrame(1.f);
+		for (int x(0); x < 5; x++)
+			anim.AddFrame(vec2(150 * (x + 1), 150), vec2(150 * x, 0));
+		anim.SetRepeating(true);
+		anim.SetSecPerFrame(0.15f);
 	}
 
 	animController.SetActiveAnim(0);
 
 	ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 20, 20, true, &animController);
 
-	ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
+	ECS::GetComponent<Transform>(entity).SetPosition(vec3(x, y, 30.f));
 
 	auto& tempSpr = ECS::GetComponent<Sprite>(entity);
 
@@ -386,7 +388,7 @@ unsigned int Enemies::CreateEnemy(b2World* m_physicsWorld, EnemyTypes m_type, fl
 	tempBody->SetFixedRotation(true);
 	tempBody->SetUserData((void*)entity);
 
-	tempPhsBody = PhysicsBody(tempBody, 20.f, 20.f, vec2(0, 0), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy);
+	tempPhsBody = PhysicsBody(tempBody, 18.f, 20.f, vec2(0, 0), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy);
 	tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
 
 	unsigned int bitHolder = EntityIdentifier::AnimationBit() | EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit() | EntityIdentifier::EnemyBit();

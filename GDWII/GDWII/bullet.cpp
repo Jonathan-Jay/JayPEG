@@ -13,31 +13,46 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 	ECS::AttachComponent<AnimationController>(entity);
 
 	std::string filename = "Bullet.png";
+	if (shooter == CollisionIDs::Enemy) {
+		filename = "Enemies/shootShot.png";
+	}
 
 	auto& animController = ECS::GetComponent<AnimationController>(entity);
 	animController.InitUVs(filename);
 
 	animController.AddAnimation(Animation());
 	auto& anim = animController.GetAnimation(0);
-	for (int x(0); x < 5; x++) {
-		anim.AddFrame(vec2(250 * x, 250), vec2(250 * (x + 1) - 1, 0));
-	}
 	anim.SetRepeating(true);
 	anim.SetSecPerFrame(0.04f);
-	animController.SetActiveAnim(0);
+	if (shooter == CollisionIDs::Player) {
+		for (int x(0); x < 5; x++) {
+			anim.AddFrame(vec2(250 * x, 250), vec2(250 * (x + 1) - 1, 0));
+		}
+		animController.SetActiveAnim(0);
 
-	if (vel.y == 0) {
-		animController.AddAnimation(Animation());
-		auto& anim2 = animController.GetAnimation(1);
-		anim2.AddFrame(vec2(0, 0), vec2(0, 0));
-		anim2.SetRepeating(false);
-		anim2.SetSecPerFrame(0.01f);
-		animController.SetActiveAnim(1);
+		if (vel.y == 0) {
+			animController.AddAnimation(Animation());
+			auto& anim2 = animController.GetAnimation(1);
+			anim2.AddFrame(vec2(0, 0), vec2(0, 0));
+			anim2.SetRepeating(false);
+			anim2.SetSecPerFrame(0.01f);
+			animController.SetActiveAnim(1);
+		}
+	}
+	else {
+		anim.AddFrame(vec2(0, 50), vec2(100, 0));
+		anim.AddFrame(vec2(100, 50), vec2(200, 0));
+		animController.SetActiveAnim(0);
 	}
 
-	ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 2.f, bulletRadius * 2.f, true, &animController);
+	if (shooter == CollisionIDs::Player) {
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 2.f, bulletRadius * 2.f, true, &animController);
+	}
+	else {
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 4.f, bulletRadius * 2.f, true, &animController);
+	}
 
-	ECS::GetComponent<Transform>(entity).SetPosition(vec3(pos.x, pos.y, 0.f));
+	ECS::GetComponent<Transform>(entity).SetPosition(vec3(pos.x, pos.y, 27.f));
 
 	auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
