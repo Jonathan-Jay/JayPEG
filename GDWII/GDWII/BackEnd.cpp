@@ -178,15 +178,17 @@ void BackEnd::ReshapeWindow(int w, int h, entt::registry * mainReg)
 	//Reshape all created buffers to be proper
 	EffectManager::ReshapeBuffers(unsigned(w), unsigned(h));
 
-	//Adjusts for aspect ratio
-	vec4 temp = mainReg->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize();
-	auto& tempCam = mainReg->get<Camera>(EntityIdentifier::MainCamera());
+	if (mainReg != nullptr) {
+		//Adjusts for aspect ratio
+		vec4 temp = mainReg->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize();
+		auto& tempCam = mainReg->get<Camera>(EntityIdentifier::MainCamera());
 
-	//Set values
-	mainReg->get<Camera>(EntityIdentifier::MainCamera()).SetWindowSize(vec2(float(m_windowWidth), float(m_windowHeight)));
-	mainReg->get<Camera>(EntityIdentifier::MainCamera()).Orthographic(m_aspectRatio, temp.x, temp.y, temp.z, temp.w, tempCam.GetNear(), tempCam.GetFar());
+		//Set values
+		mainReg->get<Camera>(EntityIdentifier::MainCamera()).SetWindowSize(vec2(float(m_windowWidth), float(m_windowHeight)));
+		mainReg->get<Camera>(EntityIdentifier::MainCamera()).Orthographic(m_aspectRatio, temp.x, temp.y, temp.z, temp.w, tempCam.GetNear(), tempCam.GetFar());
 
-	tempCam.SetPosition(tempCam.GetPosition());
+		tempCam.SetPosition(tempCam.GetPosition());
+	}
 }
 
 void BackEnd::SetWindowName(std::string name)

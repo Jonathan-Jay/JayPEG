@@ -73,7 +73,7 @@ void Window::Flip()
 {
 	//Swaps the buffers (using double buffer system)
 	SDL_GL_SwapWindow(m_window);
-}
+ }
 
 void Window::SetWindowName(std::string name)
 {

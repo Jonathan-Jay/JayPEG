@@ -1,7 +1,6 @@
 #include "Level1.h"
 
-Level1::Level1(std::string name)
-	: Scene(name)
+Level1::Level1(std::string name) : Scene(name)
 {
 	m_gravity = b2Vec2(float32(0.f), float32(-20.f));
 
@@ -20,7 +19,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 	float aspectRatio = windowWidth / windowHeight;
 
-	vec3 playerPos = { -1243.f, -186.f, 30.f };
+	vec3 playerPos = { -854, 1000, 30.f };
 
 	{
 		auto entity = ECS::CreateEntity();
@@ -32,11 +31,11 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 		ECS::GetComponent<HorizontalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<HorizontalScroll>(entity).SetOffset(15.f);
-		ECS::GetComponent<HorizontalScroll>(entity).SetLimits(-1740, 1680);
+		//ECS::GetComponent<HorizontalScroll>(entity).SetLimits(-1740, 1680);
 
 		ECS::GetComponent<VerticalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<VerticalScroll>(entity).SetOffset(15.f);
-		ECS::GetComponent<VerticalScroll>(entity).SetLimits(-1200, 1254);
+		//ECS::GetComponent<VerticalScroll>(entity).SetLimits(-1200, 1254);
 
 		vec4 temp = ECS::GetComponent<Camera>(entity).GetOrthoSize();
 		ECS::GetComponent<Camera>(entity).SetWindowSize(vec2(float(windowWidth), float(windowHeight)));
@@ -56,7 +55,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		ECS::AttachComponent<Transform>(entity);
 		ECS::AttachComponent<PhysicsBody>(entity);
 
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(-1243.f, -186.f, 15.f));
+		ECS::GetComponent<Transform>(entity).SetPosition(playerPos);
 
 		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
@@ -218,11 +217,9 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		ECS::AttachComponent<Transform>(entity);
 		ECS::AttachComponent<PhysicsBody>(entity);
 
-		//std::string filename = "tempmap.png";
-		std::string filename = "tempmap2.png";
+		std::string filename = "background.png";
 
-		//ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 4329, 1926);
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 4200, 3373);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 5600, 3373);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 20.f));
 
@@ -237,24 +234,10 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		tempBody->SetGravityScale(0);
 		
 		std::vector<float> x = {
-			-1309, -555, -555, -664, -664, -255, -255, 102, 102, 375, 375, 703, 703, 862, 862, 979, 979,
-			1138, 1138, 970, 970, 1460, 1460, 1420, 1420, -277, -277, -25, -25, -242, -242, -276, -276, -1890, -1890,
-			-1066, -1066, -820, -820, 290, 290, 1596, 1596, 1235, 1235, 1595, 1595, 1568, 1568, 1635, 1635, 808, 808,
-			841, 841, 370, 370, 701, 701, 535, 535, 701, 701, 655, 655, 1407, 1407, 1315, 1315, 1409, 1409, 1379, 1379,
-			1403, 1403, 1369, 1369, 1450, 1450, 1840, 1840, 1450, 1450, 1400, 1400, 756, 756, 696, 696, -241, -241, -287, -287,
-			-1046, -1046, -1082, -1082, -1400, - 1400, - 996, - 996, - 1043, - 1043, - 983, - 983, - 1046, - 1046, - 993, - 993,
-			- 1043, - 1043, - 1000, - 1000, - 937, - 937, - 842, - 842, - 1476, - 1476, - 688, - 688, - 569, - 569, - 247, - 247,
-			- 191, - 191, - 245, - 245, - 93, - 93, -247, -247, 105, 105, -470, -470, -420, -420, -1310, -1310
+			-336, -336, 522, 522, -941, -941, -460, -460
 		};
 		std::vector<float> y = {
-			-202, -202, -215, -215, -408, -408, -375, - 375, - 330, - 330, - 373, - 373, - 417, - 417, - 460, - 460,
-			- 416,  - 416,  - 220, - 220, - 209,  - 209,  - 229,  - 229,  - 1051,  - 1051,  - 845, - 845, - 684,  - 684,
-			- 760,  - 760,  - 671, -671, -1200, -1200, -900,  - 900,  - 1210, - 1210, - 1370,  - 1370, - 1200,  - 1200,
-			- 1182,  - 1182,  - 229,  - 229,  - 207,  - 207,  - 11, - 11, - 198, - 198, - 215, - 215, - 155, - 155, - 56, - 56, 1, 1,
-			118, 118, 234, 234, 445,  445,  502,  502,  1029,  1029,  1048,  1048,  1135,  1135,  1181,  1181, 1150,  1150,  1394,  1394,
-			1282,  1282,  1348, 1348, 1185, 1185, 1350,  1350,  1161,  1161,  1351, 1351, 1315, 1315, 1422, 1422, 1204,  1204,  1146, 1146,
-			1018,  1018,  960, 960, 772,  772,  712, 712, 505, 505, 462,  462,  411,  411,  349, 349, 270,  270,  334,  334,
-			273,  273,  205,  205,  151,  151,  21, 21, - 49,  -49, -159, -159, -212, -212, -195, -195, 9, 9, -202
+			919, 960, 960, 1260, 1260, 960, 960, 914
 		};
 
 		/*
@@ -277,6 +260,47 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		ECS::SetUpIdentifier(entity, bitHolder, "world");
 	}
 
+	{
+		auto entity = ECS::CreateEntity();
+
+		ECS::AttachComponent<Sprite>(entity);
+		ECS::AttachComponent<Transform>(entity);
+		ECS::AttachComponent<PhysicsBody>(entity);
+
+		std::string filename = "walls.png";
+
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 5600, 3373);
+
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 25.f));
+
+		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
+
+		b2Body* tempBody;
+		b2BodyDef tempDef;
+		tempDef.type = b2_staticBody;
+		tempDef.position.Set(float32(0), float32(0));
+
+		tempBody = m_physicsWorld->CreateBody(&tempDef);
+		tempBody->SetGravityScale(0);
+
+		std::vector<float> x = { -1300, -907, -907, -848
+			-848, -780, -780, -720, -720, -645, -645, -580, -580, -510, -510, -920, -920,
+			-590, -590, -520, -520, -260, -260, -190, -190, 70, 70, 200, 200, 325, 325, 520, 520, -275,
+			-275, -212, -212, -144, -144, -76, -76, -9, -9, 57
+		};
+		std::vector<float> y = {
+			137, 137, 72, 72
+			-5, -5, -76, -76, -152, -152, -220, -220, -295, -295, -315, -315, -460, -460,
+			-430, -430, -393, -393, -427, -427, -466, -466, -500, -500, -535, -535, -500, -500, -310, -310,
+			- 293, -293, -224, -224, -151, -151, -84, -84, -7, -7
+		};
+
+		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment);
+
+		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
+		ECS::SetUpIdentifier(entity, bitHolder, "front");
+	}
+	/*
 	{
 		auto entity = ECS::CreateEntity();
 
@@ -334,6 +358,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		unsigned int bitHolder = EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "island 2");
 	}
+	*/
 
 	CreateUI();
 
@@ -342,7 +367,22 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Enemies::reset(m_physicsWorld);
 	Missiles::reset();
 	Bullets::reset();
+	/*
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 28, 985);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, -842.379211, -451.026703);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, -722.790894, -443.387817);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 87.626526, -460.499451);
+	*/
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 1.793221, -433.416138);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 1.793221, -433.416138);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 1.793221, -433.416138);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 1.793221, -433.416138);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 1.793221, -433.416138);
 
+	Collectibles::CreateCollectible(vec3(-850, -420, 30), 30, 30, CollectiblesType::Missile);
+	Collectibles::CreateCollectible(vec3(225, 960, 28), 60, 15, CollectiblesType::RegenStation);
+
+	/*
 	tempPlatform.Init(m_physicsWorld, vec3(-135, 183, 50), vec3(584, 209, 50), 100, 10, "png.jpg", 200);
 	tempPlatform.isBouncy();
 
@@ -354,9 +394,9 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		Collectibles::CreateCollectible(vec3(-1815, -1170, 50.f), 30, 30, CollectiblesType::RegenUp)
 	);
 
-	for (size_t i = 0; i < 2; i++) {	
-		Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 270, -280);
-		Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 270, -280);
+	for (size_t i = 0; i < 1; i++) {	
+		Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 0, -280);
+		Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 0, -280);
 	}
 
 	Missiles::CreateWall(m_physicsWorld, vec3(675, -300, 50.f), 50, 160, "png.jpg");
@@ -384,15 +424,12 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Collectibles::CreateCollectible(vec3(-1415, 270, 25.f), 60, 15, CollectiblesType::RegenStation);
 	Collectibles::CreateCollectible(vec3(-116, -842, 25.f), 60, 15, CollectiblesType::RegenStation);
 	Collectibles::CreateCollectible(vec3(1710, 1170, 25.f), 60, 15, CollectiblesType::RegenStation);
-
+	*/
 	//summon bullets to load sprite
 	Bullets::setDamage(bulletDamage);
 	Missiles::setDamage(missileDamage);
-	Bullets::CreateBullet(m_sceneReg, m_physicsWorld, b2Vec2(playerPos.x - 1000, playerPos.y), b2Vec2(0, 0), 0, CollisionIDs::Player);
-	Missiles::CreateMissile(m_sceneReg, m_physicsWorld, b2Vec2(playerPos.x - 1000, playerPos.y), b2Vec2(0, 0), 0);
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
-
 }
 
 void Level1::GamepadStick(XInputController* con)
@@ -511,6 +548,16 @@ void Level1::MouseClick(SDL_MouseButtonEvent evnt)
 			m_sceneReg->get<Camera>(maincamera).GetPositionY());
 
 		printf("(%f, %f)\n", pos.x, pos.y);
+
+		if (xPos.size() != 0) {
+			if (abs(xPos[xPos.size() - 1] - pos.x) < abs(yPos[yPos.size() - 1] - pos.y)) {
+				pos.x = xPos[xPos.size() - 1];
+			}
+			else {
+				pos.y = yPos[yPos.size() - 1];
+			}
+		}
+
 		xPos.push_back(pos.x);
 		yPos.push_back(pos.y);
 	}
@@ -523,15 +570,15 @@ void Level1::MouseClick(SDL_MouseButtonEvent evnt)
 	if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
 		for (int x(0); x < xPos.size(); x++) {
 			if (x == xPos.size() - 1)
-				std::cout << std::fixed << std::setprecision(2) << xPos[x] << '\n';
+				std::cout << std::fixed << std::setprecision(0) << xPos[x] << '\n';
 			else
-				std::cout << std::fixed << std::setprecision(2) << xPos[x] << ", ";
+				std::cout << std::fixed << std::setprecision(0) << xPos[x] << ", ";
 		}
 		for (int x(0); x < yPos.size(); x++) {
 			if (x == yPos.size() - 1)
-				std::cout << std::fixed << std::setprecision(2) << yPos[x] << '\n';
+				std::cout << std::fixed << std::setprecision(0) << yPos[x] << '\n';
 			else
-				std::cout << std::fixed << std::setprecision(2) << yPos[x] << ", ";
+				std::cout << std::fixed << std::setprecision(0) << yPos[x] << ", ";
 		}
 	}
 }
@@ -755,7 +802,7 @@ void Level1::Update()
 					}
 					else if (facingDown) {
 						velo.y = maxJumpStrength;
-						pos.y -= playerHeight / 2.f;
+						pos.y -= playerHeight / 2.f - 5.5f;
 						vel.y = -projectileSpeed * 2.f;
 					}
 					else {
@@ -860,6 +907,7 @@ void Level1::Update()
 			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(10 + movingRight);
 	}
 }
+
 int Level1::ChangeScene()
 {
 	if (exiting) {

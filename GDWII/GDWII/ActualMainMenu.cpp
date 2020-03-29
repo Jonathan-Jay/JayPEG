@@ -1,8 +1,6 @@
 #include "ActualMainMenu.h"
 
-ActualMainMenu::ActualMainMenu(std::string name)
-	:Scene(name)
-{
+ActualMainMenu::ActualMainMenu(std::string name) : Scene(name) {
 	//sounds
 	m_soundEffects.push_back({ "Megaman.wav", "sounds" });
 	m_soundEffects.push_back({ "nep.wav", "sounds" });

@@ -24,8 +24,6 @@ public:
 	void MouseClick(SDL_MouseButtonEvent evnt) override;
 	void MouseWheel(SDL_MouseWheelEvent evnt) override;
 
-
-
 private:
 	//tests if player is grounded
 	bool Grounded();
@@ -83,14 +81,11 @@ private:
 	float playerHeight = 40.f;
 	float playerWidth = 22.f;
 	float playerSpeed = 25.f;
-	float minJumpStrength = 50.f;
-	float maxJumpStrength = 75.f;
+	float minJumpStrength = 25.f;
+	float maxJumpStrength = 50.f;
 	float jumpIncrementPerSec = 125.f;
 
 	//doors
-	Door bossDoor;
-	Door bossRoomDoor;
-	Door tempPlatform;
 };
 
 #endif // !__LVL1__

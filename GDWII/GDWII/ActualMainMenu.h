@@ -10,7 +10,7 @@ class ActualMainMenu : public Scene
 public:
 	ActualMainMenu(std::string name);
 
-	void InitScene(float windowWidth, float windowHeight);
+	void InitScene(float windowWidth, float windowHeight) override;
 	void MouseClick(SDL_MouseButtonEvent evnt) override;
 	void MouseMotion(SDL_MouseMotionEvent evnt) override;
 	void GamepadStick(XInputController* con) override;
