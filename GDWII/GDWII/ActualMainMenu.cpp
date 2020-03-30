@@ -4,7 +4,7 @@ ActualMainMenu::ActualMainMenu(std::string name)
 	:Scene(name)
 {
 	//sounds
-	m_soundEffects.push_back({ "Megaman.wav", "sounds" });
+	m_soundEffects.push_back({ "MenuBackground.mp3", "sounds" });
 	m_soundEffects.push_back({ "ClickBeat1.wav", "sounds" });
 	m_soundEffects.push_back({"RolloverSound1.wav", "sounds"});
 }
@@ -127,7 +127,7 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 1500, 750, false);
 
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(1250.f, 1.f, 0.f));
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(1500.f, 1.f, 49.f));
 
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
@@ -143,7 +143,7 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 247*2, 204*2, false);
 
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(1250.f, 25.f, 2.f));
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(1250.f, 25.f, 50.f));
 
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
