@@ -118,7 +118,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 				frameCount = 15;
 				break;
 			case 6:
-				frameCount = 8;
+				frameCount = 15;
 				repeat = false;
 				break;
 			case 7:
@@ -1118,21 +1118,25 @@ void Level1::UpdateUI()
 		m_sceneReg->get<Transform>(uiElements[x]).SetRotationAngleY(tempAngleY);
 		m_sceneReg->get<Transform>(uiElements[x]).SetRotationAngleZ(tempAngleZ);
 	}
+	*/
 
 	//zoom stuff
 	float yOrtho = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize().y;
-	float xPos = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
-	if (xPos > 0 && xPos < 500) {
-		if (yOrtho < 500) {
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-1);
+	vec3 playerPos = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPosition();
+	if (playerPos.x > -1000 && playerPos.x < -600 &&
+		playerPos.y > -540 && playerPos.y < -300) {
+		if (yOrtho > 100) {
+			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(Timer::deltaTime * 100);
 		}
 	}
 	else {
-		if (yOrtho > 100) {
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(1);
+		if (yOrtho > 200) {
+			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(Timer::deltaTime * 100);
+		}
+		else if (yOrtho < 200) {
+			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-Timer::deltaTime * 100);
 		}
 	}
-	*/
 }
 
 void Level1::CreateUI()
