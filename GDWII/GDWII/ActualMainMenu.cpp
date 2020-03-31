@@ -1,8 +1,6 @@
 #include "ActualMainMenu.h"
 
-ActualMainMenu::ActualMainMenu(std::string name)
-	:Scene(name)
-{
+ActualMainMenu::ActualMainMenu(std::string name) : Scene(name) {
 	//sounds
 	m_soundEffects.push_back({ "MenuBackground.mp3", "sounds" });
 	m_soundEffects.push_back({ "ClickBeat1.wav", "sounds" });

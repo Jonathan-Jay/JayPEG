@@ -189,6 +189,7 @@
     <ClInclude Include="Input.h" />
     <ClInclude Include="JSON.h" />
     <ClInclude Include="Level1.h" />
+    <ClInclude Include="LoadingScreen.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="missile.h" />
     <ClInclude Include="PhysicsBody.h" />
@@ -247,6 +248,7 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="JSON.cpp" />
     <ClCompile Include="Level1.cpp" />
+    <ClCompile Include="LoadingScreen.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="missile.cpp" />

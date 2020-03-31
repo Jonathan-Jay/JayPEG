@@ -1,7 +1,8 @@
 #ifndef __BULLET__
 #define __BULLET__
 
-#include "EntityManager.h"
+#include "PhysicsSystem.h"
+#include <entt/entity/registry.hpp>
 
 class Bullets
 {

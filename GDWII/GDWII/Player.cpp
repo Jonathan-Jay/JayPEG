@@ -17,7 +17,8 @@ Player::Player(int maxHealth, int maxEnergy, float energyRegen)
 	this->energyRegen = energyRegen;
 
 	this->hasMissile = 0;
-	this->bulletUpgrade = 0;
+	this->hasBulletUpgrade = 0;
+	this->stunned = 0;
 }
 
 Player::~Player()
@@ -36,7 +37,8 @@ void Player::reset(int maxHealth, int maxEnergy, float energyRegen)
 	this->energyRegen = energyRegen;
 
 	this->hasMissile = 0;
-	this->bulletUpgrade = 0;
+	this->hasBulletUpgrade = 0;
+	this->stunned = 0;
 }
 
 int Player::getMaxHealth() const
@@ -77,11 +79,31 @@ bool Player::getMissile(bool gotIt)
 	return hasMissile;
 }
 
-int Player::getUpgrade(bool change)
+bool Player::getUpgrade(bool gotIt)
 {
-	this->bulletUpgrade += change;
+	if (gotIt)
+		hasBulletUpgrade = true;
 	
-	return bulletUpgrade;
+	return hasBulletUpgrade;
+}
+
+void Player::setStunned(float length)
+{
+	stunned = length;
+}
+
+bool Player::getStunned()
+{
+	return (stunned > 0.25f ? true : false);
+}
+
+void Player::takeDamage(int amt)
+{
+	if (stunned == 0) {
+		subCurrentHealth(amt);
+
+		stunned = 0.5f;
+	}
 }
 
 //set the Energy regen speed
@@ -155,11 +177,20 @@ bool Player::subCurrentEnergy(float subEnergy)
 
 bool Player::updatePlayer()
 {
+	if (currentHealth == 0)
+		return true;
+
 	if (currentEnergy != maxEnergy) {
 		addCurrentEnergy(Timer::deltaTime * energyRegen);
 		if (currentEnergy == maxEnergy)
 			Sound2D("nep.wav", "sounds").play();
 	}
 
-	return ((currentHealth == 0) ? true : false);
+	if (stunned > 0) {
+		stunned -= Timer::deltaTime;
+		if (stunned < 0)
+			stunned = 0;
+	}
+
+	return false;
 }

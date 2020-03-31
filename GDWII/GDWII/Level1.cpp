@@ -1,7 +1,6 @@
 #include "Level1.h"
 
-Level1::Level1(std::string name)
-	: Scene(name)
+Level1::Level1(std::string name) : Scene(name)
 {
 	m_gravity = b2Vec2(float32(0.f), float32(-20.f));
 
@@ -20,7 +19,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 	float aspectRatio = windowWidth / windowHeight;
 
-	vec3 playerPos = { -1243.f, -186.f, 30.f };
+	vec3 playerPos = { -854, 1000, 30.f };
 
 	{
 		auto entity = ECS::CreateEntity();
@@ -32,11 +31,11 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 		ECS::GetComponent<HorizontalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<HorizontalScroll>(entity).SetOffset(15.f);
-		ECS::GetComponent<HorizontalScroll>(entity).SetLimits(-1740, 1680);
+		//ECS::GetComponent<HorizontalScroll>(entity).SetLimits(-1740, 1680);
 
 		ECS::GetComponent<VerticalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<VerticalScroll>(entity).SetOffset(15.f);
-		ECS::GetComponent<VerticalScroll>(entity).SetLimits(-1200, 1254);
+		//ECS::GetComponent<VerticalScroll>(entity).SetLimits(-1200, 1254);
 
 		vec4 temp = ECS::GetComponent<Camera>(entity).GetOrthoSize();
 		ECS::GetComponent<Camera>(entity).SetWindowSize(vec2(float(windowWidth), float(windowHeight)));
@@ -56,7 +55,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		ECS::AttachComponent<Transform>(entity);
 		ECS::AttachComponent<PhysicsBody>(entity);
 
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(-1243.f, -186.f, 15.f));
+		ECS::GetComponent<Transform>(entity).SetPosition(playerPos);
 
 		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
@@ -92,19 +91,59 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 
 		//all animations will be equally seperated in the y, their opposite direction is done by flipping corner x values
-		for (int y(1); y <= 1; y++) {
+		for (int y(1); y <= 12; y++) {
 			animController.AddAnimation(Animation());
 			animController.AddAnimation(Animation());
 
 			int frameCount = 0;
 			bool pingPong = false;
+			bool repeat = true;
 			switch (y) {
 			case 1:
 				frameCount = 20;
 				pingPong = true;
 				break;
 			case 2:
+				frameCount = 20;
+				pingPong = true;
+				break;
+			case 3:
 				frameCount = 1;
+				repeat = false;
+				break;
+			case 4:
+				frameCount = 15;
+				break;
+			case 5:
+				frameCount = 15;
+				break;
+			case 6:
+				frameCount = 15;
+				repeat = false;
+				break;
+			case 7:
+				frameCount = 1;
+				repeat = false;
+				break;
+			case 8:
+				frameCount = 1;
+				repeat = false;
+				break;
+			case 9:
+				frameCount = 1;
+				repeat = false;
+				break;
+			case 10:
+				frameCount = 1;
+				repeat = false;
+				break;
+			case 11:
+				frameCount = 1;
+				repeat = false;
+				break;
+			case 12:
+				frameCount = 1;
+				repeat = false;
 				break;
 			default:
 				std::cout << "think you missed an animation...\n";
@@ -121,7 +160,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 					}
 					anim.AddFrame(vec2(250 * x, 250 * y - 1), vec2(250 * (x - 1) - 1, 250 * (y - 1)));
 				}
-				anim.SetRepeating(true);
+				anim.SetRepeating(repeat);
 				anim.SetSecPerFrame(0.04f);
 			}
 
@@ -136,7 +175,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 					}
 					anim.AddFrame(vec2(250 * (x - 1), 250 * y - 1), vec2(250 * x - 1, 250 * (y - 1)));
 				}
-				anim.SetRepeating(true);
+				anim.SetRepeating(repeat);
 				anim.SetSecPerFrame(0.04f);
 			}
 		}
@@ -178,11 +217,9 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		ECS::AttachComponent<Transform>(entity);
 		ECS::AttachComponent<PhysicsBody>(entity);
 
-		//std::string filename = "tempmap.png";
-		std::string filename = "tempmap2.png";
+		std::string filename = "background.png";
 
-		//ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 4329, 1926);
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 4200, 3373);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 5600, 3373);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 20.f));
 
@@ -197,24 +234,10 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		tempBody->SetGravityScale(0);
 		
 		std::vector<float> x = {
-			-1309, -555, -555, -664, -664, -255, -255, 102, 102, 375, 375, 703, 703, 862, 862, 979, 979,
-			1138, 1138, 970, 970, 1460, 1460, 1420, 1420, -277, -277, -25, -25, -242, -242, -276, -276, -1890, -1890,
-			-1066, -1066, -820, -820, 290, 290, 1596, 1596, 1235, 1235, 1595, 1595, 1568, 1568, 1635, 1635, 808, 808,
-			841, 841, 370, 370, 701, 701, 535, 535, 701, 701, 655, 655, 1407, 1407, 1315, 1315, 1409, 1409, 1379, 1379,
-			1403, 1403, 1369, 1369, 1450, 1450, 1840, 1840, 1450, 1450, 1400, 1400, 756, 756, 696, 696, -241, -241, -287, -287,
-			-1046, -1046, -1082, -1082, -1400, - 1400, - 996, - 996, - 1043, - 1043, - 983, - 983, - 1046, - 1046, - 993, - 993,
-			- 1043, - 1043, - 1000, - 1000, - 937, - 937, - 842, - 842, - 1476, - 1476, - 688, - 688, - 569, - 569, - 247, - 247,
-			- 191, - 191, - 245, - 245, - 93, - 93, -247, -247, 105, 105, -470, -470, -420, -420, -1310, -1310
+			-336, -336, 522, 522, -941, -941, -460, -460
 		};
 		std::vector<float> y = {
-			-202, -202, -215, -215, -408, -408, -375, - 375, - 330, - 330, - 373, - 373, - 417, - 417, - 460, - 460,
-			- 416,  - 416,  - 220, - 220, - 209,  - 209,  - 229,  - 229,  - 1051,  - 1051,  - 845, - 845, - 684,  - 684,
-			- 760,  - 760,  - 671, -671, -1200, -1200, -900,  - 900,  - 1210, - 1210, - 1370,  - 1370, - 1200,  - 1200,
-			- 1182,  - 1182,  - 229,  - 229,  - 207,  - 207,  - 11, - 11, - 198, - 198, - 215, - 215, - 155, - 155, - 56, - 56, 1, 1,
-			118, 118, 234, 234, 445,  445,  502,  502,  1029,  1029,  1048,  1048,  1135,  1135,  1181,  1181, 1150,  1150,  1394,  1394,
-			1282,  1282,  1348, 1348, 1185, 1185, 1350,  1350,  1161,  1161,  1351, 1351, 1315, 1315, 1422, 1422, 1204,  1204,  1146, 1146,
-			1018,  1018,  960, 960, 772,  772,  712, 712, 505, 505, 462,  462,  411,  411,  349, 349, 270,  270,  334,  334,
-			273,  273,  205,  205,  151,  151,  21, 21, - 49,  -49, -159, -159, -212, -212, -195, -195, 9, 9, -202
+			919, 960, 960, 1260, 1260, 960, 960, 914
 		};
 
 		/*
@@ -237,6 +260,47 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		ECS::SetUpIdentifier(entity, bitHolder, "world");
 	}
 
+	{
+		auto entity = ECS::CreateEntity();
+
+		ECS::AttachComponent<Sprite>(entity);
+		ECS::AttachComponent<Transform>(entity);
+		ECS::AttachComponent<PhysicsBody>(entity);
+
+		std::string filename = "walls.png";
+
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 5600, 3373);
+
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 25.f));
+
+		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
+
+		b2Body* tempBody;
+		b2BodyDef tempDef;
+		tempDef.type = b2_staticBody;
+		tempDef.position.Set(float32(0), float32(0));
+
+		tempBody = m_physicsWorld->CreateBody(&tempDef);
+		tempBody->SetGravityScale(0);
+
+		std::vector<float> x = { -1300, -907, -907, -848
+			-848, -780, -780, -720, -720, -645, -645, -580, -580, -510, -510, -920, -920,
+			-590, -590, -520, -520, -260, -260, -190, -190, 70, 70, 200, 200, 325, 325, 520, 520, -275,
+			-275, -212, -212, -144, -144, -76, -76, -9, -9, 57
+		};
+		std::vector<float> y = {
+			137, 137, 72, 72
+			-5, -5, -76, -76, -152, -152, -220, -220, -295, -295, -315, -315, -460, -460,
+			-430, -430, -393, -393, -427, -427, -466, -466, -500, -500, -535, -535, -500, -500, -310, -310,
+			- 293, -293, -224, -224, -151, -151, -84, -84, -7, -7
+		};
+
+		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment);
+
+		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
+		ECS::SetUpIdentifier(entity, bitHolder, "front");
+	}
+	/*
 	{
 		auto entity = ECS::CreateEntity();
 
@@ -294,6 +358,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		unsigned int bitHolder = EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "island 2");
 	}
+	*/
 
 	CreateUI();
 
@@ -302,7 +367,22 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Enemies::reset(m_physicsWorld);
 	Missiles::reset();
 	Bullets::reset();
+	/*
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 28, 985);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, -842.379211, -451.026703);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, -722.790894, -443.387817);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 87.626526, -460.499451);
+	*/
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 1.793221, -433.416138);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 1.793221, -433.416138);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 1.793221, -433.416138);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 1.793221, -433.416138);
+	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 1.793221, -433.416138);
 
+	Collectibles::CreateCollectible(vec3(-850, -420, 30), 30, 30, CollectiblesType::Missile);
+	Collectibles::CreateCollectible(vec3(225, 960, 28), 60, 15, CollectiblesType::RegenStation);
+
+	/*
 	tempPlatform.Init(m_physicsWorld, vec3(-135, 183, 50), vec3(584, 209, 50), 100, 10, "png.jpg", 200);
 	tempPlatform.isBouncy();
 
@@ -314,9 +394,9 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		Collectibles::CreateCollectible(vec3(-1815, -1170, 50.f), 30, 30, CollectiblesType::RegenUp)
 	);
 
-	for (size_t i = 0; i < 2; i++) {	
-		Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 270, -280);
-		Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 270, -280);
+	for (size_t i = 0; i < 1; i++) {	
+		Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 0, -280);
+		Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 0, -280);
 	}
 
 	Missiles::CreateWall(m_physicsWorld, vec3(675, -300, 50.f), 50, 160, "png.jpg");
@@ -344,113 +424,112 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Collectibles::CreateCollectible(vec3(-1415, 270, 25.f), 60, 15, CollectiblesType::RegenStation);
 	Collectibles::CreateCollectible(vec3(-116, -842, 25.f), 60, 15, CollectiblesType::RegenStation);
 	Collectibles::CreateCollectible(vec3(1710, 1170, 25.f), 60, 15, CollectiblesType::RegenStation);
-
+	*/
 	//summon bullets to load sprite
 	Bullets::setDamage(bulletDamage);
 	Missiles::setDamage(missileDamage);
-	Bullets::CreateBullet(m_sceneReg, m_physicsWorld, b2Vec2(playerPos.x - 1000, playerPos.y), b2Vec2(0, 0), 0, CollisionIDs::Player);
-	Missiles::CreateMissile(m_sceneReg, m_physicsWorld, b2Vec2(playerPos.x - 1000, playerPos.y), b2Vec2(0, 0), 0);
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
-
 }
 
 void Level1::GamepadStick(XInputController* con)
 {
 	controllerInput = false;
-	if (con->IsButtonPressed(Buttons::X))
-	{
-		gunActive = true;
-		controllerInput = true;
-	}
-	else if (con->IsButtonPressed(Buttons::B))
-	{
-		controllerInput = true;
-		if (!missileShot)
-			missileActive = true;
-	}
-
-	Stick sticks[2];
-	con->GetSticks(sticks);
-	b2Vec2 temp = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
-	if (recoilDelay == 0)
-		temp.x = 0;
-	if (sticks[0].x > 0.5f)
-	{
-		if (!crouching && recoilDelay == 0)
-			temp.x += playerSpeed;
-		movingRight = true;
-		controllerInput = true;
-	}
-	else if (sticks[0].x < -0.5f)
-	{
-		if (!crouching && recoilDelay == 0)
-			temp.x -= playerSpeed;
-		movingRight = false;
-		controllerInput = true;
-	}
-	if (sticks[0].y > 0.7f || con->IsButtonPressed(Buttons::DPAD_UP)) {
-		facingUp = true;
-		controllerInput = true;
-	}
-	else {
-		facingUp = false;
-	}
-	if (!facingUp) {
-		if (sticks[0].y < -0.7f || con->IsButtonPressed(Buttons::DPAD_DOWN)) {
-			facingDown = true;
+	if (!stunned) {
+		if (con->IsButtonPressed(Buttons::X))
+		{
+			gunActive = true;
 			controllerInput = true;
 		}
-		else {
-			facingDown = false;
+		else if (con->IsButtonPressed(Buttons::B))
+		{
+			controllerInput = true;
+			if (!missileShot)
+				missileActive = true;
 		}
-	}
 
-	if (temp.x == 0) {
-		if (con->IsButtonPressed(Buttons::DPAD_RIGHT)) {
+		Stick sticks[2];
+		con->GetSticks(sticks);
+		b2Vec2 temp = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
+		if (recoilDelay == 0)
+			temp.x = 0;
+		if (sticks[0].x > 0.5f)
+		{
 			if (!crouching && recoilDelay == 0)
 				temp.x += playerSpeed;
 			movingRight = true;
 			controllerInput = true;
 		}
-		if (con->IsButtonPressed(Buttons::DPAD_LEFT)) {
+		else if (sticks[0].x < -0.5f)
+		{
 			if (!crouching && recoilDelay == 0)
 				temp.x -= playerSpeed;
 			movingRight = false;
 			controllerInput = true;
 		}
-	}
-
-	if (con->IsButtonPressed(Buttons::A)) {
-		if (canJump) {
-			if (jumpHeight < maxJumpStrength) {
-				temp.y = jumpHeight;
-				jumpHeight += jumpIncrementPerSec * Timer::deltaTime;
+		if (sticks[0].y > 0.7f || con->IsButtonPressed(Buttons::DPAD_UP)) {
+			facingUp = true;
+			controllerInput = true;
+		}
+		else {
+			facingUp = false;
+		}
+		if (!facingUp) {
+			if (sticks[0].y < -0.7f || con->IsButtonPressed(Buttons::DPAD_DOWN)) {
+				facingDown = true;
+				controllerInput = true;
 			}
 			else {
-				canJump = false;
-				jumpHeight = minJumpStrength;
+				facingDown = false;
 			}
 		}
-		controllerInput = true;
-	}
-	else if (controllerInput) {
-		canJump = false;
-		jumpHeight = minJumpStrength;
-	}
 
-	if (temp.y < -projectileSpeed * 1.5f) {
-		temp.y = -projectileSpeed * 1.5f;
-	}
-	m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
+		if (temp.x == 0) {
+			if (con->IsButtonPressed(Buttons::DPAD_RIGHT)) {
+				if (!crouching && recoilDelay == 0)
+					temp.x += playerSpeed;
+				movingRight = true;
+				controllerInput = true;
+			}
+			if (con->IsButtonPressed(Buttons::DPAD_LEFT)) {
+				if (!crouching && recoilDelay == 0)
+					temp.x -= playerSpeed;
+				movingRight = false;
+				controllerInput = true;
+			}
+		}
 
-	if (controllerInput && missileShot) {
-		if (con->IsButtonReleased(Buttons::B))
-			missileShot = false;
-	}
+		if (con->IsButtonPressed(Buttons::A)) {
+			if (canJump) {
+				if (jumpHeight < maxJumpStrength) {
+					temp.y = jumpHeight;
+					jumpHeight += jumpIncrementPerSec * Timer::deltaTime;
+				}
+				else {
+					canJump = false;
+					jumpHeight = minJumpStrength;
+				}
+			}
+			controllerInput = true;
+		}
+		else if (controllerInput) {
+			canJump = false;
+			jumpHeight = minJumpStrength;
+		}
 
-	if (con->IsButtonPressed(Buttons::SELECT)) {
-		exiting = true;
+		if (temp.y < -projectileSpeed * 1.5f) {
+			temp.y = -projectileSpeed * 1.5f;
+		}
+		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
+
+		if (controllerInput && missileShot) {
+			if (con->IsButtonReleased(Buttons::B))
+				missileShot = false;
+		}
+
+		if (con->IsButtonPressed(Buttons::SELECT)) {
+			exiting = true;
+		}
 	}
 }
 
@@ -469,6 +548,16 @@ void Level1::MouseClick(SDL_MouseButtonEvent evnt)
 			m_sceneReg->get<Camera>(maincamera).GetPositionY());
 
 		printf("(%f, %f)\n", pos.x, pos.y);
+
+		if (xPos.size() != 0) {
+			if (abs(xPos[xPos.size() - 1] - pos.x) < abs(yPos[yPos.size() - 1] - pos.y)) {
+				pos.x = xPos[xPos.size() - 1];
+			}
+			else {
+				pos.y = yPos[yPos.size() - 1];
+			}
+		}
+
 		xPos.push_back(pos.x);
 		yPos.push_back(pos.y);
 	}
@@ -481,15 +570,15 @@ void Level1::MouseClick(SDL_MouseButtonEvent evnt)
 	if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)) {
 		for (int x(0); x < xPos.size(); x++) {
 			if (x == xPos.size() - 1)
-				std::cout << std::fixed << std::setprecision(2) << xPos[x] << '\n';
+				std::cout << std::fixed << std::setprecision(0) << xPos[x] << '\n';
 			else
-				std::cout << std::fixed << std::setprecision(2) << xPos[x] << ", ";
+				std::cout << std::fixed << std::setprecision(0) << xPos[x] << ", ";
 		}
 		for (int x(0); x < yPos.size(); x++) {
 			if (x == yPos.size() - 1)
-				std::cout << std::fixed << std::setprecision(2) << yPos[x] << '\n';
+				std::cout << std::fixed << std::setprecision(0) << yPos[x] << '\n';
 			else
-				std::cout << std::fixed << std::setprecision(2) << yPos[x] << ", ";
+				std::cout << std::fixed << std::setprecision(0) << yPos[x] << ", ";
 		}
 	}
 }
@@ -510,7 +599,7 @@ void Level1::MouseWheel(SDL_MouseWheelEvent evnt)
 void Level1::KeyboardDown()
 {
 	//only update if no controller input
-	if (!controllerInput) {
+	if (!controllerInput && !stunned) {
 		if (Input::GetKey(Key::Z)) {
 			gunActive = true;
 		}
@@ -566,9 +655,15 @@ void Level1::KeyboardDown()
 			canJump = false;
 			jumpHeight = minJumpStrength;
 		}
+		if (temp.y < -projectileSpeed * 1.5f) {
+			temp.y = -projectileSpeed * 1.5f;
+		}
 		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
-	}
 
+		if (Input::GetKeyDown(Key::Escape)) {
+			exiting = true;
+		}
+	}
 	/*
 	b2Vec2 velo = { 0,0 };
 	if (Input::GetKey(Key::W)) {
@@ -585,10 +680,6 @@ void Level1::KeyboardDown()
 	}
 	m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(velo);
 	*/
-
-	if (Input::GetKeyDown(Key::Escape)) {
-		exiting = true;
-	}
 }
 
 void Level1::Update()
@@ -620,7 +711,7 @@ void Level1::Update()
 		crouching = true;
 	}
 	else {
-		//if just exitign crouch
+		//if just exiting crouch
 		if (crouching) {
 			b2Body* playerBody = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody();
 
@@ -642,7 +733,7 @@ void Level1::Update()
 
 	//only shoot when both weapons are ready
 	if (gunActive) {
-		if (gunDelay == 0.f) {
+		if (gunDelay == 0) {
 			m_soundEffects[1].play();
 			if (crouching) {
 				//remove tag to make force horizontal
@@ -663,7 +754,7 @@ void Level1::Update()
 					vel.y = projectileSpeed;
 				}
 				else if (facingDown) {
-					pos.y -= playerHeight / 2.f;
+					pos.y -= playerHeight / 2.f - 5.5f;
 					vel.y = -projectileSpeed * 2.f;
 				}
 				else {
@@ -711,8 +802,8 @@ void Level1::Update()
 					}
 					else if (facingDown) {
 						velo.y = maxJumpStrength;
-						pos.y -= playerHeight / 2.f;
-						vel.y = -projectileSpeed;
+						pos.y -= playerHeight / 2.f - 5.5f;
+						vel.y = -projectileSpeed * 2.f;
 					}
 					else {
 						if (crouching)
@@ -763,40 +854,69 @@ void Level1::Update()
 	UpdateUI();
 
 	/*Animations:
-	0: left
-	1: right
+	0 and 1: idle forwards
+	2 and 3: idle up
+	4 and 5: crouch
+	6 and 7: walk forwards
+	8 and 9: walk up
+	10 and 11: death
+	12 and 13: up up
+	14 and 15: up down
+	16 and 17: up forwards
+	18 and 19: down up
+	20 and 21: down down
+	22 and 23: down forwards
 	first check if grounded*/
-
-	if (onGround) {	//ground/standing animation
-		//check if crouching, then moving, then idle (crouch won't change if you move)
-		if (crouching)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
-		//if moving
-		else if (m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity().x != 0) {
-			//walking while aiming up
-			if (facingUp)		m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
-			//walking
-			else				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
-		}	//if idle
-		else {
+	if (deathCounter == 0) {
+		b2Vec2 velo = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
+		if (onGround) {				//ground/standing animation
+			//check if crouching, then moving, then idle (crouch won't change if you move)
+			if (crouching)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(4 + movingRight);
+			//if moving
+			else if (velo.x != 0) {
+				//walking while aiming up
+				if (facingUp)		m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(8 + movingRight);
+				//walking
+				else				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(6 + movingRight);
+			}	//if idle
+			else {
+				//aiming up
+				if (facingUp) 		m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(2 + movingRight);
+				//standing
+				else				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(movingRight);
+			}
+		}
+		else if (velo.y > 0) {		//air upwards
 			//aiming up
-			if (facingUp) 		m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
-			//standing
-			else				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
+			if (facingUp)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(12 + movingRight);
+			//aiming down
+			else if (facingDown)	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(14 + movingRight);
+			//aiing left-right
+			else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(16 + movingRight);
+		}
+		else {						//air downwards animation
+			//aiming up
+			if (facingUp)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(18 + movingRight);
+			//aiming down
+			else if (facingDown)	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(20 + movingRight);
+			//aiing left-right
+			else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(22 + movingRight);
 		}
 	}
-	else {			//air animation
-		//aiming up
-		if (facingUp)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
-		//aiming down
-		else if (facingDown)	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
-		//aiing left-right
-		else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(0 + movingRight);
+	else {		//death
+			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(10 + movingRight);
 	}
 }
+
 int Level1::ChangeScene()
 {
 	if (exiting) {
 		exiting = false;
+		return 0;
+	}
+	if (gameOver) {
+		std::cout << "you died -Dark souls\n";
+		gameOver = false;
 		return 0;
 	}
 	return -1;
@@ -854,14 +974,24 @@ void Level1::UpdateUI()
 
 	auto& playerData = m_sceneReg->get<Player>(EntityIdentifier::MainPlayer());
 	if (playerData.updatePlayer()) {
-
-
-		std::cout << "you died\n";
-		playerData.setMaxHealth(playerData.getMaxHealth());
-		playerData.addCurrentHealth(maxHP);
-
-
+		if (onGround) {
+			m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(b2Vec2(0, 0));
+			playerData.setStunned(10.f);
+			if (deathCounter > 0) {
+				deathCounter -= Timer::deltaTime;
+				if (deathCounter < 0) {
+					deathCounter = 0;
+					gameOver = true;
+				}
+			}
+			else
+				deathCounter = 2.5f;
+		}
 	}
+
+	if (stunned = playerData.getStunned())
+		canJump = false;
+
 	/*
 	*/
 	bool offsetchanged = false;
@@ -884,8 +1014,8 @@ void Level1::UpdateUI()
 	if (offsetchanged) {
 		std::cout << "offset: (" << tempOffSet.x << ", " << tempOffSet.y << ")\n";
 	}
-	if (Input::GetKey(Key::E)) {
-		playerData.subCurrentHealth(1);
+	if (Input::GetKeyDown(Key::E)) {
+		playerData.takeDamage(1);
 	}
 	if (Input::GetKeyDown(Key::Q)) {
 		playerData.getMissile(true);
@@ -988,21 +1118,25 @@ void Level1::UpdateUI()
 		m_sceneReg->get<Transform>(uiElements[x]).SetRotationAngleY(tempAngleY);
 		m_sceneReg->get<Transform>(uiElements[x]).SetRotationAngleZ(tempAngleZ);
 	}
+	*/
 
 	//zoom stuff
 	float yOrtho = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize().y;
-	float xPos = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
-	if (xPos > 0 && xPos < 500) {
-		if (yOrtho < 500) {
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-1);
+	vec3 playerPos = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPosition();
+	if (playerPos.x > -1000 && playerPos.x < -600 &&
+		playerPos.y > -540 && playerPos.y < -300) {
+		if (yOrtho > 100) {
+			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(Timer::deltaTime * 100);
 		}
 	}
 	else {
-		if (yOrtho > 100) {
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(1);
+		if (yOrtho > 200) {
+			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(Timer::deltaTime * 100);
+		}
+		else if (yOrtho < 200) {
+			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-Timer::deltaTime * 100);
 		}
 	}
-	*/
 }
 
 void Level1::CreateUI()

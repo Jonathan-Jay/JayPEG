@@ -1,3 +1,6 @@
+#ifndef __PHYSICS_SYSTEM_H__
+#define __PHYSICS_SYSTEM_H__
+
 #pragma once
 
 #include "ECS.h"
@@ -66,3 +69,5 @@ public:
 		return fraction;
 	}
 };
+
+#endif // !__PHYSICS_SYSTEM_H__
