@@ -1,13 +1,13 @@
 #include "ActualMainMenu.h"
 
-ActualMainMenu::ActualMainMenu(std::string name) : Scene(name) {
+ActualMainMenu::ActualMainMenu(std::string name)
+	: Scene(name) {
 	//sounds
-	m_soundEffects.push_back({ "MenuBackground.mp3", "sounds" });
-	m_soundEffects.push_back({ "ClickBeat1.wav", "sounds" });
-	m_soundEffects.push_back({"RolloverSound1.wav", "sounds"});
+	m_soundEffects.push_back({ "MenuBackground.mp3", "sounds" });	// 0
+	m_soundEffects.push_back({ "ClickBeat1.wav", "sounds" });		// 1
+	m_soundEffects.push_back({ "RolloverSound1.wav", "sounds" });	// 2
 }
-//used for camera movements
-float speed = 100.f;
+
 void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 {
 	m_sceneReg = new entt::registry;
@@ -124,9 +124,9 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 		std::string filename = "ReturnToMenu.png";
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 149 * 3, 15 * 3, false);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 1500 / 3, 170 / 3, false);
 
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(1575.f, -250.f, 51.f));
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(1515.f, -250.f, 51.f));
 
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
@@ -157,7 +157,7 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 		std::string filename = "Credits.png";
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 247*2, 204*2, false);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 2520 / 5, 2050 / 5, false);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(1250.f, 25.f, 50.f));
 
@@ -167,16 +167,16 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 	}
 
 }
-bool cameraSpan = false;
-float moveAmount = 0;
-float accell = 25.f;
 
 void ActualMainMenu::Update()
 {
 	m_soundEffects[0].loop();
 
-	if (wait == 1 && !onCredits) {
-		if (Input::GetKeyDown(Key::LeftArrow))
+	if (wait == 1) {
+		if (Input::GetKeyDown(Key::Escape)) {
+			index = 0;
+		}
+		else if (Input::GetKeyDown(Key::LeftArrow))
 		{
 			leftOnMenu();
 		}
@@ -186,8 +186,15 @@ void ActualMainMenu::Update()
 		}
 		if (Input::GetKeyDown(Key::Z) || Input::GetKeyDown(Key::Space) || Input::GetKeyDown(Key::Enter))
 		{
-			if (menuSelected())
-				index = 2;
+			if (menuSelected()) {
+				HoverSound();
+				if (!onCredits) {
+					index = 2;
+					playHoverSound = true;
+				}
+				else
+					index = 4;
+			}
 		}
 
 		switch (index) {
@@ -195,30 +202,34 @@ void ActualMainMenu::Update()
 			m_sceneReg->get<Sprite>(3).SetSizeScale(1.f);
 			m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
 			m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
+			m_sceneReg->get<Sprite>(6).SetSizeScale(0.75f);
 			break;
 		case 2:
 			m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
 			m_sceneReg->get<Sprite>(4).SetSizeScale(1.f);
 			m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
+			m_sceneReg->get<Sprite>(6).SetSizeScale(0.75f);
 			break;
 		case 3:
 			m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
 			m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
 			m_sceneReg->get<Sprite>(5).SetSizeScale(1.f);
+			m_sceneReg->get<Sprite>(6).SetSizeScale(0.75f);
 			break;
-		default:
+		case 4:
 			m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
 			m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
 			m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
 			m_sceneReg->get<Sprite>(6).SetSizeScale(1.f);
 			break;
+		default:
+			m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
+			m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
+			m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
+			m_sceneReg->get<Sprite>(6).SetSizeScale(0.75f);
+			break;
 		}
 	}
-	//scaling for return to menu button
-	if (index == 4) 
-	{ m_sceneReg->get<Sprite>(6).SetSizeScale(1.05f); }
-	else 
-	{ m_sceneReg->get<Sprite>(6).SetSizeScale(0.75f); }
 
 	if (counter > 0) {
 		switch (index) {
@@ -228,6 +239,7 @@ void ActualMainMenu::Update()
 				-((counter < 0.1 ? counter : 0.2 - counter) * 150)) );
 			m_sceneReg->get<Transform>(4).SetPositionX(0);
 			m_sceneReg->get<Transform>(5).SetPositionX(325);
+			m_sceneReg->get<Transform>(6).SetPositionX(1515);
 			break;
 		case 2:
 			m_sceneReg->get<Transform>(3).SetPositionX(-325);
@@ -235,6 +247,7 @@ void ActualMainMenu::Update()
 				((counter < 0.1 ? counter : 0.2 - counter) * 150) :
 				-((counter < 0.1 ? counter : 0.2 - counter) * 150) );
 			m_sceneReg->get<Transform>(5).SetPositionX(325);
+			m_sceneReg->get<Transform>(6).SetPositionX(1515);
 			break;
 		case 3:
 			m_sceneReg->get<Transform>(3).SetPositionX(-325);
@@ -242,11 +255,21 @@ void ActualMainMenu::Update()
 			m_sceneReg->get<Transform>(5).SetPositionX(325 + (bouncingRight ?
 				((counter < 0.1 ? counter : 0.2 - counter) * 150) :
 				-((counter < 0.1 ? counter : 0.2 - counter) * 150)) );
+			m_sceneReg->get<Transform>(6).SetPositionX(1515);
+			break;
+		case 4:
+			m_sceneReg->get<Transform>(3).SetPositionX(-325);
+			m_sceneReg->get<Transform>(4).SetPositionX(0);
+			m_sceneReg->get<Transform>(5).SetPositionX(325);
+			m_sceneReg->get<Transform>(6).SetPositionX(1515 + (bouncingRight ?
+				((counter < 0.1 ? counter : 0.2 - counter) * 150) :
+				-((counter < 0.1 ? counter : 0.2 - counter) * 150)) );
 			break;
 		default:
 			m_sceneReg->get<Transform>(3).SetPositionX(-325);
 			m_sceneReg->get<Transform>(4).SetPositionX(0);
 			m_sceneReg->get<Transform>(5).SetPositionX(325);
+			m_sceneReg->get<Transform>(6).SetPositionX(1515);
 			counter = 0;
 			break;
 		}
@@ -302,15 +325,12 @@ void ActualMainMenu::MouseClick(SDL_MouseButtonEvent evnt)
 		if (positionTesting(6, mousePos))
 		{
 			index = 4;
-			moveAmount = 0.f;
-			cameraSpan = true;
-			lerpCamera(moveAmount, accell);
-			onCredits = false;
+			menuSelected();
 		}
 	}
 
 }
-bool playHoverSound = true;
+
 void ActualMainMenu::MouseMotion(SDL_MouseMotionEvent evnt)
 {
 	float windowHeight = BackEnd::GetWindowHeight();
@@ -369,56 +389,48 @@ void ActualMainMenu::GamepadStick(XInputController* con)
 	Stick sticks[2];
 	con->GetSticks(sticks);
 	//ANALOG STICK MOVEMENTS FOR MAIN MENU (LEFT AND RIGHT DPAD AS WELL)
-	if (!onCredits) {
-		if (reset && wait == 1) {
-			if (sticks[0].x < -0.75f)
-			{
-				leftOnMenu();
-			}
-			else if (sticks[0].x > 0.75f)
-			{
-				rightOnMenu();
-			}
-			else if (sticks[1].x < -0.75f)
-			{
-				leftOnMenu();
-			}
-			else if (sticks[1].x > 0.75f)
-			{
-				rightOnMenu();
-			}
-			else if (con->IsButtonPressed(Buttons::DPAD_LEFT))
-			{
-				leftOnMenu();
-			}
-			else if (con->IsButtonPressed(Buttons::DPAD_RIGHT))
-			{
-				rightOnMenu();
-			}
-
-			//BUTTON PRESSES
-			if (con->IsButtonPressed(Buttons::A))
-			{
-				if (menuSelected())
-					index = 2;
-			}
-			if (con->IsButtonPressed(Buttons::B))
-			{
-				printf("B pressed\n");
-			}
-		}
-		else
+	if (reset && wait == 1) {
+		if (sticks[0].x < -0.75f ||
+			sticks[1].x < -0.75f ||
+			con->IsButtonPressed(Buttons::DPAD_LEFT))
 		{
-			//makes sure that the analog stick is reset before setting reset to true (which then allows for another change)
-			if (sticks[0].x > -0.75f && sticks[0].x < 0.75f && sticks[1].x > -0.75f && sticks[1].x < 0.75f &&
-				con->IsButtonReleased(Buttons::DPAD_LEFT) && con->IsButtonReleased(Buttons::DPAD_RIGHT) &&
-				con->IsButtonReleased(Buttons::A) && con->IsButtonReleased(Buttons::B))
-			{
-				reset = true;
+			leftOnMenu();
+		}
+		else if (sticks[0].x > 0.75f ||
+			sticks[1].x > 0.75f ||
+			con->IsButtonPressed(Buttons::DPAD_RIGHT))
+		{
+			rightOnMenu();
+		}
+
+		//BUTTON PRESSES
+		if (con->IsButtonPressed(Buttons::A))
+		{
+			if (menuSelected()) {
+				HoverSound();
+				if (!onCredits)
+					index = 2;
+				else
+					index = 4;
+				playHoverSound = true;
 			}
+			reset = false;
+		}
+		if (con->IsButtonPressed(Buttons::B))
+		{
+			index = 0;
 		}
 	}
-
+	else
+	{
+		//makes sure that the analog stick is reset before setting reset to true (which then allows for another change)
+		if (sticks[0].x > -0.75f && sticks[0].x < 0.75f && sticks[1].x > -0.75f && sticks[1].x < 0.75f &&
+			con->IsButtonReleased(Buttons::DPAD_LEFT) && con->IsButtonReleased(Buttons::DPAD_RIGHT) &&
+			con->IsButtonReleased(Buttons::A))
+		{
+			reset = true;
+		}
+	}
 
 }
 int ActualMainMenu::ChangeScene()
@@ -429,7 +441,7 @@ int ActualMainMenu::ChangeScene()
 			clickedPlay = false;
 			onCredits = false;
 			index = 0;
-			m_soundEffects[0].setLoopCount(2);
+			m_soundEffects[0].setLoopCount(1);
 			return 1;
 		}
 		if (wait < 0.1) {
@@ -451,7 +463,11 @@ void ActualMainMenu::rightOnMenu()
 {
 	bouncingRight = true;
 	counter = 0.2f;
-	if (index < 3 && index > 0)
+	if (onCredits) {
+		index = 4;
+		HoverSound();
+	}
+	else if (index < 3 && index > 0)
 	{
 		index++;
 		HoverSound();
@@ -459,6 +475,7 @@ void ActualMainMenu::rightOnMenu()
 	else
 	{
 		index = 3;
+		HoverSound();
 	}
 	reset = false;
 	playHoverSound = true;
@@ -467,7 +484,11 @@ void ActualMainMenu::leftOnMenu()
 {
 	bouncingRight = false;
 	counter = 0.2f;
-	if (index > 1 && index < 4)
+	if (onCredits) {
+		index = 4;
+		HoverSound();
+	}
+	else if (index > 1 && index < 4)
 	{
 		index--;
 		HoverSound();
@@ -475,22 +496,29 @@ void ActualMainMenu::leftOnMenu()
 	else
 	{
 		index = 1;
+		HoverSound();
 	}
 	reset = false;	
 	playHoverSound = true;
 }
 bool ActualMainMenu::menuSelected()
 {
+	/*indexes and what they mean
+	0: nothing, literally
+	1: credits
+	2: start
+	3: exit
+	*/
 	bool temp = false;
 	if (index == 1)
 	{
-		std::cout << "lol\n";
 		moveAmount = 1250.f;
 		accell = 25.f;
 		speed = 100.f;
 		cameraSpan = true;
 		onCredits = true;
 		m_soundEffects[1].play();
+		index = 0;
 	}
 	else if (index == 2)
 	{
@@ -501,6 +529,14 @@ bool ActualMainMenu::menuSelected()
 	{
 		m_soundEffects[1].play();
 		std::exit(NULL);
+	}
+	else if (index == 4) {
+		moveAmount = 0.f;
+		cameraSpan = true;
+		lerpCamera(moveAmount, accell);
+		onCredits = false;
+		m_soundEffects[1].play();
+		index = 0;
 	}
 	else {
 		temp = true;

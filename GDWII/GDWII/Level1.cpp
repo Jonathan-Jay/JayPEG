@@ -8,6 +8,7 @@ Level1::Level1(std::string name) : Scene(name)
 	m_soundEffects.push_back({ "Rabi-Ribi.mp3", "sounds" });	//0
 	m_soundEffects.push_back({ "nep.wav", "sounds" });			//1
 	m_soundEffects.push_back({ "snake.mp3", "sounds" });		//2
+
 }
 
 void Level1::InitScene(float windowWidth, float windowHeight)

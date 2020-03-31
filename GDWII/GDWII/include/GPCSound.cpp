@@ -37,15 +37,11 @@ void SoundManager::update()
 
 unsigned SoundManager::load2DSound(const std::string& relativeFilePath)
 {
-	char tempName[7] = {};
-	for (int x(0); x < relativeFilePath.length() && x < 6; x++) {
-		tempName[x] = relativeFilePath[x];
-	}
 	for (unsigned x(0); x < _sounds.size(); x++) {
 		char tempName2[7] = {};
 		_result = _sounds[x]->getName(tempName2, 7);
 		checkFmodErrors(_result, "Sound Dup Test");
-		if (!strcmp(tempName, tempName2)) {
+		if (!strcmp((relativeFilePath.substr(0, 6)).c_str(), tempName2)) {
 			return x;
 		}
 	}
@@ -61,15 +57,11 @@ unsigned SoundManager::load2DSound(const std::string& relativeFilePath)
 
 unsigned SoundManager::createChannelGroup(const std::string& groupName)
 {
-	char tempName[7] = {};
-	for (int x(0); x < groupName.length() && x < 6; x++) {
-		tempName[x] = groupName[x];
-	}
 	for (unsigned x(0); x < _channelGroups.size(); x++) {
 		char tempName2[7] = {};
 		_result = _channelGroups[x]->getName(tempName2, 7);
 		checkFmodErrors(_result, "Channel Group Dup Test");
-		if (!strcmp(tempName, tempName2)) {
+		if (!strcmp((groupName.substr(0, 6)).c_str(), tempName2)) {
 			return x;
 		}
 	}

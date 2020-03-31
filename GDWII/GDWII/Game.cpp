@@ -40,7 +40,7 @@ void Game::InitGame()
 	//Grabs the initialized window
 	m_window = BackEnd::GetWindow();
 
-	SoundManager::init("./assets/sounds/", 25);
+	SoundManager::init("./assets/sounds/", 100);
 	//Creates a new scene.
 	//Replace this with your own scene.
 	m_scenes.push_back(new ActualMainMenu("Main Menu")); //actual Main Menu
