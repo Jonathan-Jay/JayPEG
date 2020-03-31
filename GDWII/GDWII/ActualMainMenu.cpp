@@ -2,10 +2,12 @@
 
 ActualMainMenu::ActualMainMenu(std::string name) : Scene(name) {
 	//sounds
-	m_soundEffects.push_back({ "Megaman.wav", "sounds" });
-	m_soundEffects.push_back({ "nep.wav", "sounds" });
+	m_soundEffects.push_back({ "MenuBackground.mp3", "sounds" });
+	m_soundEffects.push_back({ "ClickBeat1.wav", "sounds" });
+	m_soundEffects.push_back({"RolloverSound1.wav", "sounds"});
 }
-
+//used for camera movements
+float speed = 100.f;
 void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 {
 	m_sceneReg = new entt::registry;
@@ -114,8 +116,60 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 		ECS::SetUpIdentifier(entity, bitHolder, "QuitButton");
 
 	}
+	{
+		auto entity = ECS::CreateEntity();
+
+		ECS::AttachComponent<Sprite>(entity);
+		ECS::AttachComponent<Transform>(entity);
+
+		std::string filename = "ReturnToMenu.png";
+
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 149 * 3, 15 * 3, false);
+
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(1575.f, -250.f, 51.f));
+
+
+		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
+		ECS::SetUpIdentifier(entity, bitHolder, "ReturnButton");
+
+	}
+	{
+		auto entity = ECS::CreateEntity();
+
+		ECS::AttachComponent<Sprite>(entity);
+		ECS::AttachComponent<Transform>(entity);
+
+		std::string filename = "TitleBack.png";
+
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 1500, 750, false);
+
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(1500.f, 1.f, 49.f));
+
+
+		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
+		ECS::SetUpIdentifier(entity, bitHolder, "Background 2");
+	}
+	{
+		auto entity = ECS::CreateEntity();
+
+		ECS::AttachComponent<Sprite>(entity);
+		ECS::AttachComponent<Transform>(entity);
+
+		std::string filename = "Credits.png";
+
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 247*2, 204*2, false);
+
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(1250.f, 25.f, 50.f));
+
+
+		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
+		ECS::SetUpIdentifier(entity, bitHolder, "Credits");
+	}
 
 }
+bool cameraSpan = false;
+float moveAmount = 0;
+float accell = 25.f;
 
 void ActualMainMenu::Update()
 {
@@ -156,9 +210,15 @@ void ActualMainMenu::Update()
 			m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
 			m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
 			m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
+			m_sceneReg->get<Sprite>(6).SetSizeScale(1.f);
 			break;
 		}
 	}
+	//scaling for return to menu button
+	if (index == 4) 
+	{ m_sceneReg->get<Sprite>(6).SetSizeScale(1.05f); }
+	else 
+	{ m_sceneReg->get<Sprite>(6).SetSizeScale(0.75f); }
 
 	if (counter > 0) {
 		switch (index) {
@@ -200,7 +260,7 @@ void ActualMainMenu::Update()
 	//update for camera movement.
 	if (cameraSpan)
 	{
-		lerpCamera();
+		lerpCamera(moveAmount, accell);
 	}
 }
 
@@ -239,10 +299,18 @@ void ActualMainMenu::MouseClick(SDL_MouseButtonEvent evnt)
 
 			menuSelected();
 		}
+		if (positionTesting(6, mousePos))
+		{
+			index = 4;
+			moveAmount = 0.f;
+			cameraSpan = true;
+			lerpCamera(moveAmount, accell);
+			onCredits = false;
+		}
 	}
 
 }
-
+bool playHoverSound = true;
 void ActualMainMenu::MouseMotion(SDL_MouseMotionEvent evnt)
 {
 	float windowHeight = BackEnd::GetWindowHeight();
@@ -260,19 +328,39 @@ void ActualMainMenu::MouseMotion(SDL_MouseMotionEvent evnt)
 	if (wait == 1.f) {
 		if (positionTesting(3, mousePos))
 		{
+			HoverSound();
 			index = 1;
 		}
 		else if (positionTesting(4, mousePos))
 		{
+			HoverSound();
 			index = 2;
 		}
 		else if (positionTesting(5, mousePos))
 		{
+			HoverSound();
 			index = 3;
 		}
-		else {
+		else if (positionTesting(6, mousePos))
+		{
+			HoverSound();
+			index = 4;
+		}
+		else
+		{
+			playHoverSound = true;
 			index = 0;
 		}
+	}
+}
+
+void ActualMainMenu::HoverSound()
+{
+	//used for hover sound of when mouse cursor is on a button or not
+	if (playHoverSound)
+	{
+		playHoverSound = false;
+		m_soundEffects[2].play();
 	}
 }
 
@@ -366,12 +454,14 @@ void ActualMainMenu::rightOnMenu()
 	if (index < 3 && index > 0)
 	{
 		index++;
+		HoverSound();
 	}
 	else
 	{
 		index = 3;
 	}
 	reset = false;
+	playHoverSound = true;
 }
 void ActualMainMenu::leftOnMenu()
 {
@@ -380,29 +470,36 @@ void ActualMainMenu::leftOnMenu()
 	if (index > 1 && index < 4)
 	{
 		index--;
+		HoverSound();
 	}
 	else
 	{
 		index = 1;
 	}
-	reset = false;															
+	reset = false;	
+	playHoverSound = true;
 }
 bool ActualMainMenu::menuSelected()
 {
 	bool temp = false;
-	m_soundEffects[1].play();
 	if (index == 1)
 	{
 		std::cout << "lol\n";
+		moveAmount = 1250.f;
+		accell = 25.f;
+		speed = 100.f;
 		cameraSpan = true;
 		onCredits = true;
+		m_soundEffects[1].play();
 	}
 	else if (index == 2)
 	{
 		clickedPlay = true;
+		m_soundEffects[1].play();
 	}
 	else if (index == 3)
 	{
+		m_soundEffects[1].play();
 		std::exit(NULL);
 	}
 	else {
@@ -414,20 +511,35 @@ bool ActualMainMenu::menuSelected()
 }
 
 //Camera spanning code, required for camera movement on credits button click
-float speed = 100.f;
-void ActualMainMenu::lerpCamera()
+void ActualMainMenu::lerpCamera(float endPosition, float accel)
 {
-	float acceleration = 25.f;
+	float acceleration = accel;
 	float currentPos = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPositionX() + speed;
-	float finalPos = 1250.f;
-	if (m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPositionX() < finalPos)
+	float finalPos = endPosition;
+	if (m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPositionX() != finalPos)
 	{
-		speed += (currentPos < (finalPos / 2) ? acceleration * Timer::deltaTime : -acceleration * Timer::deltaTime);
 		m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetPosition(currentPos, 0, 0);
-		if (currentPos > finalPos)
+		//so that the camera can go in either direction ////REALLY DOESNT WORK in both directions
+		if (finalPos > 0)
 		{
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetPosition(finalPos, 0, 0);
-			cameraSpan = false;
+			speed += (currentPos < (finalPos / 2) ? acceleration * Timer::deltaTime : -acceleration * Timer::deltaTime);
+			if (currentPos > finalPos)
+			{
+				m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetPosition(finalPos, 0, 0);
+				cameraSpan = false;
+			}
+		}
+		else 
+		{
+			//so that the camera doesnt go in the wrong direction
+			if (speed > 0) { speed *= -1; }
+
+			speed -= acceleration * Timer::deltaTime;
+			if (currentPos < finalPos)
+			{
+				m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetPosition(finalPos, 0, 0);
+				cameraSpan = false;
+			}
 		}
 	}
 }

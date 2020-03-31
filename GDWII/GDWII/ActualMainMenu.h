@@ -13,6 +13,7 @@ public:
 	void InitScene(float windowWidth, float windowHeight) override;
 	void MouseClick(SDL_MouseButtonEvent evnt) override;
 	void MouseMotion(SDL_MouseMotionEvent evnt) override;
+	void HoverSound();
 	void GamepadStick(XInputController* con) override;
 	void Update() override;
 	int ChangeScene() override;
@@ -22,7 +23,7 @@ private:
 	void leftOnMenu();
 	//returns true if nothing selected
 	bool menuSelected();
-	void lerpCamera();
+	void lerpCamera(float, float);
 	bool positionTesting(int entity, vec2 otherPos);
 	bool cameraSpan = false;
 	bool onCredits = false;
