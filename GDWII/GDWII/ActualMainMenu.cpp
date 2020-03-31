@@ -8,7 +8,8 @@ ActualMainMenu::ActualMainMenu(std::string name)
 	m_soundEffects.push_back({ "ClickBeat1.wav", "sounds" });
 	m_soundEffects.push_back({"RolloverSound1.wav", "sounds"});
 }
-
+//used for camera movements
+float speed = 100.f;
 void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 {
 	m_sceneReg = new entt::registry;
@@ -123,6 +124,23 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 		ECS::AttachComponent<Sprite>(entity);
 		ECS::AttachComponent<Transform>(entity);
 
+		std::string filename = "ReturnToMenu.png";
+
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 149 * 3, 15 * 3, false);
+
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(1575.f, -250.f, 51.f));
+
+
+		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
+		ECS::SetUpIdentifier(entity, bitHolder, "ReturnButton");
+
+	}
+	{
+		auto entity = ECS::CreateEntity();
+
+		ECS::AttachComponent<Sprite>(entity);
+		ECS::AttachComponent<Transform>(entity);
+
 		std::string filename = "TitleBack.png";
 
 		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 1500, 750, false);
@@ -153,7 +171,7 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 }
 bool cameraSpan = false;
 float moveAmount = 0;
-float accell = 0;
+float accell = 25.f;
 
 void ActualMainMenu::Update()
 {
@@ -194,9 +212,15 @@ void ActualMainMenu::Update()
 			m_sceneReg->get<Sprite>(3).SetSizeScale(0.5f);
 			m_sceneReg->get<Sprite>(4).SetSizeScale(0.5f);
 			m_sceneReg->get<Sprite>(5).SetSizeScale(0.5f);
+			m_sceneReg->get<Sprite>(6).SetSizeScale(1.f);
 			break;
 		}
 	}
+	//scaling for return to menu button
+	if (index == 4) 
+	{ m_sceneReg->get<Sprite>(6).SetSizeScale(1.05f); }
+	else 
+	{ m_sceneReg->get<Sprite>(6).SetSizeScale(0.75f); }
 
 	if (counter > 0) {
 		switch (index) {
@@ -277,6 +301,14 @@ void ActualMainMenu::MouseClick(SDL_MouseButtonEvent evnt)
 
 			menuSelected();
 		}
+		if (positionTesting(6, mousePos))
+		{
+			index = 4;
+			moveAmount = 0.f;
+			cameraSpan = true;
+			lerpCamera(moveAmount, accell);
+			onCredits = false;
+		}
 	}
 
 }
@@ -311,7 +343,12 @@ void ActualMainMenu::MouseMotion(SDL_MouseMotionEvent evnt)
 			HoverSound();
 			index = 3;
 		}
-		else 
+		else if (positionTesting(6, mousePos))
+		{
+			HoverSound();
+			index = 4;
+		}
+		else
 		{
 			playHoverSound = true;
 			index = 0;
@@ -321,6 +358,7 @@ void ActualMainMenu::MouseMotion(SDL_MouseMotionEvent evnt)
 
 void ActualMainMenu::HoverSound()
 {
+	//used for hover sound of when mouse cursor is on a button or not
 	if (playHoverSound)
 	{
 		playHoverSound = false;
@@ -451,6 +489,7 @@ bool ActualMainMenu::menuSelected()
 		std::cout << "lol\n";
 		moveAmount = 1250.f;
 		accell = 25.f;
+		speed = 100.f;
 		cameraSpan = true;
 		onCredits = true;
 		m_soundEffects[1].play();
@@ -474,7 +513,6 @@ bool ActualMainMenu::menuSelected()
 }
 
 //Camera spanning code, required for camera movement on credits button click
-float speed = 100.f;
 void ActualMainMenu::lerpCamera(float endPosition, float accel)
 {
 	float acceleration = accel;
@@ -483,7 +521,7 @@ void ActualMainMenu::lerpCamera(float endPosition, float accel)
 	if (m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetPositionX() != finalPos)
 	{
 		m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetPosition(currentPos, 0, 0);
-		//so that the camera can go in either direction ////REALLY DOESNT WORK
+		//so that the camera can go in either direction ////REALLY DOESNT WORK in both directions
 		if (finalPos > 0)
 		{
 			speed += (currentPos < (finalPos / 2) ? acceleration * Timer::deltaTime : -acceleration * Timer::deltaTime);
@@ -495,6 +533,10 @@ void ActualMainMenu::lerpCamera(float endPosition, float accel)
 		}
 		else 
 		{
+			//so that the camera doesnt go in the wrong direction
+			if (speed > 0) { speed *= -1; }
+
+			speed -= acceleration * Timer::deltaTime;
 			if (currentPos < finalPos)
 			{
 				m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetPosition(finalPos, 0, 0);
