@@ -300,65 +300,42 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "front");
 	}
-	/*
-	{
-		auto entity = ECS::CreateEntity();
 
-		ECS::AttachComponent<Transform>(entity);
-		ECS::AttachComponent<PhysicsBody>(entity);
 
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
-		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
-		b2Body* tempBody;
-		b2BodyDef tempDef;
-		tempDef.type = b2_staticBody;
-		tempDef.position.Set(float32(0), float32(0));
 
-		tempBody = m_physicsWorld->CreateBody(&tempDef);
-
-		std::vector<float> x = {
-			-247, -299, -299, -968, -968, -905, -905, -947, -947, -904, -904, 150, 150, -247, -247
-		};
-		std::vector<float> y = {
-			392, 392, 577, 577, 625, 625, 841, 841, 894, 894, 1050, 1050, 997, 997, 392
-		};
-
-		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment);
-
-		unsigned int bitHolder = EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "island 1");
-	}
 
 	{
 		auto entity = ECS::CreateEntity();
 
+		ECS::AttachComponent<Sprite>(entity);
 		ECS::AttachComponent<Transform>(entity);
 		ECS::AttachComponent<PhysicsBody>(entity);
 
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
+		std::string filename = "png.jpg";
+
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 50, 50);
+
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(-50.f, 0.f, 25.f));
+
 		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
 		b2Body* tempBody;
 		b2BodyDef tempDef;
-		tempDef.type = b2_staticBody;
-		tempDef.position.Set(float32(0), float32(0));
+		tempDef.type = b2_dynamicBody;
+		tempDef.position.Set(float32(-50), float32(0));
 
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 
-		std::vector<float> x = {
-			702, 702, 276, 276, 1252, 1252, 1233, 1233, 764, 764, 702
-		};
-		std::vector<float> y = {
-			361, 997, 997, 1050, 1050, 1020, 1020, 584, 584, 361, 361
-		};
+		tempPhsBody = PhysicsBody(tempBody, 50, 50, vec2(0,0), true, CollisionIDs::Environment);
 
-		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment);
-
-		unsigned int bitHolder = EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "island 2");
+		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
+		ECS::SetUpIdentifier(entity, bitHolder, "temp");
+		tempEnt = entity;
 	}
-	*/
+
+
+
 
 	CreateUI();
 
@@ -372,7 +349,6 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, -842.379211, -451.026703);
 	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, -722.790894, -443.387817);
 	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 87.626526, -460.499451);
-	*/
 	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 1.793221, -433.416138);
 	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 1.793221, -433.416138);
 	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 1.793221, -433.416138);
@@ -381,6 +357,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 	Collectibles::CreateCollectible(vec3(-850, -420, 30), 30, 30, CollectiblesType::Missile);
 	Collectibles::CreateCollectible(vec3(225, 960, 28), 60, 15, CollectiblesType::RegenStation);
+	*/
 
 	/*
 	tempPlatform.Init(m_physicsWorld, vec3(-135, 183, 50), vec3(584, 209, 50), 100, 10, "png.jpg", 200);
@@ -680,6 +657,21 @@ void Level1::KeyboardDown()
 	}
 	m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(velo);
 	*/
+
+	if (Input::GetKeyDown(Key::L)) {
+		b2Vec2 launch = Enemies::projectileMotion(
+			m_sceneReg->get<Transform>(tempEnt).GetPosition(),
+			m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPosition(),
+			-20, 100);
+
+		if (launch == b2Vec2(0, 0)) {
+			std::cout << "failed\n";
+		}
+		else {
+			std::cout << "success: (" << launch.x << ", " << launch.y << ")\n";
+			m_sceneReg->get<PhysicsBody>(tempEnt).GetBody()->SetLinearVelocity(launch);
+		}
+	}
 }
 
 void Level1::Update()
@@ -1126,15 +1118,15 @@ void Level1::UpdateUI()
 	if (playerPos.x > -1000 && playerPos.x < -600 &&
 		playerPos.y > -540 && playerPos.y < -300) {
 		if (yOrtho > 100) {
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(Timer::deltaTime * 100);
+			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(floor(Timer::deltaTime * 100));
 		}
 	}
 	else {
 		if (yOrtho > 200) {
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(Timer::deltaTime * 100);
+			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(floor(Timer::deltaTime * 100));
 		}
 		else if (yOrtho < 200) {
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-Timer::deltaTime * 100);
+			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-floor(Timer::deltaTime * 100));
 		}
 	}
 }

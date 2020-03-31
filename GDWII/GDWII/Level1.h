@@ -86,6 +86,7 @@ private:
 	float jumpIncrementPerSec = 125.f;
 
 	//doors
+	int tempEnt = 0;
 };
 
 #endif // !__LVL1__

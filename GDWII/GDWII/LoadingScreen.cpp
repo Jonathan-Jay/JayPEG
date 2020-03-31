@@ -43,7 +43,7 @@ void LoadingScreen::InitScene(float windowWidth, float windowHeight) {
 		ECS::GetComponent<Transform>(entity).SetPosition(0, 0, 1);
 
 		std::string filename = "LoadText.png";
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 210, 50);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 327, 57);
 
 		unsigned int bitHolder = EntityIdentifier::TransformBit() | EntityIdentifier::SpriteBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "temp");

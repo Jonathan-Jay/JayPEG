@@ -35,7 +35,7 @@ void Game::InitGame()
 		SDL_Log("SDL_GetDesktopDisplayMode failed: %s", SDL_GetError());
 	}
 
-	BackEnd::ReshapeWindow(m_width * 0.8f, m_height * 0.8f);
+	BackEnd::ReshapeWindow(m_width * 0.9f, m_height * 0.9f);
 
 	//Grabs the initialized window
 	m_window = BackEnd::GetWindow();
@@ -48,8 +48,7 @@ void Game::InitGame()
 	m_scenes.push_back(new LoadingScreen("Loading")); //loading
 
 	//Sets active scene reference to our scene
-	//m_activeScene = m_scenes[2];
-	m_activeScene = m_scenes[1];
+	m_activeScene = m_scenes[2];
 
 	m_activeScene->InitScene(float(BackEnd::GetWindowWidth()), float(BackEnd::GetWindowHeight()));
 
@@ -244,7 +243,7 @@ void Game::KeyboardDown()
 		if (m_window->GetFullscreen()) {
 			m_window->SetFullscreen(0);
 			m_window->SetWindowResizable(true);
-			BackEnd::ReshapeWindow(m_width * 0.5f, m_height * 0.5f, m_register);
+			BackEnd::ReshapeWindow(m_width * 0.9f, m_height * 0.9f, m_register);
 		}
 		else {
 			m_window->SetFullscreen(1);
