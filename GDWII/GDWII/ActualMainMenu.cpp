@@ -4,7 +4,7 @@ ActualMainMenu::ActualMainMenu(std::string name)
 	: Scene(name) {
 	//sounds
 	m_soundEffects.push_back({ "MenuBackground.mp3", "sounds" });	// 0
-	m_soundEffects.push_back({ "ClickBeat1.wav", "sounds" });		// 1
+	m_soundEffects.push_back({ "ClickBeat1.mp3", "sounds" });
 	m_soundEffects.push_back({ "RolloverSound1.wav", "sounds" });	// 2
 }
 
