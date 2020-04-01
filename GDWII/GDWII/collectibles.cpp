@@ -4,7 +4,7 @@ std::vector<std::vector<CollectiblesData>> Collectibles::list = { };
 float Collectibles::regenStationCounter = 0;
 float Collectibles::regenDelay = 0.25f;
 
-unsigned int Collectibles::CreateCollectible(vec3 position, float width, float height, CollectiblesType type)
+unsigned int Collectibles::CreateCollectible(vec3 position, int width, int height, CollectiblesType type)
 {
 	auto entity = ECS::CreateEntity();
 
@@ -86,7 +86,7 @@ unsigned int Collectibles::CreateCollectible(vec3 position, float width, float h
 	return entity;
 }
 
-int Collectibles::testAllCollectibles(entt::registry* reg, float halfOfPlayerWidth, float halfOfPlayerHeight)
+int Collectibles::testAllCollectibles(entt::registry* reg, int halfOfPlayerWidth, int halfOfPlayerHeight)
 {
 	vec3 playerPos = reg->get<Transform>(EntityIdentifier::MainPlayer()).GetPosition();
 	unsigned int yList = 0;

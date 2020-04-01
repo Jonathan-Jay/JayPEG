@@ -52,7 +52,7 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 4.f, bulletRadius * 2.f, true, &animController);
 	}
 
-	ECS::GetComponent<Transform>(entity).SetPosition(vec3(pos.x, pos.y, 27.f));
+	ECS::GetComponent<Transform>(entity).SetPosition(vec3(pos.x, pos.y, 29.f));
 
 	auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 

@@ -51,7 +51,7 @@ public:
 	bool getChanging() { return m_list[m_index].changing; }
 
 
-	static void update(entt::registry *reg);
+	static void update(entt::registry *reg, bool playerOnGround);
 
 	static void reset() { m_list.resize(0); }
 
