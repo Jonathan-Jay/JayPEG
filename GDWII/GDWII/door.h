@@ -7,18 +7,19 @@ struct doorData
 	vec3 startPos;
 	vec3 endPos;
 	float speed;
+	float width;
 	short int type = 0;
-	std::vector<std::vector<int>> otherData = {};
 	bool previousState = false;
 	bool opened = false;
 	bool changing = false;
+	std::vector<std::vector<int>> otherData = {};
 };
 
 class Door
 {
 public:
 	Door() {}
-	//starts at pos, moves to otherpos when not opened
+	//starts at pos, moves to otherpos when not opened, subtract 12 from width and 30 from height for filesize
 	void Init(b2World* physicsWorld, vec3 pos, vec3 otherPos, float width, float height, std::string filename, float speed);
 
 	/*types are dependant on what it is set as:

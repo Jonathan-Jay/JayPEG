@@ -11,14 +11,15 @@ public:
 	ActualMainMenu(std::string name);
 
 	void InitScene(float windowWidth, float windowHeight) override;
+	void KeyboardDown() override;
 	void MouseClick(SDL_MouseButtonEvent evnt) override;
 	void MouseMotion(SDL_MouseMotionEvent evnt) override;
-	void HoverSound();
 	void GamepadStick(XInputController* con) override;
 	void Update() override;
 	int ChangeScene() override;
 
 private:
+	void HoverSound();
 	void rightOnMenu();
 	void leftOnMenu();
 	//returns true if nothing selected

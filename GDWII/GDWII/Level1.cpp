@@ -5,9 +5,9 @@ Level1::Level1(std::string name) : Scene(name)
 	m_gravity = b2Vec2(float32(0.f), float32(-20.f));
 
 	//sounds
-	m_soundEffects.push_back({ "Rabi-Ribi.mp3", "sounds" });	//0
-	m_soundEffects.push_back({ "nep.wav", "sounds" });			//1
-	m_soundEffects.push_back({ "snake.mp3", "sounds" });		//2
+	m_soundEffects.push_back({ "MenuBackground.mp3", "music" });	// 0
+	m_soundEffects.push_back({ "nep.wav", "sounds" });				// 1
+	m_soundEffects.push_back({ "snake.mp3", "sounds" });			// 2
 
 }
 
@@ -20,8 +20,10 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 	float aspectRatio = windowWidth / windowHeight;
 
+#pragma region entities
 	vec3 playerPos = { -1247, -254, 30.f };
 
+	//main camera
 	{
 		auto entity = ECS::CreateEntity();
 
@@ -49,6 +51,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		ECS::SetIsMainCamera(entity, true);
 	}
 
+	//main player
 	{
 		auto entity = ECS::CreateEntity();
 
@@ -183,6 +186,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		ECS::SetIsMainPlayer(entity, true);
 	}
 
+	//first world piece
 	{
 		auto entity = ECS::CreateEntity();
 
@@ -205,14 +209,14 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		tempBody->SetGravityScale(0);
-		
+
 		std::vector<float> x = {
 			-1347, -1087, -1087, -956, -956, -499, -499, -607, -607, -213, -213, 123, 123, 189, 189, 459,
 			459, 524, 524, 784, 784, 914, 914, 1037, 1037, 1235, 1235, 1024, 1024, 1549, 1549, 1493,
-			1493, -202, -202, 43, 43, -182, -182, -208, -208, -1843, -1843, -1886, -1886, -2032, -2032, -997,
-			-997, -801, -801, 363, 363, 1691, 1691, 1240, 1240, 1691, 1691, 1642, 1642, 1691, 1691, 826, 826,
-			890, 890, 436, 436, 501, 501, 568, 568, 636, 636, 703, 703, 771, 771, 1996, 1996, 1483, 1483, 1462,
-			1462, 1271, 1271, 1462, 1462, 1400, 1400, 1462, 1462, 1400, 1400, 1462, 1462, 1914, 1914, 1510,
+			1493, -205, -205, 43, 43, -182, -182, -208, -208, -1843, -1843, -1886, -1886, -2032, -2032, -999,
+			-999, -801, -801, 363, 363, 1691, 1691, 1240, 1240, 1691, 1691, 1642, 1642, 1691, 1691, 826, 826,
+			890, 890, 436, 436, 501, 501, 568, 568, 636, 636, 703, 703, 771, 771, 1996, 1996, 1483, 1483, 1463,
+			1463, 1271, 1271, 1463, 1463, 1400, 1400, 1463, 1463, 1400, 1400, 1463, 1463, 1914, 1914, 1510,
 			1510, 1465, 1465, 821, 821, 757, 757, -174, -174, -240, -240, -1022, -1022, -1060, -1060, -1350,
 			-1350, -1022, -1022, -961, -961, -1022, -1022, -961, -961, -1022, -1022, -961, -961, -1022,
 			-1022, -961, -961, -1022, -1022, -894, -894, -762, -762, -1420, -1420, -655, -655, -583, -583, -518,
@@ -222,7 +226,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 			-294, -294, -498, -498, -294, -294, -319, -319, -500, -500, -463, -463, -428, -428, -392, -392,
 			-430, -430, -466, -466, -501, -501, -541, -541, -501, -501, -319, -319, -293, -293, -318, -318,
 			-1123, -1123, -936, -936, -765, -765, -836, -836, -764, -764, -1202, -1202, -1135, -1135, -1312,
-			-1312, -968, -968, -1278, -1278, -1442, -1442, -1292, -1292, -1267, -1267, -320, -320, -293, -293,
+			-1312, -968, -968, -1278, -1278, -1442, -1442, -1292, -1292, -1267, -1267, -318, -318, -293, -293,
 			-97, -97, -293, -293, -319, -319, -293, -293, -223, -223, -154, -154, -82, -82, -6, -6, 132, 132,
 			313, 313, 227, 227, 313, 313, 341, 341, 903, 903, 959, 959, 1041, 1041, 1068, 1068, 1106, 1106, 1324, 1324,
 			1194, 1194, 1260, 1260, 1088, 1088, 1260, 1260, 1088, 1088, 1260, 1260, 1233, 1233, 1315, 1315, 1135, 1135,
@@ -231,26 +235,13 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 			-294, -294, -318, -318, -294, -294, -109, -109, -294
 		};
 
-		/*
-		std::cout << "b2Vec2 tempArray[" << x.size() << "] = {\n";
-		for (int count(0); count < x.size(); count++) {
-			if (count == x.size() - 1) {
-				std::cout << "\tb2Vec2(" << x[count] << ", " << y[count] << ")\n";
-			}
-			else {
-				std::cout << "\tb2Vec2(" << x[count] << ", " << y[count] << "),\n";
-			}
-		}
-		std::cout << "};\n";
-		*/
-
 		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment);
-		//tempPhsBody = PhysicsBody(tempBody, tempArray, 83);
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "world");
+		ECS::SetUpIdentifier(entity, bitHolder, "background");
 	}
 
+	//second world piece (left island)
 	{
 		auto entity = ECS::CreateEntity();
 
@@ -286,9 +277,10 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment);
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "front");
+		ECS::SetUpIdentifier(entity, bitHolder, "walls");
 	}
 
+	//third world piece (right island)
 	{
 		auto entity = ECS::CreateEntity();
 
@@ -296,11 +288,11 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		ECS::AttachComponent<Transform>(entity);
 		ECS::AttachComponent<PhysicsBody>(entity);
 
-		std::string filename = "walls.png";
+		std::string filename = "wallsCover.png";
 
 		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 5600, 3373);
 
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 25.f));
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 28.f));
 
 		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
@@ -313,7 +305,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		tempBody->SetGravityScale(0);
 
 		std::vector<float> x = {
-			825, 757, 757, 375, 375, 1307, 1307, 825, 825
+			824, 757, 757, 375, 375, 1307, 1307, 824, 824
 		};
 		std::vector<float> y = {
 			265, 265, 904, 904, 959, 959, 497, 497, 265
@@ -322,12 +314,32 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment);
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "front");
+		ECS::SetUpIdentifier(entity, bitHolder, "cover");
 	}
+
+	/*
+	std::cout << "b2Vec2 tempArray[" << x.size() << "] = {\n";
+	for (int count(0); count < x.size(); count++) {
+		if (count == x.size() - 1) {
+			std::cout << "\tb2Vec2(" << x[count] << ", " << y[count] << ")\n";
+		}
+		else {
+			std::cout << "\tb2Vec2(" << x[count] << ", " << y[count] << "),\n";
+		}
+	}
+	std::cout << "};\n";
+
+	tempPhsBody = PhysicsBody(tempBody, tempArray, 83);
+	*/
+
+#pragma endregion entities
+	
+	//for a single platform that is textureless
+	Missiles::CreateWall(m_physicsWorld, vec3(325, 715, 0), 275, 25, "", false);
 
 	CreateUI();
 
-	//reseting stuff
+	//resetting stuff
 	Door::reset();
 	Collectibles::reset();
 	Enemies::reset(m_physicsWorld);
@@ -336,25 +348,66 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Bullets::setDamage(bulletDamage);
 	Missiles::setDamage(missileDamage);
 
-	platforms[0].Init(m_physicsWorld, vec3(-717, 146, 26), vec3(-717, 283, 26), 78, 27, "Doors/platform1.png", 50);
-	platforms[1].Init(m_physicsWorld, vec3(-672, -1150, 26), vec3(-672, -1000, 26), 142, 27, "Doors/platform2.png", 75);
-	platforms[2].Init(m_physicsWorld, vec3(-408, -1250, 26), vec3(-408, -1100, 26), 142, 27, "Doors/platform2.png", 75);
+#pragma region object summons
+	/*
+	//debugging stuff
+	tempPosMove = { -0, 0 };
+	tempEnt.resize(0);
+	tempEntIndex = 0;
+	*/
+
+	//platform inits, all bouncy cause they go back and forth
+	platforms[0].Init(m_physicsWorld, vec3(-717, 146, 26), vec3(-717, 283, 26), 72, 27, "Objects/platform1.png", 50);
+	platforms[1].Init(m_physicsWorld, vec3(-672, -1150, 26), vec3(-672, -1000, 26), 136, 27, "Objects/platform2.png", 75);
+	platforms[2].Init(m_physicsWorld, vec3(-408, -1250, 26), vec3(-408, -1100, 26), 136, 27, "Objects/platform2.png", 75);
 	platforms[0].isBouncy();
 	platforms[1].isBouncy();
 	platforms[2].isBouncy();
 
-	Missiles::CreateWall(m_physicsWorld, vec3(325, 715, 30), 275, 25, "", false);
+	//doors init, two open when an entity dies, the other when the player enters the boss room
+	doors[0].Init(m_physicsWorld, vec3(1473, 181, 26), vec3(1473, 281, 26), 20, 134, "Objects/miniBossDoor.png", 50);	//missile
+	doors[1].Init(m_physicsWorld, vec3(-986, -702, 26), vec3(-986, -865, 26), 26, 240, "Objects/bossDoor.png", 250);	//boss room
+	doors[2].Init(m_physicsWorld, vec3(-1865, -1255, 26), vec3(-1865, -1135, 26), 26, 151, "Objects/winDoor.png", 50);	//win
+	doors[0].isEntityTrigger(	//opens when mini-boss is killed
+		Collectibles::CreateCollectible(vec3(1473 - 50, 181, 26), 25, 25, CollectiblesType::BulletStrengthUp)
+	);
+	doors[1].isAABB(vec2(-2140, -1480), vec2(-986, -750));
+	doors[2].isEntityTrigger(	//opens when boss is killed
+		Collectibles::CreateCollectible(vec3(-1865 + 50, -1255, 26), 25, 25, CollectiblesType::BulletStrengthUp)
+	);
 
+	//hidden stuff
+	Missiles::CreateWall(m_physicsWorld, vec3(-1020, -388.5, 27), 147, 264, "Objects/RegenUpHidden.png");
+	Bullets::CreateWall(m_physicsWorld, vec3(-1189.5, 1218, 27), 335, 224, "Objects/HPUpHidden.png");
+	Bullets::CreateWall(m_physicsWorld, vec3(1706.5, 1197, 27), 487, 274, "Objects/RegenStationHidden.png");
+	Bullets::CreateWall(m_physicsWorld, vec3(1481, -1380, 27), 452, 167, "Objects/PowerUpHidden.png");
+	Bullets::CreateWall(m_physicsWorld, vec3(-75, -879, 27), 260, 297, "Objects/PreBossHidden.png");
+
+	//bombables
+	Missiles::CreateWall(m_physicsWorld, vec3(797.5, 200.5, 27), 53, 173, "Objects/bombVertical.png");
+	Missiles::CreateWall(m_physicsWorld, vec3(758, -397, 27), 53, 173, "Objects/bombVertical.png");
+	Missiles::CreateWall(m_physicsWorld, vec3(978, -528.5, 27), 131, 55, "Objects/bombFlat.png");
+	Missiles::CreateWall(m_physicsWorld, vec3(316, 931.5, 27), 131, 55, "Objects/bombFlat.png");
+
+	//breakables
+	Bullets::CreateWall(m_physicsWorld, vec3(-661, -243, 27), 72, 134, "Objects/breakableVertical.png");
+	Bullets::CreateWall(m_physicsWorld, vec3(-460, -306.5, 27), 113, 25, "Objects/breakableFlat.png");
+	Bullets::CreateWall(m_physicsWorld, vec3(1351, 946.5, 27), 113, 25, "Objects/breakableFlat.png");
+	Bullets::CreateWall(m_physicsWorld, vec3(1594, -305.5, 27), 113, 25, "Objects/breakableFlat.png");
+
+	//pick-ups
 	Collectibles::CreateCollectible(vec3(1866, 177, 26), 25, 25, CollectiblesType::Missile);
 	Collectibles::CreateCollectible(vec3(-1195, 1180, 26), 25, 25, CollectiblesType::HPUp);
 	Collectibles::CreateCollectible(vec3(325, 770, 26), 25, 25, CollectiblesType::HPUp);
 	Collectibles::CreateCollectible(vec3(-1039, -455, 26), 25, 25, CollectiblesType::RegenUp);
 	Collectibles::CreateCollectible(vec3(1605, -1400, 26), 25, 25, CollectiblesType::BulletStrengthUp);
 
+	//regen stations
 	Collectibles::CreateCollectible(vec3(-1330, 139, 26), 100, 25, CollectiblesType::RegenStation);
 	Collectibles::CreateCollectible(vec3(1696, 1106, 26), 100, 25, CollectiblesType::RegenStation);
 	Collectibles::CreateCollectible(vec3(-77, -934, 26), 100, 25, CollectiblesType::RegenStation);
-
+#pragma endregion object summons
+	
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 }
@@ -592,6 +645,76 @@ void Level1::KeyboardDown()
 		}
 	}
 
+	/*
+	//Debugging tool, lets you move entities from a list
+	if (Input::GetKeyDown(Key::E)) {
+		tempEntIndex++;
+		if (tempEntIndex >= tempEnt.size()) {
+			tempEntIndex = 0;
+		}
+		std::cout << "Index: " << tempEntIndex << '\n';
+	}
+
+	bool changedPosition = false;
+	if (Input::GetKey(Key::Shift)) {
+		if (Input::GetKey(Key::W)) {
+			tempPosMove.y++;
+			changedPosition = true;
+		}
+		if (Input::GetKey(Key::S)) {
+			tempPosMove.y--;
+			changedPosition = true;
+		}
+		if (Input::GetKey(Key::D)) {
+			tempPosMove.x++;
+			changedPosition = true;
+		}
+		if (Input::GetKey(Key::A)) {
+			tempPosMove.x--;
+			changedPosition = true;
+		}
+	}
+	else if (Input::GetKey(Key::Control)) {
+		if (Input::GetKey(Key::W)) {
+			tempPosMove.y += 10;
+			changedPosition = true;
+		}
+		if (Input::GetKey(Key::S)) {
+			tempPosMove.y -= 10;
+			changedPosition = true;
+		}
+		if (Input::GetKey(Key::D)) {
+			tempPosMove.x += 10;
+			changedPosition = true;
+		}
+		if (Input::GetKey(Key::A)) {
+			tempPosMove.x -= 10;
+			changedPosition = true;
+		}
+	}
+	else {
+		if (Input::GetKeyDown(Key::W)) {
+			tempPosMove.y++;
+			changedPosition = true;
+		}
+		if (Input::GetKeyDown(Key::S)) {
+			tempPosMove.y--;
+			changedPosition = true;
+		}
+		if (Input::GetKeyDown(Key::D)) {
+			tempPosMove.x++;
+			changedPosition = true;
+		}
+		if (Input::GetKeyDown(Key::A)) {
+			tempPosMove.x--;
+			changedPosition = true;
+		}
+	}
+	if (changedPosition) {
+		std::cout << "vec3(" << tempPosMove.x << ", " << tempPosMove.y << ", 27)\n";
+		m_sceneReg->get<PhysicsBody>(tempEnt[tempEntIndex]).GetBody()->SetTransform(tempPosMove, 0);
+	}
+	*/
 }
 
 void Level1::Update()
@@ -750,30 +873,29 @@ void Level1::Update()
 	}
 	
 
-	//update projectile logic
+	//update logic
 	Missiles::updateAllMissiles(m_sceneReg);
 	Bullets::updateAllBullets(m_sceneReg);
 	Enemies::UpdateEnemies(m_sceneReg);
 	Door::update(m_sceneReg, onGround);
 	int item = Collectibles::testAllCollectibles(m_sceneReg, playerWidth / 2.f, playerHeight / 2.f);
-	//item id for pop-up
-	if (item) {
+	if (item) {		//item id for pop-up
 		itemCount++;
 		m_sceneReg->get<AnimationController>(uiElements[15]).SetActiveAnim(item);
 		counter = 5;
 	}
 
 	//zoom ranges they return true when they succeed, so none should be active for the global zoom to be on
-	if (!zoomRange(250, vec2(-2100, -1485), vec2(65, -745)) &&
-		!zoomRange(225, vec2(-745, -1500), vec2(1710, -1115)) &&
-		!zoomRange(175, vec2(-1370, -560), vec2(-150, -80)) &&
-		!zoomRange(240, vec2(795, 95), vec2(1470, 530)) && 
-		!zoomRange(175, vec2(1470, 95), vec2(2031, 345)) &&
-		!zoomRange(175, vec2(-1440, 90), vec2(-840, 960))
+	if (!zoomRange(250, vec2(-2100, -1485), vec2(65, -745)) &&		//boss room
+		!zoomRange(225, vec2(-745, -1500), vec2(1710, -1115)) &&	//basement
+		!zoomRange(175, vec2(-1370, -560), vec2(-150, -80)) &&		//intro area
+		!zoomRange(240, vec2(795, 95), vec2(1470, 530)) &&			//mini-boss room
+		!zoomRange(175, vec2(1470, 95), vec2(2031, 345)) &&			//missile pick-up room
+		!zoomRange(175, vec2(-1440, 90), vec2(-840, 960))			//staircase up
 		) {
 		zoomRange(200, vec2(), vec2(), true);
 	}
-	
+
 	//has to run after everything since camera can move in other updates
 	UpdateUI();
 
@@ -836,12 +958,15 @@ int Level1::ChangeScene()
 {
 	if (exiting) {
 		exiting = false;
-		return 0;
+		gameOver = false;	//just in case
+		return 0;		//main menu
 	}
 	if (gameOver) {
+		//death text
 		std::cout << "you died -Dark souls\n";
 		gameOver = false;
-		return 0;
+		exiting = false;	//just in case
+		return 0;		//mainmenu
 	}
 	return -1;
 }
@@ -878,12 +1003,14 @@ void Level1::UpdateCounters()
 			missileDelay = 0;
 	}
 
+	//for movement stun
 	if (recoilDelay > 0) {
 		recoilDelay -= (onGround ? 3 : 1) * Timer::deltaTime;
 		if (recoilDelay < 0)
 			recoilDelay = 0;
 	}
 
+	//for text boxes
 	if (counter > 0) {
 		counter -= Timer::deltaTime;
 		if (counter < 0)
@@ -917,6 +1044,8 @@ void Level1::UpdateUI()
 	if (stunned = playerData.getStunned())
 		canJump = false;
 
+	/*
+	//Debugging tools
 	if (!playerData.getMissile()) {
 		playerData.getMissile(true);
 	}
@@ -927,8 +1056,9 @@ void Level1::UpdateUI()
 		tempBod->SetGravityScale(!tempBod->GetGravityScale());
 		tempBod->SetLinearVelocity(b2Vec2(0, 0));
 	}
+	*/
 
-	/*summon all ui elements here
+	/*control all ui elements here
 	ui Elements according to index in vector:
 	0: back + bullet
 	1: HP bar
@@ -962,9 +1092,13 @@ void Level1::UpdateUI()
 	vec3 uiPos = camPos	+ vec3((-ortho * m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetAspect()), ortho, 0) + uiOffset * scale;
 	uiPos.z = uiOffset.z;
 
-	m_sceneReg->get<Transform>(uiElements[15]).SetPosition(camPos + popUpOffset * scale + vec3(0, 0, 80));
-	m_sceneReg->get<Sprite>(uiElements[15]).SetSizeScale(scale);
+	//TextBox updates if visible
+	if (m_sceneReg->get<Sprite>(uiElements[15]).GetTransparency() != 0) {
+		m_sceneReg->get<Transform>(uiElements[15]).SetPosition(camPos + popUpOffset * scale + vec3(0, 0, 80));
+		m_sceneReg->get<Sprite>(uiElements[15]).SetSizeScale(scale);
+	}
 
+	//All basic stuff
 	for (unsigned int x(0); x < 4; x++) {
 		vec3 temp = { 0, 0, 0 };
 		if (x == 0) {			//have bullet upgrade?
@@ -982,6 +1116,7 @@ void Level1::UpdateUI()
 	}
 
 	unsigned int itemPercent = itemCount * 100 / totalItems;
+	//Item %
 	for (unsigned int x(0); x < 3; x++) {
 		m_sceneReg->get<AnimationController>(uiElements[x + 4]).SetActiveAnim(
 			floor(itemPercent / pow(10, 2 - x)) - floor(itemPercent / pow(10, 3 - x)) * 10);
@@ -1017,6 +1152,7 @@ bool Level1::zoomRange(int wantedOrtho, vec2 BL, vec2 TR, bool everything)
 		else if (yOrtho < wantedOrtho) {
 			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-floor(Timer::deltaTime * 100));
 		}
+		else return false;
 	}
 	else {		//check the AABB
 		vec3 playerPos = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPosition();
@@ -1031,6 +1167,8 @@ bool Level1::zoomRange(int wantedOrtho, vec2 BL, vec2 TR, bool everything)
 		}
 		else return false;
 	}
+	
+	//returns true if everything and success, or if AABB succeeded
 	return true;
 }
 
@@ -1135,6 +1273,7 @@ void Level1::CreateUI()
 		uiElements.push_back(entity);
 	}
 
+	//text boxes are very different
 	{
 		auto entity = ECS::CreateEntity();
 
@@ -1142,7 +1281,7 @@ void Level1::CreateUI()
 		ECS::AttachComponent<Transform>(entity);
 		ECS::AttachComponent<AnimationController>(entity);
 
-		std::string filename = "UI/textboxes.png1";
+		std::string filename = "UI/textboxes.png";
 
 		auto& animController = ECS::GetComponent<AnimationController>(entity);
 
@@ -1150,7 +1289,7 @@ void Level1::CreateUI()
 		for (unsigned int x(0); x < 5; x++) {
 			animController.AddAnimation(Animation());
 			auto& anim = animController.GetAnimation(x);
-			anim.AddFrame(vec2(0, 50 * (x + 1) - 1), vec2(150, 50 * x + 1));
+			anim.AddFrame(vec2(0, 500 * (x + 1) - 1), vec2(1500, 500 * x + 1));
 			anim.SetRepeating(false);
 			anim.SetSecPerFrame(1.f);
 		}

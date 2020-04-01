@@ -87,6 +87,14 @@ private:
 
 	//doors
 	Door platforms[3] = {};
+	Door doors[3] = {};
+
+	/*
+	//debbugging stuff
+	std::vector<unsigned int> tempEnt = {};
+	unsigned int tempEntIndex = 0;
+	b2Vec2 tempPosMove = {};
+	*/
 };
 
 #endif // !__LVL1__

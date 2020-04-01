@@ -159,7 +159,7 @@ int Collectibles::testAllCollectibles(entt::registry* reg, int halfOfPlayerWidth
 				//kill entity
 				ECS::DestroyEntity(list[yList][x].entity);
 				list[yList].erase(list[yList].begin() + x, list[yList].begin() + x + 1);
-				continue;
+				break;
 			}
 			x++;
 		}

@@ -12,7 +12,7 @@ void Door::Init(b2World *physicsWorld, vec3 pos, vec3 otherPos, float width, flo
 	ECS::AttachComponent<PhysicsBody>(entity);
 
 	ECS::GetComponent<Transform>(entity).SetPosition(pos);
-	ECS::GetComponent<Sprite>(entity).LoadSprite(filename, width, height + 30);
+	ECS::GetComponent<Sprite>(entity).LoadSprite(filename, width + 12, height + 30);
 
 	auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
@@ -28,7 +28,7 @@ void Door::Init(b2World *physicsWorld, vec3 pos, vec3 otherPos, float width, flo
 	unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 	ECS::SetUpIdentifier(entity, bitHolder, "door");
 
-	m_list.push_back({ entity, pos, otherPos, speed });
+	m_list.push_back({ entity, pos, otherPos, speed, width });
 	m_index = m_list.size() - 1;
 }
 
@@ -100,7 +100,8 @@ void Door::update(entt::registry *reg, bool playerOnGround)
 								if (playerOnGround && edge->contact->GetManifold()->localNormal.y == 1) {
 									reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetAwake(true);
 									reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetTransform(
-										b2Vec2(currentPos.x, currentPos.y + m_halfPlayerHeight), 0);
+										(current->width < m_halfPlayerWidth * 3.f ? b2Vec2(playerPos.x, playerPos.y) :
+											b2Vec2(currentPos.x, currentPos.y + m_halfPlayerHeight)), 0);
 								}
 								else {
 									reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetAwake(true);

@@ -3,8 +3,8 @@
 ActualMainMenu::ActualMainMenu(std::string name)
 	: Scene(name) {
 	//sounds
-	m_soundEffects.push_back({ "MenuBackground.mp3", "sounds" });	// 0
-	m_soundEffects.push_back({ "ClickBeat1.mp3", "sounds" });
+	m_soundEffects.push_back({ "MenuBackground.mp3", "music" });	// 0
+	m_soundEffects.push_back({ "ClickBeat1.mp3", "sounds" });		// 1
 	m_soundEffects.push_back({ "RolloverSound1.wav", "sounds" });	// 2
 }
 
@@ -168,10 +168,8 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 }
 
-void ActualMainMenu::Update()
+void ActualMainMenu::KeyboardDown()
 {
-	m_soundEffects[0].loop();
-
 	if (wait == 1) {
 		if (Input::GetKeyDown(Key::Escape)) {
 			index = 0;
@@ -196,7 +194,14 @@ void ActualMainMenu::Update()
 					index = 4;
 			}
 		}
+	}
+}
 
+void ActualMainMenu::Update()
+{
+	m_soundEffects[0].loop();
+
+	if (wait == 1) {
 		switch (index) {
 		case 1:
 			m_sceneReg->get<Sprite>(3).SetSizeScale(1.f);
