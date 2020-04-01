@@ -366,7 +366,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 	//doors init, two open when an entity dies, the other when the player enters the boss room
 	doors[0].Init(m_physicsWorld, vec3(1473, 181, 26), vec3(1473, 281, 26), 20, 134, "Objects/miniBossDoor.png", 50);	//missile
-	doors[1].Init(m_physicsWorld, vec3(-986, -702, 26), vec3(-986, -865, 26), 26, 240, "Objects/bossDoor.png", 250);	//boss room
+	doors[1].Init(m_physicsWorld, vec3(-986, -702, 26), vec3(-986, -865, 26), 26, 240, "Objects/bossDoor.png", 275);	//boss room
 	doors[2].Init(m_physicsWorld, vec3(-1865, -1255, 26), vec3(-1865, -1135, 26), 26, 151, "Objects/winDoor.png", 50);	//win
 	doors[0].isEntityTrigger(	//opens when mini-boss is killed
 		Collectibles::CreateCollectible(vec3(1473 - 50, 181, 26), 25, 25, CollectiblesType::BulletStrengthUp)
@@ -390,7 +390,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Missiles::CreateWall(m_physicsWorld, vec3(316, 931.5, 27), 131, 55, "Objects/bombFlat.png");
 
 	//breakables
-	Bullets::CreateWall(m_physicsWorld, vec3(-661, -243, 27), 72, 134, "Objects/breakableVertical.png");
+	Bullets::CreateWall(m_physicsWorld, vec3(-661, -228, 27), 72, 164, "Objects/breakableVertical.png");
 	Bullets::CreateWall(m_physicsWorld, vec3(-460, -306.5, 27), 113, 25, "Objects/breakableFlat.png");
 	Bullets::CreateWall(m_physicsWorld, vec3(1351, 946.5, 27), 113, 25, "Objects/breakableFlat.png");
 	Bullets::CreateWall(m_physicsWorld, vec3(1594, -305.5, 27), 113, 25, "Objects/breakableFlat.png");
@@ -509,6 +509,12 @@ void Level1::GamepadStick(XInputController* con)
 
 		if (con->IsButtonPressed(Buttons::SELECT)) {
 			exiting = true;
+		}
+
+		if (counter > 1) {
+			if (con->IsButtonPressed(Buttons::START)) {
+				counter = 1;
+			}
 		}
 	}
 }
@@ -639,6 +645,12 @@ void Level1::KeyboardDown()
 			temp.y = -projectileSpeed * 1.5f;
 		}
 		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
+
+		if (counter > 1) {
+			if (Input::GetKeyDown(Key::D)) {
+				counter = 1;
+			}
+		}
 
 		if (Input::GetKeyDown(Key::Escape)) {
 			exiting = true;
@@ -836,7 +848,7 @@ void Level1::Update()
 						vel.y = projectileSpeed;
 					}
 					else if (facingDown) {
-						velo.y = maxJumpStrength * 1.5f;
+						velo.y = maxJumpStrength * 1.25f;
 						pos.y -= playerHeight / 2.f - 5.5f;
 						vel.y = -projectileSpeed * 2.f;
 					}
@@ -846,7 +858,7 @@ void Level1::Update()
 						else
 							pos.y += 6.1f;
 						if (!onGround) {
-							velo.x = (movingRight ? -maxJumpStrength : maxJumpStrength) * 1.5f;
+							velo.x = (movingRight ? -maxJumpStrength : maxJumpStrength) * 1.25f;
 							recoilDelay = recoilCooldown;
 						}
 						else {
@@ -882,7 +894,7 @@ void Level1::Update()
 	if (item) {		//item id for pop-up
 		itemCount++;
 		m_sceneReg->get<AnimationController>(uiElements[15]).SetActiveAnim(item);
-		counter = 5;
+		counter = (item == 1 ? 7.5f : 5);
 	}
 
 	//zoom ranges they return true when they succeed, so none should be active for the global zoom to be on
@@ -1040,6 +1052,9 @@ void Level1::UpdateUI()
 				deathCounter = 2.5f;
 		}
 	}
+
+	if (!playerData.getMissile())
+		playerData.getMissile(true);
 
 	if (stunned = playerData.getStunned())
 		canJump = false;
@@ -1289,15 +1304,15 @@ void Level1::CreateUI()
 		for (unsigned int x(0); x < 5; x++) {
 			animController.AddAnimation(Animation());
 			auto& anim = animController.GetAnimation(x);
-			anim.AddFrame(vec2(0, 500 * (x + 1) - 1), vec2(1500, 500 * x + 1));
+			anim.AddFrame(vec2(0, 500 * (x + 1) - 1), vec2(2500, 500 * x + 1));
 			anim.SetRepeating(false);
 			anim.SetSecPerFrame(1.f);
 		}
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 150, 50, true, &animController);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 250, 50, true, &animController);
 		ECS::GetComponent<Sprite>(entity).SetTransparency(0);
 		animController.SetActiveAnim(0);
 
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 200.f, 80.f));
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 250.f, 80.f));
 
 		unsigned int bitHolder = EntityIdentifier::AnimationBit() | EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "dialogue boxes");
