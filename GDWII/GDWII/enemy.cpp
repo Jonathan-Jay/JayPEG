@@ -201,8 +201,10 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 
 			if (canSeePlayer)
 				state = EnemyState::Follow;
-			else
+			else {
 				state = EnemyState::Idle;
+				idleTime = 5.f;
+			}
 
 			break;
 		}
@@ -241,6 +243,12 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 
 		break;
 	case EnemyState::Idle:
+		idleTime -= Timer::deltaTime;
+		if (idleTime <= 0) {
+			state = EnemyState::Follow;
+			targetPos = targetPos2;
+		}
+
 		break;
 	default:
 		break;

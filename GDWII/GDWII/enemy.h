@@ -39,6 +39,7 @@ public:
 	int attackDamage{ 0 };
 	float refreshSightTime{ 0.f };
 	float shootDelay{ 0.f };
+	float idleTime{ 0.f };
 	size_t enemyCheckingIndex{ 0 };
 	std::vector<unsigned int> insideEnemies;
 	bool canSeePlayer{ false };
