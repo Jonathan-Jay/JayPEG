@@ -180,12 +180,12 @@ void BackEnd::ReshapeWindow(int w, int h, entt::registry * mainReg)
 
 	if (mainReg != nullptr) {
 		//Adjusts for aspect ratio
-		vec4 temp = mainReg->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize();
 		auto& tempCam = mainReg->get<Camera>(EntityIdentifier::MainCamera());
+		vec4 temp = tempCam.GetOrthoSize();
 
 		//Set values
-		mainReg->get<Camera>(EntityIdentifier::MainCamera()).SetWindowSize(vec2(float(m_windowWidth), float(m_windowHeight)));
-		mainReg->get<Camera>(EntityIdentifier::MainCamera()).Orthographic(m_aspectRatio, temp.x, temp.y, temp.z, temp.w, tempCam.GetNear(), tempCam.GetFar());
+		tempCam.SetWindowSize(vec2(float(m_windowWidth), float(m_windowHeight)));
+		tempCam.Orthographic(m_aspectRatio, temp.x, temp.y, temp.z, temp.w, tempCam.GetNear(), tempCam.GetFar());
 
 		tempCam.SetPosition(tempCam.GetPosition());
 	}

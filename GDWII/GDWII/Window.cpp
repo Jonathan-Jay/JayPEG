@@ -93,17 +93,40 @@ void Window::SetFullscreen(Uint32 flags)
 	m_fullscreen = flags;
 }
 
+void Window::SetBorderless(bool borderless) {
+	SDL_SetWindowBordered(m_window, SDL_bool(borderless));
+}
+
+void Window::SetWindowPos(int x, int y) {
+	SDL_SetWindowPosition(m_window, x, y);
+}
+
 Uint32 Window::GetFullscreen() const
 {
 	//Return window fullscreen flag
 	return m_fullscreen;
 }
 
+int* Window::GetWindowSize() {
+	int winSize[] = {0, 0};
+
+	SDL_GetWindowSize(m_window, &winSize[0], &winSize[1]);
+	return winSize;
+}
+
+int* Window::GetWindowPos() {
+	int winPos[] = { 0, 0 };
+
+	SDL_GetWindowPosition(m_window, &winPos[0], &winPos[1]);
+	return winPos;
+}
+
 void Window::SetWindowSize(int w, int h)
 {
 	SDL_SetWindowSize(m_window, w, h);
 
-	SDL_SetWindowPosition(m_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	int* winPos = GetWindowPos();
+	SDL_SetWindowPosition(m_window, winPos[0], winPos[1]);
 }
 
 void Window::Close()

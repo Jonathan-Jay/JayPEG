@@ -7,6 +7,9 @@ float Enemies::shootDelayTime = 1.5f;
 b2World* Enemies::m_phyWorld = nullptr;
 
 void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
+	if (type == EnemyTypes::BOSS)
+		return;
+
 	b2Body* phyBod = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody();
 	vec2 playerPos{ m_reg->get<Transform>(EntityIdentifier::MainPlayer()).GetPosition() };
 	vec2 enemyPos{ m_reg->get<Transform>(enemyID.enemyID).GetPosition() };
@@ -394,6 +397,10 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 		filename += "shoot.png";
 		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 8, 10, 50, 2);
 		break;
+	case EnemyTypes::BOSS:
+		filename += "boss.png";
+		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 50, 13, 75, 3);
+		break;
 	default:
 		break;
 	}
@@ -406,23 +413,47 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 
 	{	//aniamtion 0 is walking left
 		auto& anim = animController.GetAnimation(0);
-		for (int x(0); x < 5; x++)
-			anim.AddFrame(vec2(150 * x, 150), vec2(150 * (x + 1), 0));
+		
+		if (m_type == EnemyTypes::BOSS) {
+			for (int x(0); x < 5; x++)
+				anim.AddFrame(vec2(150 * x, 150), vec2(150 * (x + 1), 0));
+			anim.SetSecPerFrame(0.25f);
+		}
+		else {
+			for (int x(0); x < 5; x++)
+				anim.AddFrame(vec2(150 * x, 150), vec2(150 * (x + 1), 0));
+			anim.SetSecPerFrame(0.15f);
+		}
+		
 		anim.SetRepeating(true);
-		anim.SetSecPerFrame(0.15f);
 	}
 	
 	{	//animation 1 is walking right
 		auto& anim = animController.GetAnimation(1);
-		for (int x(0); x < 5; x++)
-			anim.AddFrame(vec2(150 * (x + 1), 150), vec2(150 * x, 0));
+
+		if (m_type == EnemyTypes::BOSS) {
+			for (int x(0); x < 5; x++)
+				anim.AddFrame(vec2(150 * (x + 1), 150), vec2(150 * x, 0));
+			anim.SetSecPerFrame(0.25f);
+		} else {
+			for (int x(0); x < 5; x++)
+				anim.AddFrame(vec2(150 * (x + 1), 150), vec2(150 * x, 0));
+			anim.SetSecPerFrame(0.15f);
+		}
+		
 		anim.SetRepeating(true);
-		anim.SetSecPerFrame(0.15f);
+	}
+
+	if (m_type == EnemyTypes::BOSS) {
+		//do jump anim
 	}
 
 	animController.SetActiveAnim(0);
 
-	ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 20, 20, true, &animController);
+	if (m_type == EnemyTypes::BOSS)
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 40, 40, true, &animController);
+	else
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 20, 20, true, &animController);
 
 	ECS::GetComponent<Transform>(entity).SetPosition(vec3(x, y, 30.f));
 
@@ -439,7 +470,11 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 	tempBody->SetFixedRotation(true);
 	tempBody->SetUserData((void*)entity);
 
-	tempPhsBody = PhysicsBody(tempBody, 18.f, 20.f, vec2(0, 0), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy);
+	if (m_type == EnemyTypes::BOSS)
+		tempPhsBody = PhysicsBody(tempBody, 40.f, 40.f, vec2(0, 0), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy);
+	else
+		tempPhsBody = PhysicsBody(tempBody, 18.f, 20.f, vec2(0, 0), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy);
+
 	tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
 
 	unsigned int bitHolder = EntityIdentifier::AnimationBit() | EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit() | EntityIdentifier::EnemyBit();
