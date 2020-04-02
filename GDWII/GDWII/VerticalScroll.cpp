@@ -12,7 +12,7 @@ void VerticalScroll::Update()
 		if (m_shakeTime == 0)
 			m_shakeTime = -1;
 
-		difference += rand() % int(2 * m_shakeStrength) - m_shakeStrength;
+		difference = m_focus->GetPositionY() rand() % int(2 * m_shakeStrength) - m_shakeStrength;
 	}
 	else if (m_shakeTime < 0) {
 		if (m_shakeEndPos != nullptr)
