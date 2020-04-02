@@ -440,6 +440,8 @@ b2Vec2 Enemies::projectileMotion(vec3 initial, vec3 target, int gravity, int vel
 		//					[ ---------------- ]		 ( -h  )
 		//					[ (h^2 + x^2)^1/2  ]
 
+		//	thank you Michel van Biezen for this video that helped find this equation: https://www.youtube.com/watch?v=bqYtNrhdDAY
+
 		float test = (-(gravity * distance * distance / float(velo * velo) - height) /		//	-(gx^2/v^2 - h) /
 			sqrtf(distance * distance + height * height)									//	sqrt(h^2 + x^2)
 			);
