@@ -6,35 +6,42 @@ HorizontalScroll::HorizontalScroll()
 
 void HorizontalScroll::Update()
 {
-	//Right of focus
-	if (m_cam->GetPositionX() < m_rightLimit) {
-		if (m_focus->GetPosition().x > m_cam->m_localPosition.x + m_offset)
-		{
+	float difference = m_cam->GetPositionX();
+	if (m_shakeTime > 0) {
+		m_shakeTime -= Timer::deltaTime;
+		if (m_shakeTime == 0)
+			m_shakeTime = -1;
+
+		difference += rand() % int(2 * m_shakeStrength) - m_shakeStrength;
+	}
+	else if (m_shakeTime < 0) {
+		if (m_shakeEndPos != nullptr)
+			difference = *m_shakeEndPos;
+
+		m_shakeTime = 0;
+		m_shakeStrength = 0;
+		m_shakeEndPos = nullptr;
+	}
+	else {
+		if (m_focus->GetPositionX() > m_cam->GetPositionX() + m_offset) {
 			//Calculate the amount the focus has "pushed" the camera right by
-			float difference = m_focus->GetPosition().x - (m_cam->m_localPosition.x + m_offset);
-
-			//Adjust the camera
-			m_cam->SetPosition(vec3(m_cam->GetPositionX() + difference, m_cam->GetPositionY(), m_cam->GetPositionZ()));
+			difference += m_focus->GetPositionX() - (m_cam->GetPositionX() + m_offset);
 		}
-	}
-	else {
-		m_cam->SetPosition(vec3(m_rightLimit, m_cam->GetPositionY(), m_cam->GetPositionZ()));
-	}
-
-	//Left of focus
-	if (m_cam->GetPositionX() > m_leftLimit) {
-		if (m_focus->GetPosition().x < m_cam->m_localPosition.x - m_offset)
-		{
+		else if (m_focus->GetPositionX() < m_cam->GetPositionX() - m_offset) {
 			//Calculate the amount the focus has "pushed" the camera left by
-			float difference = m_focus->GetPosition().x - (m_cam->m_localPosition.x - m_offset);
-
-			//Adjust the camera
-			m_cam->SetPosition(vec3(m_cam->GetPositionX() + difference, m_cam->GetPositionY(), m_cam->GetPositionZ()));
+			difference += m_focus->GetPositionX() - (m_cam->GetPositionX() - m_offset);
 		}
 	}
-	else {
-		m_cam->SetPosition(vec3(m_leftLimit, m_cam->GetPositionY(), m_cam->GetPositionZ()));
+
+	float adjustment = m_cam->GetOrthoSize().y * m_cam->GetAspect();
+	if (difference + adjustment > m_rightLimit) {		//Right of focus
+		difference = m_rightLimit - adjustment;
+	} else if (difference - adjustment < m_leftLimit) {	//Left of focus
+		difference = m_leftLimit + adjustment;
 	}
+
+	//Adjust the camera
+	m_cam->SetPosition(vec3(difference, m_cam->GetPositionY(), m_cam->GetPositionZ()));
 }
 
 Camera * HorizontalScroll::GetCam() const
@@ -96,4 +103,12 @@ void HorizontalScroll::SetLeftLimit(float left)
 {
 	if (left < m_rightLimit)
 		m_leftLimit = left;
+}
+
+void HorizontalScroll::DoScreenShake(float time, float strength, float* endPos) {
+	m_shakeTime = time;
+	m_shakeStrength = strength;
+
+	if (endPos != nullptr)
+		m_shakeEndPos = endPos;
 }

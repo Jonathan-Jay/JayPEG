@@ -110,6 +110,10 @@ float Animation::GetSecPerFrame() const
 	return m_secPerFrame;
 }
 
+float Animation::GetPerctentAnimation() {
+	return m_currentFrame / static_cast<float>(m_frames.size());
+}
+
 void Animation::SetRepeating(bool repeating)
 {
 	m_repeating = repeating;

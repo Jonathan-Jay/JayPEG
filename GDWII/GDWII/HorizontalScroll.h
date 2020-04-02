@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Camera.h"
+#include "Timer.h"
 
 class HorizontalScroll
 {
@@ -25,6 +26,7 @@ public:
 	void SetLimits(float left, float right);
 	void SetRightLimit(float right);
 	void SetLeftLimit(float left);
+	void DoScreenShake(float time, float strength, float* endPos = nullptr);
 
 private:
 	Camera* m_cam = nullptr;
@@ -33,6 +35,9 @@ private:
 	float m_offset = 5.f;
 	float m_rightLimit = INT_MAX;
 	float m_leftLimit = INT_MIN;
+	float m_shakeTime = 0.f;
+	float m_shakeStrength = 0.f;
+	float* m_shakeEndPos = nullptr;
 };
 
 //Sends vertical scrolling camera TO json file
