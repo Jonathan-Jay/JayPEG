@@ -102,6 +102,8 @@ Uint32 Window::GetFullscreen() const
 void Window::SetWindowSize(int w, int h)
 {
 	SDL_SetWindowSize(m_window, w, h);
+
+	SDL_SetWindowPosition(m_window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 }
 
 void Window::Close()

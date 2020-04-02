@@ -8,7 +8,8 @@ class Missiles
 public:
 	//create/store entity number
 	static void CreateMissile(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float missileRadius);
-	static void CreateWall(b2World* m_physicsWorld, vec3 pos, float width, float height, std::string filename = "", bool isBombable = true);
+	//subtract 12 from width and 30 from height for filesize, leave filename blank if no texture
+	static unsigned int CreateWall(b2World* m_physicsWorld, vec3 pos, float width, float height, std::string filename = "", bool isBombable = true);
 
 	//change data
 	static void setRadius(float newRadius);

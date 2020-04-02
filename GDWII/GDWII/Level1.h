@@ -30,11 +30,11 @@ private:
 	//updates counters
 	void UpdateCounters();
 	//UI elements
-	void UpdateUI();
 	void CreateUI();
+	void UpdateUI();
 	std::vector<unsigned int> uiElements = {};
-
-	vec3 tempOffSet = vec3(0, -50, 0);
+	//camera control
+	bool zoomRange(int wantedOrtho, vec2 BL, vec2 TR, bool everything = false);
 
 	//variables used by the engine
 	bool onGround = false;
@@ -50,6 +50,7 @@ private:
 	bool exiting = false;
 	bool gameOver = false;
 	bool stunned = false;
+	int itemCount = 0;
 	float jumpHeight = 0;
 	float gunDelay = 0;
 	float missileDelay = 0;
@@ -73,19 +74,27 @@ private:
 	float recoilCooldown = 0.5f;
 
 	//player related variables (max 99 for HP and NRG please)
-	int itemCount = 0;		//how many do you start with (increase when you spawn a item)
-	int totalItems = 4;		//how many in total (including starting amount)
+	int totalItems = 5;		//how many in total
 	int maxHP = 10;
 	int maxNRG = 10;
 	float EnergyRegenPerSec = 1.f;
 	float playerHeight = 40.f;
 	float playerWidth = 22.f;
 	float playerSpeed = 25.f;
-	float minJumpStrength = 25.f;
-	float maxJumpStrength = 50.f;
-	float jumpIncrementPerSec = 125.f;
+	float minJumpStrength = 50.f;
+	float maxJumpStrength = 60.f;
+	float jumpIncrementPerSec = 100.f;
 
 	//doors
+	Door platforms[3] = {};
+	Door doors[3] = {};
+
+	/*
+	//debbugging stuff
+	std::vector<unsigned int> tempEnt = {};
+	unsigned int tempEntIndex = 0;
+	b2Vec2 tempPosMove = {};
+	*/
 };
 
 #endif // !__LVL1__

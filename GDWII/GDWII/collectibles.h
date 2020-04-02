@@ -24,10 +24,10 @@ class Collectibles
 {
 public:
 	//creates a collectible, type defines the file used
-	static unsigned int CreateCollectible(vec3 position, float width, float height, CollectiblesType type);
+	static unsigned int CreateCollectible(vec3 position, int width, int height, CollectiblesType type);
 
 	//update function
-	static int testAllCollectibles(entt::registry* reg, float halfOfPlayerWidth, float halfOfPlayerHeight);
+	static int testAllCollectibles(entt::registry* reg, int halfOfPlayerWidth, int halfOfPlayerHeight);
 
 	static void reset() { list.resize(0); }
 

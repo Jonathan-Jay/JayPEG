@@ -5,9 +5,10 @@ Level1::Level1(std::string name) : Scene(name)
 	m_gravity = b2Vec2(float32(0.f), float32(-20.f));
 
 	//sounds
-	m_soundEffects.push_back({ "Rabi-Ribi.mp3", "sounds" });	//0
-	m_soundEffects.push_back({ "nep.wav", "sounds" });			//1
-	m_soundEffects.push_back({ "snake.mp3", "sounds" });		//2
+	m_soundEffects.push_back({ "MenuBackground.mp3", "music" });	// 0
+	m_soundEffects.push_back({ "nep.wav", "sounds" });				// 1
+	m_soundEffects.push_back({ "snake.mp3", "sounds" });			// 2
+
 }
 
 void Level1::InitScene(float windowWidth, float windowHeight)
@@ -19,8 +20,10 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 	float aspectRatio = windowWidth / windowHeight;
 
-	vec3 playerPos = { -854, 1000, 30.f };
+#pragma region entities
+	vec3 playerPos = { -1247, -254, 30.f };
 
+	//main camera
 	{
 		auto entity = ECS::CreateEntity();
 
@@ -41,41 +44,14 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		ECS::GetComponent<Camera>(entity).SetWindowSize(vec2(float(windowWidth), float(windowHeight)));
 		ECS::GetComponent<Camera>(entity).Orthographic(aspectRatio, temp.x, temp.y, temp.z, temp.w, -100.f, 100.f);
 
-		ECS::GetComponent<Camera>(entity).SetOrthoSize(vec4(-200, 200, -200, 200));
+		ECS::GetComponent<Camera>(entity).SetOrthoSize(vec4(-225, 225, -225, 225));
 
 		unsigned int bitHolder = EntityIdentifier::CameraBit() | EntityIdentifier::HoriScrollCameraBit() | EntityIdentifier::VertScrollCameraBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "Camera");
 		ECS::SetIsMainCamera(entity, true);
 	}
 
-	/*
-	{
-		auto entity = ECS::CreateEntity();
-
-		ECS::AttachComponent<Transform>(entity);
-		ECS::AttachComponent<PhysicsBody>(entity);
-
-		ECS::GetComponent<Transform>(entity).SetPosition(playerPos);
-
-		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
-
-		b2Body* tempBody;
-		b2BodyDef tempDef;
-		tempDef.type = b2_dynamicBody;
-		tempDef.position.Set(float32(-1243), float32(-186));
-
-		tempBody = m_physicsWorld->CreateBody(&tempDef);
-		tempBody->SetFixedRotation(true);
-		tempBody->SetGravityScale(0);
-
-		tempPhsBody = PhysicsBody(tempBody, 5, 5, vec2(0, 0), true);
-
-		unsigned int bitHolder = EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "temp");
-		ECS::SetIsMainPlayer(entity, true);
-	}
-	*/
-
+	//main player
 	{
 		auto entity = ECS::CreateEntity();
 
@@ -210,6 +186,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		ECS::SetIsMainPlayer(entity, true);
 	}
 
+	//first world piece
 	{
 		auto entity = ECS::CreateEntity();
 
@@ -232,34 +209,39 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		tempBody->SetGravityScale(0);
-		
+
 		std::vector<float> x = {
-			-336, -336, 522, 522, -941, -941, -460, -460
+			-1347, -1087, -1087, -956, -956, -499, -499, -607, -607, -213, -213, 123, 123, 189, 189, 459,
+			459, 524, 524, 784, 784, 914, 914, 1037, 1037, 1235, 1235, 1024, 1024, 1549, 1549, 1493,
+			1493, -205, -205, 43, 43, -182, -182, -208, -208, -1843, -1843, -1886, -1886, -2032, -2032, -999,
+			-999, -801, -801, 363, 363, 1691, 1691, 1240, 1240, 1691, 1691, 1642, 1642, 1691, 1691, 826, 826,
+			890, 890, 436, 436, 501, 501, 568, 568, 636, 636, 703, 703, 771, 771, 1996, 1996, 1483, 1483, 1463,
+			1463, 1271, 1271, 1463, 1463, 1400, 1400, 1463, 1463, 1400, 1400, 1463, 1463, 1914, 1914, 1510,
+			1510, 1465, 1465, 821, 821, 757, 757, -174, -174, -240, -240, -1022, -1022, -1060, -1060, -1350,
+			-1350, -1022, -1022, -961, -961, -1022, -1022, -961, -961, -1022, -1022, -961, -961, -1022,
+			-1022, -961, -961, -1022, -1022, -894, -894, -762, -762, -1420, -1420, -655, -655, -583, -583, -518,
+			-518, -191, -191, -130, -130, -62, -62, 2, 2, 73, 73, 136, 136, 204, 204, -411, -411, -358, -358, -1347, -1347
 		};
 		std::vector<float> y = {
-			919, 960, 960, 1260, 1260, 960, 960, 914
+			-294, -294, -498, -498, -294, -294, -319, -319, -500, -500, -463, -463, -428, -428, -392, -392,
+			-430, -430, -466, -466, -501, -501, -541, -541, -501, -501, -319, -319, -293, -293, -318, -318,
+			-1123, -1123, -936, -936, -765, -765, -836, -836, -764, -764, -1202, -1202, -1135, -1135, -1312,
+			-1312, -968, -968, -1278, -1278, -1442, -1442, -1292, -1292, -1267, -1267, -318, -318, -293, -293,
+			-97, -97, -293, -293, -319, -319, -293, -293, -223, -223, -154, -154, -82, -82, -6, -6, 132, 132,
+			313, 313, 227, 227, 313, 313, 341, 341, 903, 903, 959, 959, 1041, 1041, 1068, 1068, 1106, 1106, 1324, 1324,
+			1194, 1194, 1260, 1260, 1088, 1088, 1260, 1260, 1088, 1088, 1260, 1260, 1233, 1233, 1315, 1315, 1135, 1135,
+			1064, 1064, 1041, 1041, 920, 920, 896, 896, 735, 735, 712, 712, 570, 570, 547, 547, 385, 385, 346, 346,
+			253, 253, 136, 136, 210, 210, 173, 173, 136, 136, 71, 71, -6, -6, -81, -81, -153, -153, -220, -220,
+			-294, -294, -318, -318, -294, -294, -109, -109, -294
 		};
 
-		/*
-		std::cout << "b2Vec2 tempArray[" << x.size() << "] = {\n";
-		for (int count(0); count < x.size(); count++) {
-			if (count == x.size() - 1) {
-				std::cout << "\tb2Vec2(" << x[count] << ", " << y[count] << ")\n";
-			}
-			else {
-				std::cout << "\tb2Vec2(" << x[count] << ", " << y[count] << "),\n";
-			}
-		}
-		std::cout << "};\n";
-		*/
-
 		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment);
-		//tempPhsBody = PhysicsBody(tempBody, tempArray, 83);
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "world");
+		ECS::SetUpIdentifier(entity, bitHolder, "background");
 	}
 
+	//second world piece (left island)
 	{
 		auto entity = ECS::CreateEntity();
 
@@ -283,151 +265,149 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		tempBody->SetGravityScale(0);
 
-		std::vector<float> x = { -1300, -907, -907, -848
-			-848, -780, -780, -720, -720, -645, -645, -580, -580, -510, -510, -920, -920,
-			-590, -590, -520, -520, -260, -260, -190, -190, 70, 70, 200, 200, 325, 325, 520, 520, -275,
-			-275, -212, -212, -144, -144, -76, -76, -9, -9, 57
+		std::vector<float> x = {
+			-189, -255, -255, -827, -827, -911, -911, -843, -843, -910, -910, -843, -843, -908, -908,
+			-844, -844, -876, -876, 254, 254, -189, -189
 		};
 		std::vector<float> y = {
-			137, 137, 72, 72
-			-5, -5, -76, -76, -152, -152, -220, -220, -295, -295, -315, -315, -460, -460,
-			-430, -430, -393, -393, -427, -427, -466, -466, -500, -500, -535, -535, -500, -500, -310, -310,
-			- 293, -293, -224, -224, -151, -151, -84, -84, -7, -7
+			265, 265, 498, 498, 464, 464, 491, 491, 619, 619, 645, 645, 798,
+			798, 822, 822, 932, 932, 959, 959, 906, 906, 265
 		};
 
 		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment);
 
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "front");
+		ECS::SetUpIdentifier(entity, bitHolder, "walls");
 	}
+
+	//third world piece (right island)
+	{
+		auto entity = ECS::CreateEntity();
+
+		ECS::AttachComponent<Sprite>(entity);
+		ECS::AttachComponent<Transform>(entity);
+		ECS::AttachComponent<PhysicsBody>(entity);
+
+		std::string filename = "wallsCover.png";
+
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 5600, 3373);
+
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 28.f));
+
+		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
+
+		b2Body* tempBody;
+		b2BodyDef tempDef;
+		tempDef.type = b2_staticBody;
+		tempDef.position.Set(float32(0), float32(0));
+
+		tempBody = m_physicsWorld->CreateBody(&tempDef);
+		tempBody->SetGravityScale(0);
+
+		std::vector<float> x = {
+			824, 757, 757, 375, 375, 1307, 1307, 824, 824
+		};
+		std::vector<float> y = {
+			265, 265, 904, 904, 959, 959, 497, 497, 265
+		};
+
+		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment);
+
+		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
+		ECS::SetUpIdentifier(entity, bitHolder, "cover");
+	}
+
 	/*
-	{
-		auto entity = ECS::CreateEntity();
-
-		ECS::AttachComponent<Transform>(entity);
-		ECS::AttachComponent<PhysicsBody>(entity);
-
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
-		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
-
-		b2Body* tempBody;
-		b2BodyDef tempDef;
-		tempDef.type = b2_staticBody;
-		tempDef.position.Set(float32(0), float32(0));
-
-		tempBody = m_physicsWorld->CreateBody(&tempDef);
-
-		std::vector<float> x = {
-			-247, -299, -299, -968, -968, -905, -905, -947, -947, -904, -904, 150, 150, -247, -247
-		};
-		std::vector<float> y = {
-			392, 392, 577, 577, 625, 625, 841, 841, 894, 894, 1050, 1050, 997, 997, 392
-		};
-
-		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment);
-
-		unsigned int bitHolder = EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "island 1");
+	std::cout << "b2Vec2 tempArray[" << x.size() << "] = {\n";
+	for (int count(0); count < x.size(); count++) {
+		if (count == x.size() - 1) {
+			std::cout << "\tb2Vec2(" << x[count] << ", " << y[count] << ")\n";
+		}
+		else {
+			std::cout << "\tb2Vec2(" << x[count] << ", " << y[count] << "),\n";
+		}
 	}
+	std::cout << "};\n";
 
-	{
-		auto entity = ECS::CreateEntity();
-
-		ECS::AttachComponent<Transform>(entity);
-		ECS::AttachComponent<PhysicsBody>(entity);
-
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 0.f));
-		auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
-
-		b2Body* tempBody;
-		b2BodyDef tempDef;
-		tempDef.type = b2_staticBody;
-		tempDef.position.Set(float32(0), float32(0));
-
-		tempBody = m_physicsWorld->CreateBody(&tempDef);
-
-		std::vector<float> x = {
-			702, 702, 276, 276, 1252, 1252, 1233, 1233, 764, 764, 702
-		};
-		std::vector<float> y = {
-			361, 997, 997, 1050, 1050, 1020, 1020, 584, 584, 361, 361
-		};
-
-		tempPhsBody = PhysicsBody(tempBody, x, y, CollisionIDs::Environment);
-
-		unsigned int bitHolder = EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
-		ECS::SetUpIdentifier(entity, bitHolder, "island 2");
-	}
+	tempPhsBody = PhysicsBody(tempBody, tempArray, 83);
 	*/
+
+#pragma endregion entities
+	
+	//for a single platform that is textureless
+	Missiles::CreateWall(m_physicsWorld, vec3(325, 715, 0), 275, 25, "", false);
 
 	CreateUI();
 
+	//resetting stuff
 	Door::reset();
 	Collectibles::reset();
 	Enemies::reset(m_physicsWorld);
 	Missiles::reset();
 	Bullets::reset();
-	/*
-	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 28, 985);
-	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, -842.379211, -451.026703);
-	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, -722.790894, -443.387817);
-	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 87.626526, -460.499451);
-	*/
-	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 1.793221, -433.416138);
-	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 1.793221, -433.416138);
-	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 1.793221, -433.416138);
-	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 1.793221, -433.416138);
-	Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 1.793221, -433.416138);
-
-	Collectibles::CreateCollectible(vec3(-850, -420, 30), 30, 30, CollectiblesType::Missile);
-	Collectibles::CreateCollectible(vec3(225, 960, 28), 60, 15, CollectiblesType::RegenStation);
-
-	/*
-	tempPlatform.Init(m_physicsWorld, vec3(-135, 183, 50), vec3(584, 209, 50), 100, 10, "png.jpg", 200);
-	tempPlatform.isBouncy();
-
-	bossRoomDoor.Init(m_physicsWorld, vec3(-1038, -560, 50), vec3(-1035, -785, 50), 50, 230, "png.jpg", 300);
-	bossRoomDoor.isAABB(vec2(-1900, -1220), vec2(-1046, -646));
-
-	bossDoor.Init(m_physicsWorld, vec3(-1890, -1150, 50), vec3(-1890, -1050, 50), 30, 100, "png.jpg", 100);
-	bossDoor.isEntityTrigger(
-		Collectibles::CreateCollectible(vec3(-1815, -1170, 50.f), 30, 30, CollectiblesType::RegenUp)
-	);
-
-	for (size_t i = 0; i < 1; i++) {	
-		Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::WALKER, 0, -280);
-		Enemies::CreateEnemy(m_physicsWorld, EnemyTypes::SHOOTER, 0, -280);
-	}
-
-	Missiles::CreateWall(m_physicsWorld, vec3(675, -300, 50.f), 50, 160, "png.jpg");
-	Missiles::CreateWall(m_physicsWorld, vec3(920, -435, 50.f), 120, 45, "png.jpg");
-	Missiles::CreateWall(m_physicsWorld, vec3(730, 300, 50.f), 60, 130, "png.jpg");
-	Missiles::CreateWall(m_physicsWorld, vec3(210, 1025, 50.f), 130, 50, "png.jpg");
-	Missiles::CreateWall(m_physicsWorld, vec3(1250, -1290, 50.f), 40, 150, "png.jpg");
-	Missiles::CreateWall(m_physicsWorld, vec3(205, 810, 50.f), 220, 60, "png.jpg", false);
-	Missiles::CreateWall(m_physicsWorld, vec3(-465, -1035, 50.f), 130, 30, "png.jpg", false);
-	Missiles::CreateWall(m_physicsWorld, vec3(-690, -915, 50.f), 140, 30, "png.jpg", false);
-
-	Bullets::CreateWall(m_physicsWorld, vec3(-810, -130, 50.f), 60, 140, "tempmap.png");
-	Bullets::CreateWall(m_physicsWorld, vec3(-500, -205, 50.f), 105, 20, "tempmap.png");
-	Bullets::CreateWall(m_physicsWorld, vec3(-1060, 1260, 50.f), 40, 115, "tempmap.png");
-	Bullets::CreateWall(m_physicsWorld, vec3(1430, 1230, 50.f), 45, 100, "tempmap.png");
-	Bullets::CreateWall(m_physicsWorld, vec3(1310, 1035, 50.f), 125, 45, "tempmap.png");
-	Bullets::CreateWall(m_physicsWorld, vec3(1510, -210, 50.f), 100, 25, "tempmap.png");
-	Bullets::CreateWall(m_physicsWorld, vec3(-253, -805, 50.f), 25, 90, "tempmap.png");
-
-	Collectibles::CreateCollectible(vec3(-1286, 1233, 50.f), 30, 30, CollectiblesType::RegenUp);
-	Collectibles::CreateCollectible(vec3(212, 870, 50.f), 30, 30, CollectiblesType::BulletStrengthUp);
-	Collectibles::CreateCollectible(vec3(1011, 290, 50), 20, 20, CollectiblesType::Missile);
-	Collectibles::CreateCollectible(vec3(1502, -1325, 50), 30, 30, CollectiblesType::HPUp);
-
-	Collectibles::CreateCollectible(vec3(-1415, 270, 25.f), 60, 15, CollectiblesType::RegenStation);
-	Collectibles::CreateCollectible(vec3(-116, -842, 25.f), 60, 15, CollectiblesType::RegenStation);
-	Collectibles::CreateCollectible(vec3(1710, 1170, 25.f), 60, 15, CollectiblesType::RegenStation);
-	*/
-	//summon bullets to load sprite
 	Bullets::setDamage(bulletDamage);
 	Missiles::setDamage(missileDamage);
+
+#pragma region object summons
+	/*
+	//debugging stuff
+	tempPosMove = { -0, 0 };
+	tempEnt.resize(0);
+	tempEntIndex = 0;
+	*/
+
+	//platform inits, all bouncy cause they go back and forth
+	platforms[0].Init(m_physicsWorld, vec3(-717, 146, 26), vec3(-717, 283, 26), 72, 27, "Objects/platform1.png", 50);
+	platforms[1].Init(m_physicsWorld, vec3(-672, -1150, 26), vec3(-672, -1000, 26), 136, 27, "Objects/platform2.png", 75);
+	platforms[2].Init(m_physicsWorld, vec3(-408, -1250, 26), vec3(-408, -1100, 26), 136, 27, "Objects/platform2.png", 75);
+	platforms[0].isBouncy();
+	platforms[1].isBouncy();
+	platforms[2].isBouncy();
+
+	//doors init, two open when an entity dies, the other when the player enters the boss room
+	doors[0].Init(m_physicsWorld, vec3(1473, 181, 26), vec3(1473, 281, 26), 20, 134, "Objects/miniBossDoor.png", 50);	//missile
+	doors[1].Init(m_physicsWorld, vec3(-986, -702, 26), vec3(-986, -865, 26), 26, 240, "Objects/bossDoor.png", 275);	//boss room
+	doors[2].Init(m_physicsWorld, vec3(-1865, -1255, 26), vec3(-1865, -1135, 26), 26, 151, "Objects/winDoor.png", 50);	//win
+	doors[0].isEntityTrigger(	//opens when mini-boss is killed
+		Collectibles::CreateCollectible(vec3(1473 - 50, 181, 26), 25, 25, CollectiblesType::BulletStrengthUp)
+	);
+	doors[1].isAABB(vec2(-2140, -1480), vec2(-986, -750));
+	doors[2].isEntityTrigger(	//opens when boss is killed
+		Collectibles::CreateCollectible(vec3(-1865 + 50, -1255, 26), 25, 25, CollectiblesType::BulletStrengthUp)
+	);
+
+	//hidden stuff
+	Missiles::CreateWall(m_physicsWorld, vec3(-1020, -388.5, 27), 147, 264, "Objects/RegenUpHidden.png");
+	Bullets::CreateWall(m_physicsWorld, vec3(-1189.5, 1218, 27), 335, 224, "Objects/HPUpHidden.png");
+	Bullets::CreateWall(m_physicsWorld, vec3(1706.5, 1197, 27), 487, 274, "Objects/RegenStationHidden.png");
+	Bullets::CreateWall(m_physicsWorld, vec3(1481, -1380, 27), 452, 167, "Objects/PowerUpHidden.png");
+	Bullets::CreateWall(m_physicsWorld, vec3(-75, -879, 27), 260, 297, "Objects/PreBossHidden.png");
+
+	//bombables
+	Missiles::CreateWall(m_physicsWorld, vec3(797.5, 200.5, 27), 53, 173, "Objects/bombVertical.png");
+	Missiles::CreateWall(m_physicsWorld, vec3(758, -397, 27), 53, 173, "Objects/bombVertical.png");
+	Missiles::CreateWall(m_physicsWorld, vec3(978, -528.5, 27), 131, 55, "Objects/bombFlat.png");
+	Missiles::CreateWall(m_physicsWorld, vec3(316, 931.5, 27), 131, 55, "Objects/bombFlat.png");
+
+	//breakables
+	Bullets::CreateWall(m_physicsWorld, vec3(-661, -228, 27), 72, 164, "Objects/breakableVertical.png");
+	Bullets::CreateWall(m_physicsWorld, vec3(-460, -306.5, 27), 113, 25, "Objects/breakableFlat.png");
+	Bullets::CreateWall(m_physicsWorld, vec3(1351, 946.5, 27), 113, 25, "Objects/breakableFlat.png");
+	Bullets::CreateWall(m_physicsWorld, vec3(1594, -305.5, 27), 113, 25, "Objects/breakableFlat.png");
+
+	//pick-ups
+	Collectibles::CreateCollectible(vec3(1866, 177, 26), 25, 25, CollectiblesType::Missile);
+	Collectibles::CreateCollectible(vec3(-1195, 1180, 26), 25, 25, CollectiblesType::HPUp);
+	Collectibles::CreateCollectible(vec3(325, 770, 26), 25, 25, CollectiblesType::HPUp);
+	Collectibles::CreateCollectible(vec3(-1039, -455, 26), 25, 25, CollectiblesType::RegenUp);
+	Collectibles::CreateCollectible(vec3(1605, -1400, 26), 25, 25, CollectiblesType::BulletStrengthUp);
+
+	//regen stations
+	Collectibles::CreateCollectible(vec3(-1330, 139, 26), 100, 25, CollectiblesType::RegenStation);
+	Collectibles::CreateCollectible(vec3(1696, 1106, 26), 100, 25, CollectiblesType::RegenStation);
+	Collectibles::CreateCollectible(vec3(-77, -934, 26), 100, 25, CollectiblesType::RegenStation);
+#pragma endregion object summons
+	
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 }
@@ -529,6 +509,12 @@ void Level1::GamepadStick(XInputController* con)
 
 		if (con->IsButtonPressed(Buttons::SELECT)) {
 			exiting = true;
+		}
+
+		if (counter > 1) {
+			if (con->IsButtonPressed(Buttons::START)) {
+				counter = 1;
+			}
 		}
 	}
 }
@@ -660,25 +646,86 @@ void Level1::KeyboardDown()
 		}
 		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
 
+		if (counter > 1) {
+			if (Input::GetKeyDown(Key::D)) {
+				counter = 1;
+			}
+		}
+
 		if (Input::GetKeyDown(Key::Escape)) {
 			exiting = true;
 		}
 	}
+
 	/*
-	b2Vec2 velo = { 0,0 };
-	if (Input::GetKey(Key::W)) {
-		velo.y += 50;
+	//Debugging tool, lets you move entities from a list
+	if (Input::GetKeyDown(Key::E)) {
+		tempEntIndex++;
+		if (tempEntIndex >= tempEnt.size()) {
+			tempEntIndex = 0;
+		}
+		std::cout << "Index: " << tempEntIndex << '\n';
 	}
-	if (Input::GetKey(Key::S)) {
-		velo.y -= 50;
+
+	bool changedPosition = false;
+	if (Input::GetKey(Key::Shift)) {
+		if (Input::GetKey(Key::W)) {
+			tempPosMove.y++;
+			changedPosition = true;
+		}
+		if (Input::GetKey(Key::S)) {
+			tempPosMove.y--;
+			changedPosition = true;
+		}
+		if (Input::GetKey(Key::D)) {
+			tempPosMove.x++;
+			changedPosition = true;
+		}
+		if (Input::GetKey(Key::A)) {
+			tempPosMove.x--;
+			changedPosition = true;
+		}
 	}
-	if (Input::GetKey(Key::D)) {
-		velo.x += 50;
+	else if (Input::GetKey(Key::Control)) {
+		if (Input::GetKey(Key::W)) {
+			tempPosMove.y += 10;
+			changedPosition = true;
+		}
+		if (Input::GetKey(Key::S)) {
+			tempPosMove.y -= 10;
+			changedPosition = true;
+		}
+		if (Input::GetKey(Key::D)) {
+			tempPosMove.x += 10;
+			changedPosition = true;
+		}
+		if (Input::GetKey(Key::A)) {
+			tempPosMove.x -= 10;
+			changedPosition = true;
+		}
 	}
-	if (Input::GetKey(Key::A)) {
-		velo.x -= 50;
+	else {
+		if (Input::GetKeyDown(Key::W)) {
+			tempPosMove.y++;
+			changedPosition = true;
+		}
+		if (Input::GetKeyDown(Key::S)) {
+			tempPosMove.y--;
+			changedPosition = true;
+		}
+		if (Input::GetKeyDown(Key::D)) {
+			tempPosMove.x++;
+			changedPosition = true;
+		}
+		if (Input::GetKeyDown(Key::A)) {
+			tempPosMove.x--;
+			changedPosition = true;
+		}
 	}
-	m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(velo);
+	if (changedPosition) {
+		std::cout << "vec3(" << tempPosMove.x << ", " << tempPosMove.y << ", 27)\n";
+		m_sceneReg->get<PhysicsBody>(tempEnt[tempEntIndex]).GetBody()->SetTransform(tempPosMove, 0);
+	}
 	*/
 }
 
@@ -801,7 +848,7 @@ void Level1::Update()
 						vel.y = projectileSpeed;
 					}
 					else if (facingDown) {
-						velo.y = maxJumpStrength;
+						velo.y = maxJumpStrength * 1.25f;
 						pos.y -= playerHeight / 2.f - 5.5f;
 						vel.y = -projectileSpeed * 2.f;
 					}
@@ -811,7 +858,7 @@ void Level1::Update()
 						else
 							pos.y += 6.1f;
 						if (!onGround) {
-							velo.x = (movingRight ? -maxJumpStrength : maxJumpStrength);
+							velo.x = (movingRight ? -maxJumpStrength : maxJumpStrength) * 1.25f;
 							recoilDelay = recoilCooldown;
 						}
 						else {
@@ -838,16 +885,27 @@ void Level1::Update()
 	}
 	
 
-	//update projectile logic
+	//update logic
 	Missiles::updateAllMissiles(m_sceneReg);
 	Bullets::updateAllBullets(m_sceneReg);
 	Enemies::UpdateEnemies(m_sceneReg);
-	Door::update(m_sceneReg);
+	Door::update(m_sceneReg, onGround);
 	int item = Collectibles::testAllCollectibles(m_sceneReg, playerWidth / 2.f, playerHeight / 2.f);
-	if (item) {
+	if (item) {		//item id for pop-up
 		itemCount++;
 		m_sceneReg->get<AnimationController>(uiElements[15]).SetActiveAnim(item);
-		counter = 5;
+		counter = (item == 1 ? 7.5f : 5);
+	}
+
+	//zoom ranges they return true when they succeed, so none should be active for the global zoom to be on
+	if (!zoomRange(250, vec2(-2100, -1485), vec2(65, -745)) &&		//boss room
+		!zoomRange(225, vec2(-745, -1500), vec2(1710, -1115)) &&	//basement
+		!zoomRange(175, vec2(-1370, -560), vec2(-150, -80)) &&		//intro area
+		!zoomRange(240, vec2(795, 95), vec2(1470, 530)) &&			//mini-boss room
+		!zoomRange(175, vec2(1470, 95), vec2(2031, 345)) &&			//missile pick-up room
+		!zoomRange(175, vec2(-1440, 90), vec2(-840, 960))			//staircase up
+		) {
+		zoomRange(200, vec2(), vec2(), true);
 	}
 
 	//has to run after everything since camera can move in other updates
@@ -860,12 +918,12 @@ void Level1::Update()
 	6 and 7: walk forwards
 	8 and 9: walk up
 	10 and 11: death
-	12 and 13: up up
-	14 and 15: up down
-	16 and 17: up forwards
-	18 and 19: down up
-	20 and 21: down down
-	22 and 23: down forwards
+	12 and 13: up forwards
+	14 and 15: down forwards
+	16 and 17: up down
+	18 and 19: down down
+	20 and 21: up up
+	22 and 23: down up
 	first check if grounded*/
 	if (deathCounter == 0) {
 		b2Vec2 velo = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
@@ -888,19 +946,19 @@ void Level1::Update()
 		}
 		else if (velo.y > 0) {		//air upwards
 			//aiming up
-			if (facingUp)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(12 + movingRight);
+			if (facingUp)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(20 + movingRight);
 			//aiming down
-			else if (facingDown)	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(14 + movingRight);
+			else if (facingDown)	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(16 + movingRight);
 			//aiing left-right
-			else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(16 + movingRight);
+			else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(12 + movingRight);
 		}
 		else {						//air downwards animation
 			//aiming up
-			if (facingUp)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(18 + movingRight);
+			if (facingUp)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(22 + movingRight);
 			//aiming down
-			else if (facingDown)	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(20 + movingRight);
+			else if (facingDown)	m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(18 + movingRight);
 			//aiing left-right
-			else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(22 + movingRight);
+			else					m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(14 + movingRight);
 		}
 	}
 	else {		//death
@@ -912,12 +970,15 @@ int Level1::ChangeScene()
 {
 	if (exiting) {
 		exiting = false;
-		return 0;
+		gameOver = false;	//just in case
+		return 0;		//main menu
 	}
 	if (gameOver) {
+		//death text
 		std::cout << "you died -Dark souls\n";
 		gameOver = false;
-		return 0;
+		exiting = false;	//just in case
+		return 0;		//mainmenu
 	}
 	return -1;
 }
@@ -954,12 +1015,14 @@ void Level1::UpdateCounters()
 			missileDelay = 0;
 	}
 
+	//for movement stun
 	if (recoilDelay > 0) {
 		recoilDelay -= (onGround ? 3 : 1) * Timer::deltaTime;
 		if (recoilDelay < 0)
 			recoilDelay = 0;
 	}
 
+	//for text boxes
 	if (counter > 0) {
 		counter -= Timer::deltaTime;
 		if (counter < 0)
@@ -970,7 +1033,8 @@ void Level1::UpdateCounters()
 
 void Level1::UpdateUI()
 {
-	vec3 uiOffset = { 53, -22, 50 }; // from top left corner
+	vec3 uiOffset = { 53, -22, 50 };	// from top left corner
+	vec3 popUpOffset = vec3(0, -50, 0);	// from center of camera
 
 	auto& playerData = m_sceneReg->get<Player>(EntityIdentifier::MainPlayer());
 	if (playerData.updatePlayer()) {
@@ -989,39 +1053,27 @@ void Level1::UpdateUI()
 		}
 	}
 
+	if (!playerData.getMissile())
+		playerData.getMissile(true);
+
 	if (stunned = playerData.getStunned())
 		canJump = false;
 
 	/*
-	*/
-	bool offsetchanged = false;
-	if (Input::GetKeyDown(Key::W)) {
-		offsetchanged = true;
-		tempOffSet.y += 1;
-	}
-	if (Input::GetKeyDown(Key::S)) {
-		offsetchanged = true;
-		tempOffSet.y -= 1;
-	}
-	if (Input::GetKeyDown(Key::D)) {
-		offsetchanged = true;
-		tempOffSet.x += 1;
-	}
-	if (Input::GetKeyDown(Key::A)) {
-		offsetchanged = true;
-		tempOffSet.x -= 1;
-	}
-	if (offsetchanged) {
-		std::cout << "offset: (" << tempOffSet.x << ", " << tempOffSet.y << ")\n";
-	}
-	if (Input::GetKeyDown(Key::E)) {
-		playerData.takeDamage(1);
-	}
-	if (Input::GetKeyDown(Key::Q)) {
+	//Debugging tools
+	if (!playerData.getMissile()) {
 		playerData.getMissile(true);
 	}
+	playerData.addCurrentEnergy(5);
 
-	/*summon all ui elements here
+	if (Input::GetKeyDown(Key::Q)) {
+		b2Body* tempBod = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody();
+		tempBod->SetGravityScale(!tempBod->GetGravityScale());
+		tempBod->SetLinearVelocity(b2Vec2(0, 0));
+	}
+	*/
+
+	/*control all ui elements here
 	ui Elements according to index in vector:
 	0: back + bullet
 	1: HP bar
@@ -1055,9 +1107,13 @@ void Level1::UpdateUI()
 	vec3 uiPos = camPos	+ vec3((-ortho * m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetAspect()), ortho, 0) + uiOffset * scale;
 	uiPos.z = uiOffset.z;
 
-	m_sceneReg->get<Transform>(uiElements[15]).SetPosition(camPos + tempOffSet * scale + vec3(0, 0, 80));
-	m_sceneReg->get<Sprite>(uiElements[15]).SetSizeScale(scale);
+	//TextBox updates if visible
+	if (m_sceneReg->get<Sprite>(uiElements[15]).GetTransparency() != 0) {
+		m_sceneReg->get<Transform>(uiElements[15]).SetPosition(camPos + popUpOffset * scale + vec3(0, 0, 80));
+		m_sceneReg->get<Sprite>(uiElements[15]).SetSizeScale(scale);
+	}
 
+	//All basic stuff
 	for (unsigned int x(0); x < 4; x++) {
 		vec3 temp = { 0, 0, 0 };
 		if (x == 0) {			//have bullet upgrade?
@@ -1075,6 +1131,7 @@ void Level1::UpdateUI()
 	}
 
 	unsigned int itemPercent = itemCount * 100 / totalItems;
+	//Item %
 	for (unsigned int x(0); x < 3; x++) {
 		m_sceneReg->get<AnimationController>(uiElements[x + 4]).SetActiveAnim(
 			floor(itemPercent / pow(10, 2 - x)) - floor(itemPercent / pow(10, 3 - x)) * 10);
@@ -1095,48 +1152,39 @@ void Level1::UpdateUI()
 			m_sceneReg->get<Sprite>(uiElements[x * 4 + 7 + y]).SetSizeScale(scale);
 		}
 	}
+	
+}
 
-	/*
-	float tempAngleX = m_sceneReg->get<Transform>(uiElements[0]).GetRotationAngleX();
-	float tempAngleY = m_sceneReg->get<Transform>(uiElements[0]).GetRotationAngleY();
-	float tempAngleZ = m_sceneReg->get<Transform>(uiElements[0]).GetRotationAngleZ();
+bool Level1::zoomRange(int wantedOrtho, vec2 BL, vec2 TR, bool everything)
+{
+	//zoom amount is floored to avoid jittering (only increments in integers)
 
-	tempAngleX += PI / 2 * Timer::deltaTime;
-	tempAngleY += PI / 2 * Timer::deltaTime;
-	tempAngleZ += PI / 2 * Timer::deltaTime;
-	if (tempAngleX > PI / 2) {
-		tempAngleX = -PI / 2;
-	}
-	if (tempAngleY > PI / 2) {
-		tempAngleY = -PI / 2;
-	}
-	if (tempAngleZ > PI / 2) {
-		tempAngleZ = -PI / 2;
-	}
-	for (int x(0); x < 15; x++) {
-		m_sceneReg->get<Transform>(uiElements[x]).SetRotationAngleY(tempAngleX);
-		m_sceneReg->get<Transform>(uiElements[x]).SetRotationAngleY(tempAngleY);
-		m_sceneReg->get<Transform>(uiElements[x]).SetRotationAngleZ(tempAngleZ);
-	}
-	*/
-
-	//zoom stuff
 	float yOrtho = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize().y;
-	vec3 playerPos = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPosition();
-	if (playerPos.x > -1000 && playerPos.x < -600 &&
-		playerPos.y > -540 && playerPos.y < -300) {
-		if (yOrtho > 100) {
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(Timer::deltaTime * 100);
+	if (everything) {
+		if (yOrtho > wantedOrtho) {
+			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(floor(Timer::deltaTime * 100));
 		}
+		else if (yOrtho < wantedOrtho) {
+			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-floor(Timer::deltaTime * 100));
+		}
+		else return false;
 	}
-	else {
-		if (yOrtho > 200) {
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(Timer::deltaTime * 100);
+	else {		//check the AABB
+		vec3 playerPos = m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPosition();
+		if (playerPos.x > BL.x && playerPos.x < TR.x &&
+			playerPos.y > BL.y && playerPos.y < TR.y) {
+			if (yOrtho > wantedOrtho) {
+				m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(floor(Timer::deltaTime * 100));
+			}
+			else if (yOrtho < wantedOrtho) {
+				m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-floor(Timer::deltaTime * 100));
+			}
 		}
-		else if (yOrtho < 200) {
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-Timer::deltaTime * 100);
-		}
+		else return false;
 	}
+	
+	//returns true if everything and success, or if AABB succeeded
+	return true;
 }
 
 void Level1::CreateUI()
@@ -1240,6 +1288,7 @@ void Level1::CreateUI()
 		uiElements.push_back(entity);
 	}
 
+	//text boxes are very different
 	{
 		auto entity = ECS::CreateEntity();
 
@@ -1255,14 +1304,15 @@ void Level1::CreateUI()
 		for (unsigned int x(0); x < 5; x++) {
 			animController.AddAnimation(Animation());
 			auto& anim = animController.GetAnimation(x);
-			anim.AddFrame(vec2(0, 3 * (x + 1) - 1), vec2(2, 3 * x + 1));
+			anim.AddFrame(vec2(0, 500 * (x + 1) - 1), vec2(2500, 500 * x + 1));
 			anim.SetRepeating(false);
 			anim.SetSecPerFrame(1.f);
 		}
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 100, 50, true, &animController);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 250, 50, true, &animController);
+		ECS::GetComponent<Sprite>(entity).SetTransparency(0);
 		animController.SetActiveAnim(0);
 
-		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 200.f, 80.f));
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 250.f, 80.f));
 
 		unsigned int bitHolder = EntityIdentifier::AnimationBit() | EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "dialogue boxes");
