@@ -7,20 +7,24 @@ float Enemies::shootDelayTime = 1.5f;
 b2World* Enemies::m_phyWorld = nullptr;
 
 void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
+	b2Body* phyBod = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody();
 	vec2 playerPos{ m_reg->get<Transform>(EntityIdentifier::MainPlayer()).GetPosition() };
 	vec2 enemyPos{ m_reg->get<Transform>(enemyID.enemyID).GetPosition() };
-	b2Vec2 enemyb2Pos = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetPosition();
+	b2Vec2 enemyb2Pos = phyBod->GetPosition();
 	AnimationController& animCon = m_reg->get<AnimationController>(enemyID.enemyID);
 
+	//std::cout << animCon.GetAnimation(animCon.GetActiveAnim()).GetPerctentAnimation() << "\n";
+
 	grounded = false;
-	for (b2ContactEdge* edge = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetContactList(); edge; edge = edge->next)
+	for (b2ContactEdge* edge = phyBod->GetContactList(); edge; edge = edge->next)
 		if (edge->contact->GetManifold()->localNormal.y >= 0.9 && edge->contact->GetManifold()->pointCount == 2) {
 			grounded = true;
 			break;
 		}
 
-	b2Vec2 temp = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetLinearVelocity();
-	temp.x = 0;
+	prevVel = vel;
+	vel = phyBod->GetLinearVelocity();
+	vel.x = 0;
 
 	shootDelay += Timer::deltaTime;
 	//detect if player is within sight
@@ -33,6 +37,7 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 		switch (type) {
 		case EnemyTypes::WALKER:	
 			targetPos = playerPos;
+			targetPos2 = playerPos;
 			break;
 		case EnemyTypes::SHOOTER:
 			targetPos2 = playerPos;
@@ -47,7 +52,7 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 
 				tempCalc = targetPos2.x - enemyPos.x;
 				tempCalc = tempCalc / abs(tempCalc);
-				if (refreshSightTime == 0 && tempCalc == animCon.GetActiveAnim() * 2 - 1 && shootDelay >= Enemies::GetShootDelayTime()) {
+				if (tempCalc == animCon.GetActiveAnim() * 2 - 1 && shootDelay >= Enemies::GetShootDelayTime()) {
 					Bullets::CreateBullet(m_reg, Enemies::GetPhysicsWorld(), enemyb2Pos + b2Vec2((animCon.GetActiveAnim() ? 10 : -10), 0), b2Vec2((animCon.GetActiveAnim() * 2 - 1) * 30, 0), 5, CollisionIDs::Enemy);
 					shootDelay = 0.f;
 				}
@@ -66,6 +71,13 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 			state = EnemyState::Follow;
 	}
 
+	if (canSeePlayer && state == EnemyState::Flee) {
+		targetPos.x = playerPos.x - enemyPos.x;
+		targetPos.x = playerPos.x - targetPos.x / abs(targetPos.x) * 150;
+		targetPos.y = playerPos.y;
+	}
+
+	vec4 testPoints;
 	b2Vec2 jumpTestPoint;
 	switch (state) {
 	case EnemyState::Follow:
@@ -74,29 +86,54 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 		//is close to targetPos
 		if (abs(tempCalc) < moveSpeed / 2) {
 			if (canSeePlayer)
-				animCon.SetActiveAnim(playerPos.x - enemyPos.x < 0 ? 0 : 1);
+				animCon.SetActiveAnim(targetPos2.x - enemyPos.x < 0 ? 0 : 1);
 			else {
 				if (type == EnemyTypes::SHOOTER && targetPos != targetPos2) {
 					targetPos = targetPos2;
-				} else 
+				} else
 					state = EnemyState::Wander;
 			}
 
 			break;
 		}
 
+		if (type == EnemyTypes::SHOOTER && canSeePlayer && tempCalc / abs(tempCalc) != (targetPos2.x - enemyPos.x) / abs(targetPos2.x - enemyPos.x))
+			for (b2ContactEdge* edge = phyBod->GetContactList(); edge; edge = edge->next) {
+				if (!edge->contact->IsTouching())
+					continue;
+
+				b2Manifold* man = edge->contact->GetManifold();
+				b2Vec2 locNorm = man->localNormal;
+
+				/*if (edge->contact->GetFixtureA()->GetType() == b2Shape::e_polygon)
+					locNorm = -locNorm;*/
+
+				//find ID of collider (edge) to make sure that the next collision isnt it
+				if (locNorm.y <= -0.9 && man->pointCount == 1) {
+					//animCon.SetActiveAnim(targetPos2.x - enemyPos.x < 0 ? 0 : 1);
+					tempCalc = 0;
+					break;
+				}
+			}
+
+		if (tempCalc == 0)
+			break;
+
 		tempCalc = tempCalc / abs(tempCalc) * moveSpeed;
-		temp.x += tempCalc;
+		vel.x = tempCalc;
 
 		canJump = false;
 		if (grounded)
-			if ( type == EnemyTypes::WALKER || type == EnemyTypes::SHOOTER && ( temp.x / abs(temp.x) == (targetPos2.x - enemyPos.x) / abs(targetPos2.x - enemyPos.x) || !canSeePlayer ) )
+			if ( type == EnemyTypes::WALKER || type == EnemyTypes::SHOOTER && (vel.x / abs(vel.x) == (targetPos2.x - enemyPos.x) / abs(targetPos2.x - enemyPos.x) || !canSeePlayer ) )
 				canJump = true;
 
-		//limit the jump check distance if enemyPos is too close to targetPos
-		jumpTestPoint = b2Vec2(enemyb2Pos.x + temp.x * 3, enemyb2Pos.y);
-		if ( canSeePlayer && (temp.x > 0 ? targetPos.x < jumpTestPoint.x : targetPos.x > jumpTestPoint.x) )
-			jumpTestPoint.x = targetPos.x;
+		jumpTestPoint.Set(vel.x * 3, enemyb2Pos.y);
+		if (canSeePlayer && (vel.x > 0 ? targetPos.x - enemyb2Pos.x < jumpTestPoint.x : targetPos.x - enemyb2Pos.x > jumpTestPoint.x))
+			jumpTestPoint.x = targetPos.x - enemyb2Pos.x;
+		jumpTestPoint.x += enemyb2Pos.x;
+
+		if (static_cast<int>(enemyb2Pos.x) != jumpInfo.y)
+			jumpInfo.Set(0, 0, 0);
 
 		//jump by doing raycast to side and checking to see if intersection point is different then p2 for the raycast
 		if (canJump && EnemyRaycast(enemyb2Pos, jumpTestPoint, true).x != jumpTestPoint.x) {
@@ -104,31 +141,29 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 			if (jumpInfo.y == static_cast<int>(enemyb2Pos.x) && jumpInfo.z == static_cast<int>(enemyb2Pos.y)) {
 				jumpInfo.x++;
 				if (jumpInfo.x >= 2) {
-					jumpInfo = b2Vec3(0, 0, 0);
+					jumpInfo.Set(0, 0, 0);
 					state = EnemyState::Wander;
 					break;
 				}
 			} else {
-				jumpInfo.x = 0;
-				jumpInfo.y = static_cast<int>(enemyb2Pos.x);
-				jumpInfo.z = static_cast<int>(enemyb2Pos.y);
+				jumpInfo.Set(0, static_cast<int>(enemyb2Pos.x), static_cast<int>(enemyb2Pos.y));
 			}
 
-			temp.y = jumpHeight;
+			vel.y = jumpHeight;
 		}
 
 		break;
 	case EnemyState::Wander:
 		//change direction when hitting wall/edge
-		for (b2ContactEdge* edge = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetContactList(); edge; edge = edge->next) {
+		for (b2ContactEdge* edge = phyBod->GetContactList(); edge; edge = edge->next) {
 			if (!edge->contact->IsTouching())
 				continue;
 
 			b2Manifold* man = edge->contact->GetManifold();
 			b2Vec2 locNorm = man->localNormal;
 
-			if (edge->contact->GetFixtureA()->GetType() == b2Shape::e_polygon)
-				locNorm = -locNorm;
+			/*if (edge->contact->GetFixtureA()->GetType() == b2Shape::e_polygon)
+				locNorm = -locNorm;*/
 
 			//find ID of collider (edge) to make sure that the next collision isnt it
 			if (locNorm.y <= -0.9 && man->pointCount == 1 && (previousFixture != edge->contact->GetFixtureA() || previousFixture == edge->contact->GetFixtureA() && previousChildEndex != edge->contact->GetChildIndexA() ) ) {
@@ -155,7 +190,7 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 			}
 		}
 
-		temp.x += (animCon.GetActiveAnim() * 2 - 1) * moveSpeed;
+		vel.x += (animCon.GetActiveAnim() * 2 - 1) * moveSpeed;
 		break;
 	case EnemyState::Flee:
 		tempCalc = targetPos.x - enemyPos.x;
@@ -173,16 +208,20 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 		}
 
 		tempCalc = tempCalc / abs(tempCalc) * moveSpeed;
-		temp.x += tempCalc;
+		vel.x += tempCalc;
 
 		canJump = false;
 		if (grounded)
 			canJump = true;
 
 		//limit the jump check distance if enemyPos is too close to targetPos
-		jumpTestPoint.Set(enemyb2Pos.x + temp.x * 3, enemyb2Pos.y);
-		if (temp.x > 0 ? targetPos.x < jumpTestPoint.x : targetPos.x > jumpTestPoint.x)
-			jumpTestPoint.x = targetPos.x;
+		jumpTestPoint.Set(vel.x * 3, enemyb2Pos.y);
+		if (canSeePlayer && (vel.x > 0 ? targetPos.x - enemyb2Pos.x < jumpTestPoint.x : targetPos.x - enemyb2Pos.x > jumpTestPoint.x))
+			jumpTestPoint.x = targetPos.x - enemyb2Pos.x;
+		jumpTestPoint.x += enemyb2Pos.x;
+
+		if (static_cast<int>(enemyb2Pos.x) != jumpInfo.y)
+			jumpInfo.Set(0, 0, 0);
 
 		//jump by doing raycast to side and checking to see if intersection point is different then p2 for the raycast
 		if (canJump && EnemyRaycast(enemyb2Pos, jumpTestPoint, true).x != jumpTestPoint.x) {
@@ -197,19 +236,24 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 			} else
 				jumpInfo.Set(0, static_cast<int>(enemyb2Pos.x), static_cast<int>(enemyb2Pos.y));
 
-			temp.y = jumpHeight;
+			vel.y = jumpHeight;
 		}
 
+		break;
+	case EnemyState::Idle:
 		break;
 	default:
 		break;
 	}
 
-	if (temp.x < 0) {
+	if (vel.x < 0) {
 		animCon.SetActiveAnim(0);
-	} else if (temp.x > 0) {
+	} else if (vel.x > 0) {
 		animCon.SetActiveAnim(1);
 	}
+
+	if (canSeePlayer && state == EnemyState::Follow && phyBod->GetLinearVelocity() == b2Vec2_zero && vel == prevVel)
+		animCon.SetActiveAnim(targetPos2.x - enemyPos.x < 0 ? 0 : 1);
 
 	facingRight = animCon.GetActiveAnim();
 
@@ -244,12 +288,12 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 				else
 					test3.x /= abs(test3.x);
 
-				temp.x += test3.x;
+				vel.x += test3.x;
 			}
 		}
 	}
 
-	m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->SetLinearVelocity(temp);
+	phyBod->SetLinearVelocity(vel);
 }
 
 void Enemy::Awake(entt::registry* m_reg, enemyList& enemyID) {
@@ -323,8 +367,7 @@ b2Vec2 Enemy::EnemyRaycast(b2Vec2 p1, b2Vec2 p2, bool onlyStatic) {
 	return p1 + closestFraction * (p2 - p1);
 }
 
-unsigned int Enemies::CreateEnemy(b2World* m_physicsWorld, EnemyTypes m_type, float x, float y) {
-
+unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 	auto entity = ECS::CreateEntity();
 
 	ECS::AttachComponent<Sprite>(entity);
@@ -384,7 +427,7 @@ unsigned int Enemies::CreateEnemy(b2World* m_physicsWorld, EnemyTypes m_type, fl
 	tempDef.type = b2_dynamicBody;
 	tempDef.position.Set(float32(x), float32(y));
 
-	tempBody = m_physicsWorld->CreateBody(&tempDef);
+	tempBody = m_phyWorld->CreateBody(&tempDef);
 	tempBody->SetFixedRotation(true);
 	tempBody->SetUserData((void*)entity);
 

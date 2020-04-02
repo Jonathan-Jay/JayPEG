@@ -34,11 +34,11 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 		ECS::GetComponent<HorizontalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<HorizontalScroll>(entity).SetOffset(15.f);
-		//ECS::GetComponent<HorizontalScroll>(entity).SetLimits(-1740, 1680);
+		ECS::GetComponent<HorizontalScroll>(entity).SetLimits(-1466, 790);
 
 		ECS::GetComponent<VerticalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<VerticalScroll>(entity).SetOffset(15.f);
-		//ECS::GetComponent<VerticalScroll>(entity).SetLimits(-1200, 1254);
+		ECS::GetComponent<VerticalScroll>(entity).SetLimits(-575, 1279);
 
 		vec4 temp = ECS::GetComponent<Camera>(entity).GetOrthoSize();
 		ECS::GetComponent<Camera>(entity).SetWindowSize(vec2(float(windowWidth), float(windowHeight)));
@@ -727,11 +727,39 @@ void Level1::KeyboardDown()
 		m_sceneReg->get<PhysicsBody>(tempEnt[tempEntIndex]).GetBody()->SetTransform(tempPosMove, 0);
 	}
 	*/
+
+	auto& playerData = m_sceneReg->get<Player>(EntityIdentifier::MainPlayer());
+	bool offsetchanged = false;
+	if (Input::GetKeyDown(Key::W)) {
+		offsetchanged = true;
+		tempOffSet.y += 1;
+	}
+	if (Input::GetKeyDown(Key::S)) {
+		offsetchanged = true;
+		tempOffSet.y -= 1;
+	}
+	if (Input::GetKeyDown(Key::D)) {
+		offsetchanged = true;
+		tempOffSet.x += 1;
+	}
+	if (Input::GetKeyDown(Key::A)) {
+		offsetchanged = true;
+		tempOffSet.x -= 1;
+	}
+	if (offsetchanged) {
+		std::cout << "offset: (" << tempOffSet.x << ", " << tempOffSet.y << ")\n";
+	}
+	if (Input::GetKeyDown(Key::E)) {
+		playerData.takeDamage(1);
+	}
+	if (Input::GetKeyDown(Key::Q)) {
+		playerData.getMissile(true);
+	}
 }
 
 void Level1::Update()
 {
-	m_soundEffects[0].loop();
+	//m_soundEffects[0].loop();
 
 	//update scene Data
 	UpdateCounters();
@@ -1320,4 +1348,3 @@ void Level1::CreateUI()
 	}
 
 }
-

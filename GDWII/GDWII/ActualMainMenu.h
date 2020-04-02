@@ -15,6 +15,7 @@ public:
 	void MouseClick(SDL_MouseButtonEvent evnt) override;
 	void MouseMotion(SDL_MouseMotionEvent evnt) override;
 	void GamepadStick(XInputController* con) override;
+	void KeyboardDown() override;
 	void Update() override;
 	int ChangeScene() override;
 

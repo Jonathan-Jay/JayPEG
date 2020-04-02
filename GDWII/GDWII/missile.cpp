@@ -162,28 +162,17 @@ void Missiles::updateAllMissiles(entt::registry* m_register)
 			continue;
 		}
 		else if (animCon.GetActiveAnim() == 1) {
-			vec3 pos = m_register->get<Camera>(EntityIdentifier::MainCamera()).GetPosition();
 			if (animCon.GetAnimation(1).GetAnimationDone()) {
-				m_register->get<Camera>(EntityIdentifier::MainCamera()).SetPosition(
-					m_register->get<Transform>(EntityIdentifier::MainPlayer()).GetPosition());
-				m_register->get<Camera>(EntityIdentifier::MainCamera()).SetPositionZ(0.f);
-
 				ECS::DestroyEntity(missiles[x]);
 				missiles.erase(missiles.begin() + x, missiles.begin() + x + 1);
 				continue;
-			}
-			else {
-				m_register->get<Camera>(EntityIdentifier::MainCamera()).SetPosition(
-					pos + vec3(rand() % int(2 * screenShake) - screenShake, rand() % int(2 * screenShake) - screenShake, 0));
 			}
 		}
 		else if (animCon.GetActiveAnim() == 2) {
 			if (animCon.GetAnimation(2).GetAnimationDone())
 				animCon.SetActiveAnim(0);
 		}
-
-
-		if (animCon.GetActiveAnim() == 0) {
+		else if (animCon.GetActiveAnim() == 0) {
 			if (b2ContactEdge* contact = m_register->get<PhysicsBody>(missiles[x]).GetBody()->GetContactList()) {
 				b2Vec2 pos = m_register->get<PhysicsBody>(missiles[x]).GetPosition();
 
@@ -229,6 +218,8 @@ void Missiles::updateAllMissiles(entt::registry* m_register)
 				}
 
 				Sound2D("snake.mp3", "sounds").play();
+				m_register->get<HorizontalScroll>(EntityIdentifier::MainCamera()).DoScreenShake(animCon.GetAnimation(1).GetFrames().size() * animCon.GetAnimation(1).GetSecPerFrame(), screenShake, &m_register->get<Transform>(EntityIdentifier::MainPlayer()).m_localPosition.x);
+				m_register->get<VerticalScroll>(EntityIdentifier::MainCamera()).DoScreenShake(animCon.GetAnimation(1).GetFrames().size() * animCon.GetAnimation(1).GetSecPerFrame(), screenShake, &m_register->get<Transform>(EntityIdentifier::MainPlayer()).m_localPosition.y);
 
 				ECS::RemoveComponent<PhysicsBody>(missiles[x]);
 				m_register->get<Sprite>(missiles[x]).SetWidth(explosionRadius * 2);

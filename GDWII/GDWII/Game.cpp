@@ -35,7 +35,7 @@ void Game::InitGame()
 		SDL_Log("SDL_GetDesktopDisplayMode failed: %s", SDL_GetError());
 	}
 
-	BackEnd::ReshapeWindow(m_width * 0.9f, m_height * 0.9f);
+	BackEnd::ReshapeWindow(m_width * 0.5f, m_height * 0.5f);
 
 	//Grabs the initialized window
 	m_window = BackEnd::GetWindow();
@@ -49,6 +49,7 @@ void Game::InitGame()
 
 	//Sets active scene reference to our scene
 	m_activeScene = m_scenes[2];
+	m_activeScene = m_scenes[1];
 
 	m_activeScene->InitScene(float(BackEnd::GetWindowWidth()), float(BackEnd::GetWindowHeight()));
 
@@ -81,19 +82,18 @@ bool Game::Run()
 
 		//Polls events and then checks them
 		BackEnd::PollEvents(m_register, &m_close, &m_motion, &m_click, &m_wheel);
-		CheckEvents();
-
-		//Updates the game
-		Update();
 
 		//does the window have keyboard focus?
 		if (Input::m_windowFocus)
 		{
+			CheckEvents();
+
 			//Accept all input
 			AcceptInput();
 		}
 
-		SoundManager::update();
+		//Updates the game
+		Update();
 
 		unsigned int index = m_activeScene->ChangeScene();
 		if (index != -1) {
