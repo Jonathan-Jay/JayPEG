@@ -3,6 +3,7 @@
 std::vector<std::vector<CollectiblesData>> Collectibles::list = { };
 float Collectibles::regenStationCounter = 0;
 float Collectibles::regenDelay = 0.25f;
+bool Collectibles::hasPlayedSound = false;
 
 unsigned int Collectibles::CreateCollectible(vec3 position, int width, int height, CollectiblesType type)
 {
@@ -110,6 +111,7 @@ int Collectibles::testAllCollectibles(entt::registry* reg, int halfOfPlayerWidth
 	}
 
 	int pickUp = 0;
+	
 	if (list.size() > yList) {
 		for (int x(0); x < list[yList].size();) {
 			vec3 itemPos = reg->get<Transform>(list[yList][x].entity).GetPosition();
@@ -119,11 +121,25 @@ int Collectibles::testAllCollectibles(entt::registry* reg, int halfOfPlayerWidth
 				if (regenStationCounter == 0) {
 					if ((playerPos.x < itemPos.x + halfOfWidth - halfOfPlayerWidth) && (playerPos.x > itemPos.x - halfOfWidth + halfOfPlayerWidth) &&
 						(playerPos.y < itemPos.y + halfOfHeight + halfOfPlayerHeight) && (playerPos.y > itemPos.y - halfOfHeight - halfOfPlayerHeight)) {
-
+						auto& playerData = reg->get<Player>(EntityIdentifier::MainPlayer());
 						//regen health and reset timer
-						if (reg->get<Player>(EntityIdentifier::MainPlayer()).addCurrentHealth(1)) {
-							Sound2D("nep.wav", "sounds").play();
+						if (playerData.getCurrentHealth() < playerData.getMaxHealth() - 1) {
+							playerData.addCurrentHealth(1);
+							Sound2D("FillingHealthRegen.mp3", "sounds").play();
 							regenStationCounter = regenDelay;
+							hasPlayedSound = true;
+						}
+						else if (playerData.getCurrentHealth() == playerData.getMaxHealth() - 1 && hasPlayedSound)
+						{
+							playerData.addCurrentHealth(1);
+							hasPlayedSound = false;
+							/*used so it wont repeat the noise when on the platform, unless damage was taken*/
+							Sound2D("FullHealthRegen.mp3", "sounds").play();
+							regenStationCounter = regenDelay;
+						}
+						else
+						{
+							hasPlayedSound = true;
 						}
 					}
 				}
