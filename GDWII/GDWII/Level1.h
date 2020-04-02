@@ -39,7 +39,7 @@ private:
 	bool AABBtest(vec2 BL, vec2 TR);
 
 	//variables used by the engine
-	bool onGround = false;
+	bool onGround = true;
 	bool canJump = true;
 	bool controllerInput = false;
 	bool gunActive = false;
