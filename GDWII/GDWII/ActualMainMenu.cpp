@@ -168,7 +168,7 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 }
 
-void ActualMainMenu::KeyboardDown()
+void ActualMainMenu::Update()
 {
 	m_soundEffects[0].loop();
 
@@ -586,7 +586,3 @@ bool ActualMainMenu::positionTesting(int entity, vec2 otherPos)
 		}
 	return false;
 }
-
-
-
-

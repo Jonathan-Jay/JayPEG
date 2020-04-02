@@ -34,11 +34,11 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 		ECS::GetComponent<HorizontalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<HorizontalScroll>(entity).SetOffset(15.f);
-		ECS::GetComponent<HorizontalScroll>(entity).SetLimits(-1466, 790);
+		ECS::GetComponent<HorizontalScroll>(entity).SetLimits(-2060, 2035);
 
 		ECS::GetComponent<VerticalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<VerticalScroll>(entity).SetOffset(15.f);
-		ECS::GetComponent<VerticalScroll>(entity).SetLimits(-575, 1279);
+		ECS::GetComponent<VerticalScroll>(entity).SetLimits(-1488, 1310);
 
 		vec4 temp = ECS::GetComponent<Camera>(entity).GetOrthoSize();
 		ECS::GetComponent<Camera>(entity).SetWindowSize(vec2(float(windowWidth), float(windowHeight)));
@@ -573,7 +573,7 @@ void Level1::MouseWheel(SDL_MouseWheelEvent evnt)
 {
 	auto& cam = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera());
 	if (evnt.y < 0) {
-		if (cam.GetOrthoSize().w < 400)
+		if (cam.GetOrthoSize().w < 4000)
 			cam.Zoom(evnt.y * 10.f);
 	}
 	else {
@@ -727,34 +727,6 @@ void Level1::KeyboardDown()
 		m_sceneReg->get<PhysicsBody>(tempEnt[tempEntIndex]).GetBody()->SetTransform(tempPosMove, 0);
 	}
 	*/
-
-	auto& playerData = m_sceneReg->get<Player>(EntityIdentifier::MainPlayer());
-	bool offsetchanged = false;
-	if (Input::GetKeyDown(Key::W)) {
-		offsetchanged = true;
-		tempOffSet.y += 1;
-	}
-	if (Input::GetKeyDown(Key::S)) {
-		offsetchanged = true;
-		tempOffSet.y -= 1;
-	}
-	if (Input::GetKeyDown(Key::D)) {
-		offsetchanged = true;
-		tempOffSet.x += 1;
-	}
-	if (Input::GetKeyDown(Key::A)) {
-		offsetchanged = true;
-		tempOffSet.x -= 1;
-	}
-	if (offsetchanged) {
-		std::cout << "offset: (" << tempOffSet.x << ", " << tempOffSet.y << ")\n";
-	}
-	if (Input::GetKeyDown(Key::E)) {
-		playerData.takeDamage(1);
-	}
-	if (Input::GetKeyDown(Key::Q)) {
-		playerData.getMissile(true);
-	}
 }
 
 void Level1::Update()
@@ -926,7 +898,7 @@ void Level1::Update()
 	}
 
 	//zoom ranges they return true when they succeed, so none should be active for the global zoom to be on
-	if (!zoomRange(250, vec2(-2100, -1485), vec2(65, -745)) &&		//boss room
+	/*if (!zoomRange(250, vec2(-2100, -1485), vec2(65, -745)) &&		//boss room
 		!zoomRange(225, vec2(-745, -1500), vec2(1710, -1115)) &&	//basement
 		!zoomRange(175, vec2(-1370, -560), vec2(-150, -80)) &&		//intro area
 		!zoomRange(240, vec2(795, 95), vec2(1470, 530)) &&			//mini-boss room
@@ -934,7 +906,7 @@ void Level1::Update()
 		!zoomRange(175, vec2(-1440, 90), vec2(-840, 960))			//staircase up
 		) {
 		zoomRange(200, vec2(), vec2(), true);
-	}
+	}*/
 
 	//has to run after everything since camera can move in other updates
 	UpdateUI();
