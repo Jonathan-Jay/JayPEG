@@ -49,13 +49,22 @@ public:
 	*/
 	static unsigned play2DSound(unsigned soundIndex, unsigned groupIndex);
 
+	//stop a sound
 	static void stop2DSound(unsigned channelIndex);
+	//stop a group
 	static void stopChannelGroup(unsigned groupIndex);
+	//stops everything
 	static void stopEverything();
-
+	//sets channel volume level
+	static void setVolume(unsigned index, float percent);
+	//sets channel group volume level
+	static void setGroupVolume(unsigned index, float percent);
+	//limit how many sounds playing in a group
 	static void limitGroups(unsigned limit);
 
+	//is channel playing
 	static bool isChannelPlaying(unsigned index);
+	//is group playing
 	static bool isGroupPlaying(unsigned index);
 
 	//set index to loop n times
@@ -88,6 +97,8 @@ public:
 	void stop();
 	void loop();
 	void stopGroup();
+	void setVolume(float percent);
+	void setGroupVolume(float percent);
 
 	void setSoundHandle(unsigned soundHandle) { _sound = soundHandle; }
 	void setGroupHandle(unsigned groupHandle) { _group = groupHandle; }

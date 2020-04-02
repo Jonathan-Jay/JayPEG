@@ -8,7 +8,9 @@
 
 enum class EnemyTypes {
 	WALKER,
-	SHOOTER
+	SHOOTER,
+	LOB,
+	BOSS
 };
 
 enum class EnemyState {
@@ -37,6 +39,7 @@ public:
 	int attackDamage{ 0 };
 	float refreshSightTime{ 0.f };
 	float shootDelay{ 0.f };
+	float idleTime{ 0.f };
 	size_t enemyCheckingIndex{ 0 };
 	std::vector<unsigned int> insideEnemies;
 	bool canSeePlayer{ false };
@@ -45,6 +48,8 @@ public:
 	bool grounded{ false };
 	vec2 targetPos;
 	vec2 targetPos2;
+	b2Vec2 vel;
+	b2Vec2 prevVel;
 	b2Vec3 jumpInfo;	//times jumped, x pos at jump, y pos at jump
 	b2Fixture* previousFixture{ nullptr };
 	int32 previousChildEndex{ 0 };
@@ -77,7 +82,7 @@ inline void from_json(const nlohmann::json& j, Enemy& enem) {
 
 class Enemies abstract {
 public:
-	static unsigned int CreateEnemy(b2World* m_physicsWorld, EnemyTypes type, float x, float y);
+	static unsigned int CreateEnemy(EnemyTypes type, float x, float y);
 	static void UpdateEnemies(entt::registry* m_reg);
 	static std::vector<enemyList> GetEnemies() { return enemies; }
 	static float GetSightRefreshTime() { return sightRefreshTime; }

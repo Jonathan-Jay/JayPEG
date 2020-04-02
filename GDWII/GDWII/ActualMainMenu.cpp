@@ -168,35 +168,6 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 }
 
-void ActualMainMenu::KeyboardDown()
-{
-	if (wait == 1) {
-		if (Input::GetKeyDown(Key::Escape)) {
-			index = 0;
-		}
-		else if (Input::GetKeyDown(Key::LeftArrow))
-		{
-			leftOnMenu();
-		}
-		else if (Input::GetKeyDown(Key::RightArrow))
-		{
-			rightOnMenu();
-		}
-		if (Input::GetKeyDown(Key::Z) || Input::GetKeyDown(Key::Space) || Input::GetKeyDown(Key::Enter))
-		{
-			if (menuSelected()) {
-				HoverSound();
-				if (!onCredits) {
-					index = 2;
-					playHoverSound = true;
-				}
-				else
-					index = 4;
-			}
-		}
-	}
-}
-
 void ActualMainMenu::Update()
 {
 	m_soundEffects[0].loop();
@@ -438,6 +409,30 @@ void ActualMainMenu::GamepadStick(XInputController* con)
 	}
 
 }
+
+void ActualMainMenu::KeyboardDown()
+{
+	if (wait == 1) {
+		if (Input::GetKeyDown(Key::Escape)) {
+			index = 0;
+		}
+		else if (Input::GetKeyDown(Key::LeftArrow)) {
+			leftOnMenu();
+		}
+		else if (Input::GetKeyDown(Key::RightArrow)) {
+			rightOnMenu();
+		}
+		if (Input::GetKeyDown(Key::Z) || Input::GetKeyDown(Key::Space) || Input::GetKeyDown(Key::Enter)) {
+			if (menuSelected()) {
+				HoverSound();
+				if (!onCredits)		index = 2;
+				else				index = 4;
+				playHoverSound = true;
+			}
+		}
+	}
+}
+
 int ActualMainMenu::ChangeScene()
 {
 	if (clickedPlay) {
@@ -464,6 +459,7 @@ int ActualMainMenu::ChangeScene()
 	
 	return -1;
 }
+
 void ActualMainMenu::rightOnMenu()
 {
 	bouncingRight = true;
@@ -485,6 +481,7 @@ void ActualMainMenu::rightOnMenu()
 	reset = false;
 	playHoverSound = true;
 }
+
 void ActualMainMenu::leftOnMenu()
 {
 	bouncingRight = false;
@@ -506,6 +503,7 @@ void ActualMainMenu::leftOnMenu()
 	reset = false;	
 	playHoverSound = true;
 }
+
 bool ActualMainMenu::menuSelected()
 {
 	/*indexes and what they mean
@@ -597,7 +595,3 @@ bool ActualMainMenu::positionTesting(int entity, vec2 otherPos)
 		}
 	return false;
 }
-
-
-
-

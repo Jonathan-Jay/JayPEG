@@ -36,7 +36,6 @@ private:
 	static std::vector<std::vector<CollectiblesData>> list;
 	static float regenStationCounter;
 	static float regenDelay;
-	static bool hasPlayedSound;
 
 };
 

@@ -35,9 +35,11 @@ private:
 	std::vector<unsigned int> uiElements = {};
 	//camera control
 	bool zoomRange(int wantedOrtho, vec2 BL, vec2 TR, bool everything = false);
+	//thing to help
+	bool AABBtest(vec2 BL, vec2 TR);
 
 	//variables used by the engine
-	bool onGround = false;
+	bool onGround = true;
 	bool canJump = true;
 	bool controllerInput = false;
 	bool gunActive = false;
@@ -50,7 +52,9 @@ private:
 	bool exiting = false;
 	bool gameOver = false;
 	bool stunned = false;
-	int itemCount = 0;
+	bool changeWorldPos = false;
+	short int currentWorldPos = 0;
+	short int itemCount = 0;
 	float jumpHeight = 0;
 	float gunDelay = 0;
 	float missileDelay = 0;

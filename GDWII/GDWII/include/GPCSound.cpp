@@ -38,10 +38,10 @@ void SoundManager::update()
 unsigned SoundManager::load2DSound(const std::string& relativeFilePath)
 {
 	for (unsigned x(0); x < _sounds.size(); x++) {
-		char tempName2[7] = {};
-		_result = _sounds[x]->getName(tempName2, 7);
+		char tempName2[15] = {};
+		_result = _sounds[x]->getName(tempName2, 15);
 		checkFmodErrors(_result, "Sound Dup Test");
-		if (!strcmp((relativeFilePath.substr(0, 6)).c_str(), tempName2)) {
+		if (!strcmp((relativeFilePath.substr(0, 14)).c_str(), tempName2)) {
 			return x;
 		}
 	}
@@ -58,10 +58,10 @@ unsigned SoundManager::load2DSound(const std::string& relativeFilePath)
 unsigned SoundManager::createChannelGroup(const std::string& groupName)
 {
 	for (unsigned x(0); x < _channelGroups.size(); x++) {
-		char tempName2[7] = {};
-		_result = _channelGroups[x]->getName(tempName2, 7);
+		char tempName2[10] = {};
+		_result = _channelGroups[x]->getName(tempName2, 10);
 		checkFmodErrors(_result, "Channel Group Dup Test");
-		if (!strcmp((groupName.substr(0, 6)).c_str(), tempName2)) {
+		if (!strcmp((groupName.substr(0, 9)).c_str(), tempName2)) {
 			return x;
 		}
 	}
@@ -142,6 +142,18 @@ void SoundManager::stopEverything()
 	}
 }
 
+void SoundManager::setVolume(unsigned index, float percent)
+{
+	_result = _channels[index]->setVolume(percent);
+	checkFmodErrors(_result, "setting volume");
+}
+
+void SoundManager::setGroupVolume(unsigned index, float percent)
+{
+	_result = _channelGroups[index]->setVolume(percent);
+	checkFmodErrors(_result, "setting volume");
+}
+
 void SoundManager::limitGroups(unsigned limit)
 {
 	for (int x(0); x < _channelGroups.size(); x++) {
@@ -210,6 +222,16 @@ void Sound2D::loop()
 void Sound2D::stopGroup()
 {
 	SoundManager::stopChannelGroup(_group);
+}
+
+void Sound2D::setVolume(float percent)
+{
+	SoundManager::setVolume(_channel, percent);
+}
+
+void Sound2D::setGroupVolume(float percent)
+{
+	SoundManager::setGroupVolume(_group, percent);
 }
 
 bool Sound2D::isPlaying()

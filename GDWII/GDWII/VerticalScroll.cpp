@@ -6,31 +6,41 @@ VerticalScroll::VerticalScroll()
 
 void VerticalScroll::Update()
 {
-	//Above Focus
-	if (m_cam->GetPositionY() < m_topLimit) {
-		if (m_focus->GetPosition().y > m_cam->m_localPosition.y + m_offset)
-		{
-			float difference = m_focus->GetPosition().y - (m_cam->m_localPosition.y + m_offset);
+	float difference = m_cam->GetPositionY();
+	if (m_shakeTime > 0) {
+		m_shakeTime -= Timer::deltaTime;
+		if (m_shakeTime == 0)
+			m_shakeTime = -1;
 
- 			m_cam->SetPosition(vec3(m_cam->GetPositionX(), m_cam->GetPositionY() + difference, m_cam->GetPositionZ()));
-		}
+		difference += rand() % int(2 * m_shakeStrength) - m_shakeStrength;
+	}
+	else if (m_shakeTime < 0) {
+		if (m_shakeEndPos != nullptr)
+			difference = *m_shakeEndPos;
+
+		m_shakeTime = 0;
+		m_shakeStrength = 0;
+		m_shakeEndPos = nullptr;
 	}
 	else {
-		m_cam->SetPosition(vec3(m_cam->GetPositionX(), m_topLimit, m_cam->GetPositionZ()));
-	}
-
-	//Below focus
-	if (m_cam->GetPositionY() > m_bottomLimit) {
-		if (m_focus->GetPosition().y < m_cam->m_localPosition.y - m_offset)
-		{
-			float difference = m_focus->GetPosition().y - (m_cam->m_localPosition.y - m_offset);
-
-			m_cam->SetPosition(vec3(m_cam->GetPositionX(), m_cam->GetPositionY() + difference, m_cam->GetPositionZ()));
+		if (m_focus->GetPositionY() > m_cam->GetPositionY() + m_offset) {
+			//Calculate the amount the focus has "pushed" the camera right by
+			difference += m_focus->GetPositionY() - (m_cam->GetPositionY() + m_offset);
+		}
+		else if (m_focus->GetPositionY() < m_cam->GetPositionY() - m_offset) {
+			//Calculate the amount the focus has "pushed" the camera left by
+			difference += m_focus->GetPositionY() - (m_cam->GetPositionY() - m_offset);
 		}
 	}
-	else {
-		m_cam->SetPosition(vec3(m_cam->GetPositionX(), m_bottomLimit, m_cam->GetPositionZ()));
+
+	if (difference + m_cam->GetOrthoSize().w > m_topLimit) {				//Top of focus
+		difference = m_topLimit - m_cam->GetOrthoSize().w;
+	} else if (difference - m_cam->GetOrthoSize().w < m_bottomLimit) {	//Bottom of focus
+		difference = m_bottomLimit + m_cam->GetOrthoSize().w;
 	}
+
+	//Adjust the camera
+	m_cam->SetPosition(vec3(m_cam->GetPositionX(), difference, m_cam->GetPositionZ()));
 }
 
 Camera * VerticalScroll::GetCam() const
@@ -93,4 +103,12 @@ void VerticalScroll::SetBottomLimit(float bottom)
 	if (bottom < m_topLimit) {
 		m_bottomLimit = bottom;
 	}
+}
+
+void VerticalScroll::DoScreenShake(float time, float strength, float* endPos) {
+	m_shakeTime = time;
+	m_shakeStrength = strength;
+
+	if (endPos != nullptr)
+		m_shakeEndPos = endPos;
 }
