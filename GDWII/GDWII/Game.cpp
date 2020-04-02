@@ -94,6 +94,8 @@ bool Game::Run()
 		//Updates the game
 		Update();
 
+		SoundManager::update();
+
 		unsigned int index = m_activeScene->ChangeScene();
 		if (index != -1) {
 			m_activeScene->Unload();

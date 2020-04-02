@@ -7,27 +7,30 @@ VerticalScroll::VerticalScroll()
 void VerticalScroll::Update()
 {
 	float difference = m_cam->GetPositionY();
-	if (m_focus->GetPositionY() > m_cam->GetPositionY() + m_offset) {
-		//Calculate the amount the focus has "pushed" the camera right by
-		difference += m_focus->GetPositionY() - (m_cam->GetPositionY() + m_offset);
-	} else if (m_focus->GetPositionY() < m_cam->GetPositionY() - m_offset) {
-		//Calculate the amount the focus has "pushed" the camera left by
-		difference += m_focus->GetPositionY() - (m_cam->GetPositionY() - m_offset);
-	}
-
 	if (m_shakeTime > 0) {
 		m_shakeTime -= Timer::deltaTime;
 		if (m_shakeTime == 0)
 			m_shakeTime = -1;
 
 		difference += rand() % int(2 * m_shakeStrength) - m_shakeStrength;
-	} else if (m_shakeTime < 0) {
+	}
+	else if (m_shakeTime < 0) {
 		if (m_shakeEndPos != nullptr)
 			difference = *m_shakeEndPos;
 
 		m_shakeTime = 0;
 		m_shakeStrength = 0;
 		m_shakeEndPos = nullptr;
+	}
+	else {
+		if (m_focus->GetPositionY() > m_cam->GetPositionY() + m_offset) {
+			//Calculate the amount the focus has "pushed" the camera right by
+			difference += m_focus->GetPositionY() - (m_cam->GetPositionY() + m_offset);
+		}
+		else if (m_focus->GetPositionY() < m_cam->GetPositionY() - m_offset) {
+			//Calculate the amount the focus has "pushed" the camera left by
+			difference += m_focus->GetPositionY() - (m_cam->GetPositionY() - m_offset);
+		}
 	}
 
 	if (difference + m_cam->GetOrthoSize().w > m_topLimit) {				//Top of focus

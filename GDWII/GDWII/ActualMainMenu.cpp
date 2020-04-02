@@ -172,7 +172,7 @@ void ActualMainMenu::Update()
 {
 	m_soundEffects[0].loop();
 
-	if (wait == 1 && !onCredits) {
+	if (wait == 1) {
 		switch (index) {
 		case 1:
 			m_sceneReg->get<Sprite>(3).SetSizeScale(1.f);
@@ -410,16 +410,25 @@ void ActualMainMenu::GamepadStick(XInputController* con)
 
 }
 
-void ActualMainMenu::KeyboardDown() {
-	if (wait == 1 && !onCredits) {
-		if (Input::GetKeyDown(Key::LeftArrow)) {
+void ActualMainMenu::KeyboardDown()
+{
+	if (wait == 1) {
+		if (Input::GetKeyDown(Key::Escape)) {
+			index = 0;
+		}
+		else if (Input::GetKeyDown(Key::LeftArrow)) {
 			leftOnMenu();
-		} else if (Input::GetKeyDown(Key::RightArrow)) {
+		}
+		else if (Input::GetKeyDown(Key::RightArrow)) {
 			rightOnMenu();
 		}
 		if (Input::GetKeyDown(Key::Z) || Input::GetKeyDown(Key::Space) || Input::GetKeyDown(Key::Enter)) {
-			if (menuSelected())
-				index = 2;
+			if (menuSelected()) {
+				HoverSound();
+				if (!onCredits)		index = 2;
+				else				index = 4;
+				playHoverSound = true;
+			}
 		}
 	}
 }
