@@ -7,21 +7,14 @@ HorizontalScroll::HorizontalScroll()
 void HorizontalScroll::Update()
 {
 	float difference = m_cam->GetPositionX();
-	if (m_focus->GetPositionX() > m_cam->GetPositionX() + m_offset) {
-		//Calculate the amount the focus has "pushed" the camera right by
-		difference += m_focus->GetPositionX() - (m_cam->GetPositionX() + m_offset);
-	} else if (m_focus->GetPositionX() < m_cam->GetPositionX() - m_offset) {
-		//Calculate the amount the focus has "pushed" the camera left by
-		difference += m_focus->GetPositionX() - (m_cam->GetPositionX() - m_offset);
-	}
-
 	if (m_shakeTime > 0) {
 		m_shakeTime -= Timer::deltaTime;
 		if (m_shakeTime == 0)
 			m_shakeTime = -1;
 
 		difference += rand() % int(2 * m_shakeStrength) - m_shakeStrength;
-	} else if (m_shakeTime < 0) {
+	}
+	else if (m_shakeTime < 0) {
 		if (m_shakeEndPos != nullptr)
 			difference = *m_shakeEndPos;
 
@@ -29,11 +22,22 @@ void HorizontalScroll::Update()
 		m_shakeStrength = 0;
 		m_shakeEndPos = nullptr;
 	}
+	else {
+		if (m_focus->GetPositionX() > m_cam->GetPositionX() + m_offset) {
+			//Calculate the amount the focus has "pushed" the camera right by
+			difference += m_focus->GetPositionX() - (m_cam->GetPositionX() + m_offset);
+		}
+		else if (m_focus->GetPositionX() < m_cam->GetPositionX() - m_offset) {
+			//Calculate the amount the focus has "pushed" the camera left by
+			difference += m_focus->GetPositionX() - (m_cam->GetPositionX() - m_offset);
+		}
+	}
 
-	if (difference + m_cam->GetOrthoSize().y * m_cam->GetAspect() > m_rightLimit) {		//Right of focus
-		difference = m_rightLimit - m_cam->GetOrthoSize().y * m_cam->GetAspect();
-	} else if (difference - m_cam->GetOrthoSize().y * m_cam->GetAspect() < m_leftLimit) {	//Left of focus
-		difference = m_leftLimit + m_cam->GetOrthoSize().y * m_cam->GetAspect();
+	float adjustment = m_cam->GetOrthoSize().y * m_cam->GetAspect();
+	if (difference + adjustment > m_rightLimit) {		//Right of focus
+		difference = m_rightLimit - adjustment;
+	} else if (difference - adjustment < m_leftLimit) {	//Left of focus
+		difference = m_leftLimit + adjustment;
 	}
 
 	//Adjust the camera

@@ -4,7 +4,7 @@ std::vector<unsigned int> Missiles::missiles = {};
 int Missiles::maxMissiles = 2;
 int Missiles::explosionRadius = 25;
 int Missiles::damage = 10;
-float Missiles::screenShake = 5;
+float Missiles::screenShake = 15;
 
 void Missiles::CreateMissile(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float missileRadius)
 {
@@ -218,8 +218,12 @@ void Missiles::updateAllMissiles(entt::registry* m_register)
 				}
 
 				Sound2D("snake.mp3", "sounds").play();
-				m_register->get<HorizontalScroll>(EntityIdentifier::MainCamera()).DoScreenShake(animCon.GetAnimation(1).GetFrames().size() * animCon.GetAnimation(1).GetSecPerFrame(), screenShake, &m_register->get<Transform>(EntityIdentifier::MainPlayer()).m_localPosition.x);
-				m_register->get<VerticalScroll>(EntityIdentifier::MainCamera()).DoScreenShake(animCon.GetAnimation(1).GetFrames().size() * animCon.GetAnimation(1).GetSecPerFrame(), screenShake, &m_register->get<Transform>(EntityIdentifier::MainPlayer()).m_localPosition.y);
+				m_register->get<HorizontalScroll>(EntityIdentifier::MainCamera()).DoScreenShake(
+					animCon.GetAnimation(1).GetFrames().size() * animCon.GetAnimation(1).GetSecPerFrame(),
+					screenShake, &m_register->get<Transform>(EntityIdentifier::MainPlayer()).m_localPosition.x);
+				m_register->get<VerticalScroll>(EntityIdentifier::MainCamera()).DoScreenShake(
+					animCon.GetAnimation(1).GetFrames().size() * animCon.GetAnimation(1).GetSecPerFrame(),
+					screenShake, &m_register->get<Transform>(EntityIdentifier::MainPlayer()).m_localPosition.y);
 
 				ECS::RemoveComponent<PhysicsBody>(missiles[x]);
 				m_register->get<Sprite>(missiles[x]).SetWidth(explosionRadius * 2);
