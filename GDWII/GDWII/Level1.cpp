@@ -656,7 +656,9 @@ void Level1::KeyboardDown()
 			exiting = true;
 		}
 	}
-
+	if (Input::GetKeyDown(Key::E)) {
+		m_sceneReg->get<Player>(EntityIdentifier::MainPlayer()).subCurrentHealth(1);
+	}
 	/*
 	//Debugging tool, lets you move entities from a list
 	if (Input::GetKeyDown(Key::E)) {

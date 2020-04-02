@@ -150,7 +150,7 @@ int Collectibles::testAllCollectibles(entt::registry* reg, int halfOfPlayerWidth
 				//give player item
 				auto& playerData = reg->get<Player>(EntityIdentifier::MainPlayer());
 
-				Sound2D("nep.wav", "sounds").play();
+				Sound2D("CollectionItemNoise.mp3", "sounds").play();
 
 				switch (list[yList][x].type) {
 				case CollectiblesType::Missile:
