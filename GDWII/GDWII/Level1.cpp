@@ -34,11 +34,11 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 		ECS::GetComponent<HorizontalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<HorizontalScroll>(entity).SetOffset(15.f);
-		//ECS::GetComponent<HorizontalScroll>(entity).SetLimits(-1740, 1680);
+		ECS::GetComponent<HorizontalScroll>(entity).SetLimits(-1466, 790);
 
 		ECS::GetComponent<VerticalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<VerticalScroll>(entity).SetOffset(15.f);
-		//ECS::GetComponent<VerticalScroll>(entity).SetLimits(-1200, 1254);
+		ECS::GetComponent<VerticalScroll>(entity).SetLimits(-575, 1279);
 
 		vec4 temp = ECS::GetComponent<Camera>(entity).GetOrthoSize();
 		ECS::GetComponent<Camera>(entity).SetWindowSize(vec2(float(windowWidth), float(windowHeight)));
@@ -406,6 +406,8 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Collectibles::CreateCollectible(vec3(-1330, 139, 26), 100, 25, CollectiblesType::RegenStation);
 	Collectibles::CreateCollectible(vec3(1696, 1106, 26), 100, 25, CollectiblesType::RegenStation);
 	Collectibles::CreateCollectible(vec3(-77, -934, 26), 100, 25, CollectiblesType::RegenStation);
+
+	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 600, -420);
 #pragma endregion object summons
 	
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
@@ -731,7 +733,7 @@ void Level1::KeyboardDown()
 
 void Level1::Update()
 {
-	m_soundEffects[0].loop();
+	//m_soundEffects[0].loop();
 
 	//update scene Data
 	UpdateCounters();
@@ -1320,4 +1322,3 @@ void Level1::CreateUI()
 	}
 
 }
-

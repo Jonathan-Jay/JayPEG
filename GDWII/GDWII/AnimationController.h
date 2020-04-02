@@ -67,6 +67,8 @@ public:
 	bool GetRepeating() const;
 	//Get the seconds per frame for the animation
 	float GetSecPerFrame() const;
+	//gets percentage of where the animation is
+	float GetPerctentAnimation();
 
 	//Setters
 	//Set if the animation repeats
