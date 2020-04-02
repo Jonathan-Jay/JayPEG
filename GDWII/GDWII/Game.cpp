@@ -35,10 +35,11 @@ void Game::InitGame()
 		SDL_Log("SDL_GetDesktopDisplayMode failed: %s", SDL_GetError());
 	}
 
-	BackEnd::ReshapeWindow(m_width * 0.5f, m_height * 0.5f);
+	BackEnd::ReshapeWindow(m_width, m_height);
 
 	//Grabs the initialized window
 	m_window = BackEnd::GetWindow();
+	m_window->SetWindowPos(0, 0);
 
 	SoundManager::init("./assets/sounds/", 100);
 	//Creates a new scene.
@@ -243,14 +244,17 @@ void Game::KeyboardDown()
 	m_activeScene->KeyboardDown();
 
 	if (Input::GetKeyDown(Key::F11)) {
-		if (m_window->GetFullscreen()) {
-			m_window->SetFullscreen(0);
+		int* winPos = m_window->GetWindowPos();
+		printf("%u, %u", winPos[0], winPos[1]);
+		if (winPos[0] == 0 && winPos[1] == 0) {
+			m_window->SetWindowPos(40, 40);
+			BackEnd::ReshapeWindow(m_width * 0.8f, m_height * 0.8f, m_register);
 			m_window->SetWindowResizable(true);
-			BackEnd::ReshapeWindow(m_width * 0.9f, m_height * 0.9f, m_register);
 		}
 		else {
-			m_window->SetFullscreen(1);
+			m_window->SetWindowPos(0, 0);
 			BackEnd::ReshapeWindow(m_width, m_height, m_register);
+			m_window->SetWindowResizable(false);
 		}
 	}
 

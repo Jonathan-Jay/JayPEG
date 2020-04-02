@@ -36,8 +36,16 @@ public:
 	void SetWindowResizable(bool resizable);
 	//Sets the window being fullscreen
 	void SetFullscreen(Uint32 flags);
+
+	void SetBorderless(bool borderless);
+
+	void SetWindowPos(int x, int y);
 	//Grabs whether or not the window is fullscreen
 	Uint32 GetFullscreen() const;
+
+	int* GetWindowSize();
+
+	int* GetWindowPos();
 
 	void SetWindowSize(int w, int h);
 
