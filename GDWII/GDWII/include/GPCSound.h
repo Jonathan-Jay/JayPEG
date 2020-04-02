@@ -53,6 +53,11 @@ public:
 	static void stopChannelGroup(unsigned groupIndex);
 	static void stopEverything();
 
+	static void limitGroups(unsigned limit);
+
+	static bool isChannelPlaying(unsigned index);
+	static bool isGroupPlaying(unsigned index);
+
 	//set index to loop n times
 	static void loopSound(unsigned index, unsigned loopCount);
 
@@ -91,6 +96,7 @@ public:
 	unsigned getGroupHandle() const { return _group; }
 
 	bool isPlaying();
+	bool isGroupPlaying();
 	void setLoopCount(unsigned count);
 
 private:

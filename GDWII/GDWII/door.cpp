@@ -12,7 +12,7 @@ void Door::Init(b2World *physicsWorld, vec3 pos, vec3 otherPos, float width, flo
 	ECS::AttachComponent<PhysicsBody>(entity);
 
 	ECS::GetComponent<Transform>(entity).SetPosition(pos);
-	ECS::GetComponent<Sprite>(entity).LoadSprite(filename, width, height);
+	ECS::GetComponent<Sprite>(entity).LoadSprite(filename, width + 12, height + 30);
 
 	auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
@@ -28,11 +28,11 @@ void Door::Init(b2World *physicsWorld, vec3 pos, vec3 otherPos, float width, flo
 	unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 	ECS::SetUpIdentifier(entity, bitHolder, "door");
 
-	m_list.push_back({ entity, pos, otherPos, speed });
+	m_list.push_back({ entity, pos, otherPos, speed, width });
 	m_index = m_list.size() - 1;
 }
 
-void Door::update(entt::registry *reg)
+void Door::update(entt::registry *reg, bool playerOnGround)
 {
 	for (int x(0); x < m_list.size(); x++) {
 		doorData* current = &m_list[x];
@@ -84,13 +84,31 @@ void Door::update(entt::registry *reg)
 
 				vec3 change = (current->opened ? current->endPos : current->startPos) - currentPos;
 				if (change.GetMagnitude2D() > 3) {
-					change = change.Normalize2D() * ((Timer::deltaTime < 1 ? Timer::deltaTime : 1) * current->speed);
+					if (change.x == 0) {
+						change = (change.y > 0 ? vec3(0, 1, change.z) : vec3(0, -1, change.z)) * ((Timer::deltaTime < 1 ? Timer::deltaTime : 1) * current->speed);
+					}
+					else if (change.y == 0) {
+						change = (change.x > 0 ? vec3(1, 0, change.z) : vec3(-1, 0, change.z))* ((Timer::deltaTime < 1 ? Timer::deltaTime : 1) * current->speed);
+					}
+					else {
+						change = change.Normalize2D() * ((Timer::deltaTime < 1 ? Timer::deltaTime : 1) * current->speed);
+					}
 					currentPos = currentPos + change;
-					for (b2ContactEdge* edge = reg->get<PhysicsBody>(m_list[x].entity).GetBody()->GetContactList(); edge; edge = edge->next) {
-						if ((unsigned int)edge->contact->GetFixtureA()->GetBody()->GetUserData() == EntityIdentifier::MainPlayer()) {
-							reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetAwake(true);
-							reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetTransform(
-								b2Vec2(change.x + playerPos.x, (change.y < 0 ? change.y : 0) + playerPos.y), 0);
+					if (playerOnGround) {
+						for (b2ContactEdge* edge = reg->get<PhysicsBody>(m_list[x].entity).GetBody()->GetContactList(); edge; edge = edge->next) {
+							if ((unsigned int)edge->contact->GetFixtureA()->GetBody()->GetUserData() == EntityIdentifier::MainPlayer()) {
+								if (playerOnGround && edge->contact->GetManifold()->localNormal.y == 1) {
+									reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetAwake(true);
+									reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetTransform(
+										(current->width < m_halfPlayerWidth * 3.f ? b2Vec2(playerPos.x, playerPos.y) :
+											b2Vec2(currentPos.x, currentPos.y + m_halfPlayerHeight)), 0);
+								}
+								else {
+									reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetAwake(true);
+									reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetTransform(
+										b2Vec2(change.x + playerPos.x, (change.y < 0 ? change.y : 0) + playerPos.y), 0);
+								}
+							}
 						}
 					}
 				}

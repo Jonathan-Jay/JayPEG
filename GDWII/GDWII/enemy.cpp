@@ -418,3 +418,48 @@ void Enemies::UpdateEnemies(entt::registry* m_reg) {
 			m_reg->get<Enemy>(curList.enemyID).Sleep(m_reg, curList);
 	}
 }
+
+b2Vec2 Enemies::projectileMotion(vec3 initial, vec3 target, int gravity, int velo)
+{
+	int distance = abs(initial.x - target.x);
+	int height = target.y - initial.y;
+	Radians angle = 0;
+
+	if (height < 5 && height > -5) {
+		float test = -gravity * distance / float(velo * velo);
+
+		if (test < -1 || test > 1)
+			return b2Vec2(0, 0);
+
+		angle = asinf(test) / 2;
+	}
+	else {
+		//equation:			[  (  gx^2		)  ]
+		//					[ -( ------ - h )  ]		 (  x  )
+		// angle = [  cos-1	[  (   v^2		)  ] + tan^-1( --- )  ] / 2
+		//					[ ---------------- ]		 ( -h  )
+		//					[ (h^2 + x^2)^1/2  ]
+
+		float test = (-(gravity * distance * distance / float(velo * velo) - height) /		//	-(gx^2/v^2 - h) /
+			sqrtf(distance * distance + height * height)									//	sqrt(h^2 + x^2)
+			);
+
+		if (test < -1 || test > 1)
+			return b2Vec2(0, 0);
+
+		angle = ( acosf(test) + atanf(distance / -height) ) / 2;		//	( cos^-1(test) + tan^-1(x/-h) ) / 2
+		if (angle < 0)
+			angle += PI / 2;
+	}
+
+	if (angle < PI / 6) {
+		angle = PI / 2 - angle;
+	}
+
+	if (initial.x < target.x) {
+		return b2Vec2( velo * cosf(angle), velo * sinf(angle));
+	}
+	else {
+		return b2Vec2( -velo * cosf(angle), velo * sinf(angle));
+	}
+}

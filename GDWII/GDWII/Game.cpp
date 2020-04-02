@@ -35,12 +35,12 @@ void Game::InitGame()
 		SDL_Log("SDL_GetDesktopDisplayMode failed: %s", SDL_GetError());
 	}
 
-	BackEnd::ReshapeWindow(m_width * 0.8f, m_height * 0.8f);
+	BackEnd::ReshapeWindow(m_width * 0.9f, m_height * 0.9f);
 
 	//Grabs the initialized window
 	m_window = BackEnd::GetWindow();
 
-	SoundManager::init("./assets/sounds/", 25);
+	SoundManager::init("./assets/sounds/", 100);
 	//Creates a new scene.
 	//Replace this with your own scene.
 	m_scenes.push_back(new ActualMainMenu("Main Menu")); //actual Main Menu
@@ -48,8 +48,7 @@ void Game::InitGame()
 	m_scenes.push_back(new LoadingScreen("Loading")); //loading
 
 	//Sets active scene reference to our scene
-	//m_activeScene = m_scenes[2];
-	m_activeScene = m_scenes[1];
+	m_activeScene = m_scenes[2];
 
 	m_activeScene->InitScene(float(BackEnd::GetWindowWidth()), float(BackEnd::GetWindowHeight()));
 
@@ -93,6 +92,8 @@ bool Game::Run()
 			//Accept all input
 			AcceptInput();
 		}
+
+		SoundManager::update();
 
 		unsigned int index = m_activeScene->ChangeScene();
 		if (index != -1) {
@@ -244,7 +245,7 @@ void Game::KeyboardDown()
 		if (m_window->GetFullscreen()) {
 			m_window->SetFullscreen(0);
 			m_window->SetWindowResizable(true);
-			BackEnd::ReshapeWindow(m_width * 0.5f, m_height * 0.5f, m_register);
+			BackEnd::ReshapeWindow(m_width * 0.9f, m_height * 0.9f, m_register);
 		}
 		else {
 			m_window->SetFullscreen(1);

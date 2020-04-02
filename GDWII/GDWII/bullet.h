@@ -9,7 +9,8 @@ class Bullets
 public:
 	//create/store bullet number
 	static void CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float bulletRadius, uint16 shooter);
-	static void CreateWall(b2World* m_physicsWorld, vec3 pos, float width, float height, std::string filename = "");
+	//subtract 12 from width and 30 from height for filesize, leave filename blank if no texture
+	static unsigned int CreateWall(b2World* m_physicsWorld, vec3 pos, float width, float height, std::string filename = "");
 
 	static void setDamage(int newDamage);
 	static int getDamage();

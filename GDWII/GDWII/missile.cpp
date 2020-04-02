@@ -53,7 +53,7 @@ void Missiles::CreateMissile(entt::registry* m_sceneReg, b2World* m_physicsWorld
 
 	ECS::GetComponent<Sprite>(entity).LoadSprite(filename, missileRadius * 2.f, missileRadius * 2.f, true, &animController);
 
-	ECS::GetComponent<Transform>(entity).SetPosition(vec3(pos.x, pos.y, 27.f));
+	ECS::GetComponent<Transform>(entity).SetPosition(vec3(pos.x, pos.y, 29.f));
 
 	auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
@@ -90,7 +90,7 @@ void Missiles::CreateMissile(entt::registry* m_sceneReg, b2World* m_physicsWorld
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 }
 
-void Missiles::CreateWall(b2World* m_physicsWorld, vec3 pos, float width, float height, std::string filename, bool isBombable)
+unsigned int Missiles::CreateWall(b2World* m_physicsWorld, vec3 pos, float width, float height, std::string filename, bool isBombable)
 {
 	auto entity = ECS::CreateEntity();
 
@@ -118,10 +118,12 @@ void Missiles::CreateWall(b2World* m_physicsWorld, vec3 pos, float width, float 
 	}
 	else {
 		ECS::AttachComponent<Sprite>(entity);
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, width, height);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, width + 12, height + 30);
 		unsigned int bitHolder = EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "bombwall");
 	}
+
+	return entity;
 }
 
 void Missiles::setRadius(float newRadius)
@@ -231,7 +233,6 @@ void Missiles::updateAllMissiles(entt::registry* m_register)
 				ECS::RemoveComponent<PhysicsBody>(missiles[x]);
 				m_register->get<Sprite>(missiles[x]).SetWidth(explosionRadius * 2);
 				m_register->get<Sprite>(missiles[x]).SetHeight(explosionRadius * 2);
-				m_register->get<Transform>(missiles[x]).SetPositionZ(22);
 				m_register->get<AnimationController>(missiles[x]).SetActiveAnim(1);
 			}
 		}

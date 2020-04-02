@@ -100,7 +100,8 @@ bool Player::getStunned()
 void Player::takeDamage(int amt)
 {
 	if (stunned == 0) {
-		subCurrentHealth(amt);
+		if (subCurrentHealth(amt))
+			Sound2D("nep.wav", "sounds").play();
 
 		stunned = 0.5f;
 	}

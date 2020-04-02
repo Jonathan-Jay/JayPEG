@@ -83,7 +83,7 @@ public:
 	static float GetSightRefreshTime() { return sightRefreshTime; }
 	static float GetShootDelayTime() { return shootDelayTime; }
 	static b2World* GetPhysicsWorld() { return m_phyWorld; }
-
+	static b2Vec2 projectileMotion(vec3 initial, vec3 target, int gravity, int velo);
 	static void reset(b2World* physWorld) { m_phyWorld = physWorld;	enemies.resize(0); }
 	
 private:

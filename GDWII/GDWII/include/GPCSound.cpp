@@ -37,15 +37,11 @@ void SoundManager::update()
 
 unsigned SoundManager::load2DSound(const std::string& relativeFilePath)
 {
-	char tempName[7] = {};
-	for (int x(0); x < relativeFilePath.length() && x < 6; x++) {
-		tempName[x] = relativeFilePath[x];
-	}
 	for (unsigned x(0); x < _sounds.size(); x++) {
 		char tempName2[7] = {};
 		_result = _sounds[x]->getName(tempName2, 7);
 		checkFmodErrors(_result, "Sound Dup Test");
-		if (!strcmp(tempName, tempName2)) {
+		if (!strcmp((relativeFilePath.substr(0, 6)).c_str(), tempName2)) {
 			return x;
 		}
 	}
@@ -61,15 +57,11 @@ unsigned SoundManager::load2DSound(const std::string& relativeFilePath)
 
 unsigned SoundManager::createChannelGroup(const std::string& groupName)
 {
-	char tempName[7] = {};
-	for (int x(0); x < groupName.length() && x < 6; x++) {
-		tempName[x] = groupName[x];
-	}
 	for (unsigned x(0); x < _channelGroups.size(); x++) {
 		char tempName2[7] = {};
 		_result = _channelGroups[x]->getName(tempName2, 7);
 		checkFmodErrors(_result, "Channel Group Dup Test");
-		if (!strcmp(tempName, tempName2)) {
+		if (!strcmp((groupName.substr(0, 6)).c_str(), tempName2)) {
 			return x;
 		}
 	}
@@ -125,7 +117,6 @@ unsigned SoundManager::play2DSound(unsigned soundIndex, unsigned groupIndex)
 		index = 0;
 
 	_result = _system->playSound(_sounds[soundIndex], _channelGroups[groupIndex], false, &_channels[index]);
-
 	checkFmodErrors(_result, "Play Sound 2D");
 
 	return index;
@@ -149,6 +140,32 @@ void SoundManager::stopEverything()
 		_result = _channelGroups[x]->stop();
 		checkFmodErrors(_result, "Stopping EVerything (via groups)");
 	}
+}
+
+void SoundManager::limitGroups(unsigned limit)
+{
+	for (int x(0); x < _channelGroups.size(); x++) {
+		int amt = 0;
+		_result = _channelGroups[x]->getNumChannels(&amt);
+		checkFmodErrors(_result, "getting group channel number");
+		if (amt > limit) {
+			_channelGroups[x]->stop();
+		}
+	}
+}
+
+bool SoundManager::isChannelPlaying(unsigned index)
+{
+	bool playing = false;
+	_channels[index]->isPlaying(&playing);
+	return playing;
+}
+
+bool SoundManager::isGroupPlaying(unsigned index)
+{
+	bool playing = false;
+	_channelGroups[index]->isPlaying(&playing);
+	return playing;
 }
 
 void SoundManager::loopSound(unsigned index, unsigned loopCount)
@@ -197,9 +214,12 @@ void Sound2D::stopGroup()
 
 bool Sound2D::isPlaying()
 {
-	bool playing = false;
-	SoundManager::_channels[_channel]->isPlaying(&playing);
-	return playing;
+	return SoundManager::isChannelPlaying(_channel);
+}
+
+bool Sound2D::isGroupPlaying()
+{
+	return SoundManager::isGroupPlaying(_group);
 }
 
 void Sound2D::setLoopCount(unsigned count)
