@@ -6,6 +6,7 @@ ActualMainMenu::ActualMainMenu(std::string name)
 	m_soundEffects.push_back({ "MenuBackground.mp3", "music" });	// 0
 	m_soundEffects.push_back({ "ClickBeat1.mp3", "sounds" });		// 1
 	m_soundEffects.push_back({ "RolloverSound1.wav", "sounds" });	// 2
+	m_soundEffects[0].setGroupVolume(1.f);
 }
 
 void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
