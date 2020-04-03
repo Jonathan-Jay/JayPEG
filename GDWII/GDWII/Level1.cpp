@@ -15,7 +15,6 @@ Level1::Level1(std::string name) : Scene(name)
 	m_soundEffects.push_back({ "snake.mp3", "sounds" });			// 7		missile
 
 	Sound2D("CollectionItemNoise.mp3", "collectibles").setGroupVolume(2);
-	m_soundEffects[0].setGroupVolume(0.75f);
 }
 
 void Level1::InitScene(float windowWidth, float windowHeight)
@@ -428,6 +427,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
+	m_soundEffects[0].setGroupVolume(0.75f);
 	m_soundEffects[0].play();
 }
 
