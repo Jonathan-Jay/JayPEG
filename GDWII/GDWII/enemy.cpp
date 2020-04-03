@@ -425,9 +425,9 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 		auto& anim = animController.GetAnimation(0);
 		
 		if (m_type == EnemyTypes::BOSS) {
-			for (int x(0); x < 5; x++)
-				anim.AddFrame(vec2(150 * x, 150), vec2(150 * (x + 1), 0));
-			anim.SetSecPerFrame(0.25f);
+			for (int x(0); x < 22; x++)
+				anim.AddFrame(vec2(1450 * (x + 1), 800), vec2(1450 * x, 0));
+			anim.SetSecPerFrame(0.15f);
 		}
 		else {
 			for (int x(0); x < 5; x++)
@@ -442,9 +442,9 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 		auto& anim = animController.GetAnimation(1);
 
 		if (m_type == EnemyTypes::BOSS) {
-			for (int x(0); x < 5; x++)
-				anim.AddFrame(vec2(150 * (x + 1), 150), vec2(150 * x, 0));
-			anim.SetSecPerFrame(0.25f);
+			for (int x(0); x < 22; x++)
+				anim.AddFrame(vec2(1450 * x, 1600), vec2(1450 * (x + 1), 0));
+			anim.SetSecPerFrame(0.15f);
 		} else {
 			for (int x(0); x < 5; x++)
 				anim.AddFrame(vec2(150 * (x + 1), 150), vec2(150 * x, 0));
@@ -454,18 +454,52 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 		anim.SetRepeating(true);
 	}
 
-	if (m_type == EnemyTypes::BOSS) {
-		//do jump anim
-	}
-
 	animController.SetActiveAnim(0);
 
+	if (m_type == EnemyTypes::BOSS) {
+		animController.AddAnimation(Animation());
+		animController.AddAnimation(Animation());
+		animController.AddAnimation(Animation());
+		animController.AddAnimation(Animation());
+		{		//punch left
+			auto& anim = animController.GetAnimation(2);
+			for (int x(0); x < 9; x++)
+				anim.AddFrame(vec2(1450 * (x + 1), 1600), vec2(1450 * x, 800));
+			anim.SetSecPerFrame(0.15f);
+			anim.SetRepeating(true);
+		}
+
+		{		//punch right
+			auto& anim = animController.GetAnimation(3);
+			for (int x(0); x < 9; x++)
+				anim.AddFrame(vec2(1450 * x, 1600), vec2(1450 * (x + 1), 800));
+			anim.SetSecPerFrame(0.15f);
+			anim.SetRepeating(true);
+		}
+
+		{		//jump left
+			auto& anim = animController.GetAnimation(4);
+			for (int x(0); x < 10; x++)
+				anim.AddFrame(vec2(1450 * (x + 1), 2400), vec2(1450 * x, 1600));
+			anim.SetSecPerFrame(0.15f);
+			anim.SetRepeating(true);
+		}
+
+		{		//punch right
+			auto& anim = animController.GetAnimation(5);
+			for (int x(0); x < 10; x++)
+				anim.AddFrame(vec2(1450 * x, 2400), vec2(1450 * (x + 1), 1600));
+			anim.SetSecPerFrame(0.15f);
+			anim.SetRepeating(true);
+		}
+	}
+
 	if (m_type == EnemyTypes::BOSS)
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 40, 40, true, &animController);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 363, 202, true, &animController);
 	else
 		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 20, 20, true, &animController);
 
-	ECS::GetComponent<Transform>(entity).SetPosition(vec3(x, y, 30.f));
+	ECS::GetComponent<Transform>(entity).SetPosition(vec3(x, y, 29.f));
 
 	auto& tempSpr = ECS::GetComponent<Sprite>(entity);
 
@@ -481,17 +515,19 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 	tempBody->SetUserData((void*)entity);
 
 	if (m_type == EnemyTypes::BOSS)
-		tempPhsBody = PhysicsBody(tempBody, 40.f, 40.f, vec2(0, 0), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy ^ CollisionIDs::Player);
+		tempPhsBody = PhysicsBody(tempBody, 120, 120, vec2(0, -10), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy);
 	else
 		tempPhsBody = PhysicsBody(tempBody, 18.f, 20.f, vec2(0, 0), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy ^ CollisionIDs::Player);
 
 	tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
 
 	unsigned int bitHolder = EntityIdentifier::AnimationBit() | EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit() | EntityIdentifier::EnemyBit();
-	ECS::SetUpIdentifier(entity, bitHolder, "enemy");
+	if (m_type == EnemyTypes::BOSS)
+		ECS::SetUpIdentifier(entity, bitHolder, "boss");
+	else
+		ECS::SetUpIdentifier(entity, bitHolder, "enemy");
 
-	enemies.push_back(enemyList{entity});
-
+	enemies.push_back(enemyList{ entity });
 	return entity;
 }
 

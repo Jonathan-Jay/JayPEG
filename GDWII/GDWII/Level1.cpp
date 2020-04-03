@@ -5,10 +5,16 @@ Level1::Level1(std::string name) : Scene(name)
 	m_gravity = b2Vec2(float32(0.f), float32(-20.f));
 
 	//sounds
-	m_soundEffects.push_back({ "MenuBackground.mp3", "music" });	// 0
-	m_soundEffects.push_back({ "nep.wav", "sounds" });				// 1
-	m_soundEffects.push_back({ "snake.mp3", "sounds" });			// 2
+	m_soundEffects.push_back({ "Level1BackMusic.mp3", "music" });	// 0
+	m_soundEffects.push_back({ "Step/1StepNoise.mp3", "walk" });	// 1
+	m_soundEffects.push_back({ "Step/2StepNoise.mp3", "walk" });	// 4
+	m_soundEffects.push_back({ "Step/3StepNoise.mp3", "walk" });	// 3
+	m_soundEffects.push_back({ "Step/4StepNoise.mp3", "walk" });	// 4
+	m_soundEffects.push_back({ "Step/5StepNoise.mp3", "walk" });	// 5
+	m_soundEffects.push_back({ "nep.wav", "sounds" });				// 6		gun
+	m_soundEffects.push_back({ "snake.mp3", "sounds" });			// 7		missile
 
+	Sound2D("CollectionItemNoise.mp3", "collectibles").setGroupVolume(2);
 }
 
 void Level1::InitScene(float windowWidth, float windowHeight)
@@ -21,7 +27,8 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	float aspectRatio = windowWidth / windowHeight;
 
 #pragma region entities
-	vec3 playerPos = { -1247, -254, 30.f };
+	//vec3 playerPos = { -1247, -200, 30.f };
+	vec3 playerPos = { -886, -925, 30.f };
 
 	//main camera
 	{
@@ -350,7 +357,9 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Bullets::setDamage(0, bulletDamage);
 	Missiles::setDamage(missileDamage);
 
-	currentWorldPos = 0;
+	currentWorldPos = 2;
+	changeWorldPos = false;
+	onGround = true;
 
 #pragma region object summons
 	/*
@@ -377,9 +386,9 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	);
 	doors[1].isAABB(vec2(-2140, -1480), vec2(-986, -750));
 	doors[2].isEntityTrigger(	//opens when boss is killed
-		Collectibles::CreateCollectible(vec3(-1865 + 50, -1255, 26), 25, 25, CollectiblesType::BulletStrengthUp)
+		Enemies::CreateEnemy(EnemyTypes::BOSS, -1688, -1240)
 	);
-
+	/*
 	//hidden stuff
 	Missiles::CreateWall(m_physicsWorld, vec3(-1020, -388.5, 27), 147, 264, "Objects/RegenUpHidden.png");
 	Bullets::CreateWall(m_physicsWorld, vec3(-1189.5, 1218, 27), 335, 224, "Objects/HPUpHidden.png");
@@ -410,12 +419,16 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Collectibles::CreateCollectible(vec3(-1330, 139, 26), 100, 25, CollectiblesType::RegenStation);
 	Collectibles::CreateCollectible(vec3(1696, 1106, 26), 100, 25, CollectiblesType::RegenStation);
 	Collectibles::CreateCollectible(vec3(-77, -934, 26), 100, 25, CollectiblesType::RegenStation);
+	*/
 
 	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 600, -420);
+
 #pragma endregion object summons
 	
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
+	m_soundEffects[0].setGroupVolume(0.75f);
+	m_soundEffects[0].play();
 }
 
 void Level1::GamepadStick(XInputController* con)
@@ -487,6 +500,10 @@ void Level1::GamepadStick(XInputController* con)
 
 		if (con->IsButtonPressed(Buttons::A)) {
 			if (canJump) {
+				//if it is only starting the jump, play sound
+				if (jumpHeight == minJumpStrength)
+					m_soundEffects[rand() % 5 + 1].play();
+
 				if (jumpHeight < maxJumpStrength) {
 					temp.y = jumpHeight;
 					jumpHeight += jumpIncrementPerSec * Timer::deltaTime;
@@ -633,6 +650,10 @@ void Level1::KeyboardDown()
 		}
 		if (Input::GetKey(Key::Space)) {
 			if (canJump) {
+				//if it is only starting the jump, play sound
+				if (jumpHeight == minJumpStrength)
+					m_soundEffects[rand() % 5 + 1].play();
+
 				if (jumpHeight < maxJumpStrength) {
 					temp.y = jumpHeight;
 					jumpHeight += jumpIncrementPerSec * Timer::deltaTime;
@@ -663,7 +684,6 @@ void Level1::KeyboardDown()
 		}
 	}
 	
-	/*
 	//gravity cancelling tool
 	if (Input::GetKeyDown(Key::Q)) {
 		b2Body* tempBod = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody();
@@ -671,9 +691,10 @@ void Level1::KeyboardDown()
 		tempBod->SetLinearVelocity(b2Vec2(0, 0));
 	}
 	if (Input::GetKeyDown(Key::E)) {
-		m_sceneReg->get<Player>(EntityIdentifier::MainPlayer()).subCurrentHealth(1);
+		m_sceneReg->get<Player>(EntityIdentifier::MainPlayer()).takeDamage(1);
 	}
 
+	/*
 	//Debugging tool, lets you move entities from a list
 	if (Input::GetKeyDown(Key::E)) {
 		tempEntIndex++;
@@ -747,7 +768,8 @@ void Level1::KeyboardDown()
 
 void Level1::Update()
 {
-	//m_soundEffects[0].loop();
+	m_soundEffects[0].loop();	//music
+	b2Vec2 velo = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
 
 	//update scene Data
 	UpdateCounters();
@@ -797,7 +819,7 @@ void Level1::Update()
 	//only shoot when both weapons are ready
 	if (gunActive) {
 		if (gunDelay == 0) {
-			m_soundEffects[1].play();
+			m_soundEffects[6].play();
 			if (crouching) {
 				//remove tag to make force horizontal
 				facingUp = false;
@@ -842,7 +864,7 @@ void Level1::Update()
 		//missiles only spawn when delay is 1 (ready to use) and you have enough NRG
 		if (gunDelay == 0.f && missileDelay == 0.f && m_sceneReg->get<Player>(EntityIdentifier::MainPlayer()).getMissile()) {
 			if (m_sceneReg->get<Player>(EntityIdentifier::MainPlayer()).subCurrentEnergy(missileCost)) {
-				m_soundEffects[1].play();
+				m_soundEffects[7].play();
 				if (crouching) {
 					//remove tag to make force horizontal
 					facingUp = false;
@@ -855,7 +877,6 @@ void Level1::Update()
 						m_sceneReg->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionY()
 					};
 					b2Vec2 vel(0, 0);
-					b2Vec2 velo = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
 
 					//depending on the direction player is facing, give acceleration
 					if (facingUp) {
@@ -900,7 +921,6 @@ void Level1::Update()
 		missileActive = false;
 	}
 	
-
 	//update logic
 	Missiles::updateAllMissiles(m_sceneReg);
 	Bullets::updateAllBullets(m_sceneReg);
@@ -1001,7 +1021,6 @@ void Level1::Update()
 	22 and 23: down up
 	first check if grounded*/
 	if (deathCounter == 0) {
-		b2Vec2 velo = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
 		if (onGround) {				//ground/standing animation
 			//check if crouching, then moving, then idle (crouch won't change if you move)
 			if (crouching)			m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(4 + movingRight);
@@ -1011,6 +1030,10 @@ void Level1::Update()
 				if (facingUp)		m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(8 + movingRight);
 				//walking
 				else				m_sceneReg->get<AnimationController>(EntityIdentifier::MainPlayer()).SetActiveAnim(6 + movingRight);
+
+				//noise
+				if (!m_soundEffects[1].isGroupPlaying() && recoilDelay == 0)
+					m_soundEffects[rand() % 5 + 1].play();
 			}	//if idle
 			else {
 				//aiming up
@@ -1068,6 +1091,8 @@ bool Level1::Grounded()
 				temp = -temp;
 			}
 			if (temp < -0.9f && edge->contact->GetManifold()->pointCount == 2) {
+				//if it previously was not on ground, play landing noise
+				if (!onGround)		m_soundEffects[rand() % 5 + 1].play();
 				return true;
 			}
 		}

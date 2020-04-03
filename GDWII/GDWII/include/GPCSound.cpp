@@ -142,6 +142,18 @@ void SoundManager::stopEverything()
 	}
 }
 
+void SoundManager::setVolume(unsigned index, float percent)
+{
+	_result = _channels[index]->setVolume(percent);
+	checkFmodErrors(_result, "setting volume");
+}
+
+void SoundManager::setGroupVolume(unsigned index, float percent)
+{
+	_result = _channelGroups[index]->setVolume(percent);
+	checkFmodErrors(_result, "setting volume");
+}
+
 void SoundManager::limitGroups(unsigned limit)
 {
 	for (int x(0); x < _channelGroups.size(); x++) {
@@ -210,6 +222,16 @@ void Sound2D::loop()
 void Sound2D::stopGroup()
 {
 	SoundManager::stopChannelGroup(_group);
+}
+
+void Sound2D::setVolume(float percent)
+{
+	SoundManager::setVolume(_channel, percent);
+}
+
+void Sound2D::setGroupVolume(float percent)
+{
+	SoundManager::setGroupVolume(_group, percent);
 }
 
 bool Sound2D::isPlaying()

@@ -166,6 +166,8 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 		ECS::SetUpIdentifier(entity, bitHolder, "Credits");
 	}
 
+	m_soundEffects[0].setGroupVolume(1.f);
+	m_soundEffects[0].play();
 }
 
 void ActualMainMenu::Update()

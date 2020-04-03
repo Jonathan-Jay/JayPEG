@@ -110,6 +110,7 @@ int Collectibles::testAllCollectibles(entt::registry* reg, int halfOfPlayerWidth
 	}
 
 	int pickUp = 0;
+	
 	if (list.size() > yList) {
 		for (int x(0); x < list[yList].size();) {
 			vec3 itemPos = reg->get<Transform>(list[yList][x].entity).GetPosition();
@@ -119,10 +120,13 @@ int Collectibles::testAllCollectibles(entt::registry* reg, int halfOfPlayerWidth
 				if (regenStationCounter == 0) {
 					if ((playerPos.x < itemPos.x + halfOfWidth - halfOfPlayerWidth) && (playerPos.x > itemPos.x - halfOfWidth + halfOfPlayerWidth) &&
 						(playerPos.y < itemPos.y + halfOfHeight + halfOfPlayerHeight) && (playerPos.y > itemPos.y - halfOfHeight - halfOfPlayerHeight)) {
-
+						auto& playerData = reg->get<Player>(EntityIdentifier::MainPlayer());
 						//regen health and reset timer
-						if (reg->get<Player>(EntityIdentifier::MainPlayer()).addCurrentHealth(1)) {
-							Sound2D("nep.wav", "sounds").play();
+						if (playerData.addCurrentHealth(1)) {
+							if (playerData.getCurrentHealth() != playerData.getMaxHealth())
+								Sound2D("FillingHealthRegen.mp3", "sounds").play();
+							else
+								Sound2D("FullHealthRegen.mp3", "sounds").play();
 							regenStationCounter = regenDelay;
 						}
 					}
@@ -134,7 +138,7 @@ int Collectibles::testAllCollectibles(entt::registry* reg, int halfOfPlayerWidth
 				//give player item
 				auto& playerData = reg->get<Player>(EntityIdentifier::MainPlayer());
 
-				Sound2D("nep.wav", "sounds").play();
+				Sound2D("CollectionItemNoise.mp3", "collectibles").play();
 
 				switch (list[yList][x].type) {
 				case CollectiblesType::Missile:

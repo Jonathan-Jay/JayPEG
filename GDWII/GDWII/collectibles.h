@@ -31,10 +31,12 @@ public:
 
 	static void reset() { list.resize(0); }
 
+
 private:
 	static std::vector<std::vector<CollectiblesData>> list;
 	static float regenStationCounter;
 	static float regenDelay;
+
 };
 
 #endif // !__COLLECT__
