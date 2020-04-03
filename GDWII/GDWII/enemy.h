@@ -11,18 +11,22 @@ enum class EnemyTypes {
 	WALKER,
 	SHOOTER,
 	LOB,
-	BOSS
+	BOSS,
+	MINIBOSS
 };
-
+ 
 enum class EnemyState {
 	Follow,
 	Wander,
 	Flee,
-	Idle
+	Idle,
+	Punching,
+	LargeJumping
 };
 
 struct enemyList {
 	unsigned int enemyID{ 0 };
+	bool enabled{ true };
 	bool isActive{ false };
 	bool wasActive{ false };
 	bool toDelete{ false };
@@ -40,7 +44,7 @@ public:
 	int jumpHeight{ 0 };
 	int attackDamage{ 0 };
 	float refreshSightTime{ 0.f };
-	float shootDelay{ 0.f };
+	float attackDelay{ 0.f };
 	float idleTime{ 0.f };
 	size_t enemyCheckingIndex{ 0 };
 	std::vector<unsigned int> insideEnemies;
@@ -57,7 +61,7 @@ public:
 	b2Fixture* previousFixture{ nullptr };
 	int32 previousChildEndex{ 0 };
 
-	void SetStats(EnemyTypes _type, int _health, int _moveSpeed, int _jumpHeight, int _attackDamage) { type = _type; health = _health; moveSpeed = _moveSpeed; jumpHeight = _jumpHeight; }
+	void SetStats(EnemyTypes _type, int _health, int _moveSpeed, int _jumpHeight, int _attackDamage) { type = _type; health = _health; moveSpeed = _moveSpeed; jumpHeight = _jumpHeight; attackDamage = _attackDamage; }
 	void Update(entt::registry* m_reg, enemyList& enemyID);
 	void Awake(entt::registry* m_reg, enemyList& enemyID);
 	void Sleep(entt::registry* m_reg, enemyList& enemyID);
@@ -90,10 +94,11 @@ public:
 	static void UpdateEnemies(entt::registry* m_reg);
 	static std::vector<enemyList> GetEnemies() { return enemies; }
 	static float GetSightRefreshTime() { return sightRefreshTime; }
-	static float GetShootDelayTime() { return shootDelayTime; }
+	static float GetattackDelayTime() { return attackDelayTime; }
 	static b2World* GetPhysicsWorld() { return m_phyWorld; }
-	static b2Vec2 projectileMotion(vec3 initial, vec3 target, int gravity, int velo);
+	static b2Vec2 projectileMotion(b2Vec2 initial, b2Vec2 target, int gravity, int velo);
 	static void reset(b2World* physWorld) { m_phyWorld = physWorld;	enemies.resize(0); }
+	static void SetEnemyActive(unsigned int entity);
 	
 private:
 	static std::vector<enemyList> enemies;
@@ -101,7 +106,7 @@ private:
 	static int deactivationLength;
 	//how long to wait to refresh the sight of the enemy
 	static float sightRefreshTime;
-	static float shootDelayTime;
+	static float attackDelayTime;
 
 	static b2World* m_phyWorld;
 };

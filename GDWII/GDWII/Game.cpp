@@ -40,6 +40,7 @@ void Game::InitGame()
 	//Grabs the initialized window
 	m_window = BackEnd::GetWindow();
 	m_window->SetWindowPos(0, 0);
+	m_window->SetWindowResizable(false);
 
 	SoundManager::init("./assets/sounds/", 100);
 	//Creates a new scene.
@@ -245,7 +246,6 @@ void Game::KeyboardDown()
 
 	if (Input::GetKeyDown(Key::F11)) {
 		int* winPos = m_window->GetWindowPos();
-		printf("%u, %u", winPos[0], winPos[1]);
 		if (winPos[0] == 0 && winPos[1] == 0) {
 			m_window->SetWindowPos(40, 40);
 			BackEnd::ReshapeWindow(m_width * 0.8f, m_height * 0.8f, m_register);

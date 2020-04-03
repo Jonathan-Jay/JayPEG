@@ -27,8 +27,8 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	float aspectRatio = windowWidth / windowHeight;
 
 #pragma region entities
-	//vec3 playerPos = { -1247, -200, 30.f };
-	vec3 playerPos = { -886, -925, 30.f };
+	vec3 playerPos = { -1247, -200, 30.f };
+	//vec3 playerPos = { -886, -925, 30.f };
 
 	//main camera
 	{
@@ -421,7 +421,8 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Collectibles::CreateCollectible(vec3(-77, -934, 26), 100, 25, CollectiblesType::RegenStation);
 	*/
 
-	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 600, -420);
+	//Enemies::SetEnemyActive(Enemies::CreateEnemy(EnemyTypes::MINIBOSS, 600, -420));
+	Enemies::CreateEnemy(EnemyTypes::LOB, 600, -420);
 
 #pragma endregion object summons
 	
@@ -768,7 +769,7 @@ void Level1::KeyboardDown()
 
 void Level1::Update()
 {
-	m_soundEffects[0].loop();	//music
+	//m_soundEffects[0].loop();	//music
 	b2Vec2 velo = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
 
 	//update scene Data
@@ -996,8 +997,41 @@ void Level1::Update()
 			changeWorldPos = false;
 		}
 
+		/*
+		if (AABBtest(vec3(), vec3()) {
+			win
+		}
+		*/
+
 		if (!zoomRange(250, vec2(-2100, -1485), vec2(65, -745)) &&		//boss room
 			!zoomRange(225, vec2(-745, -1500), vec2(1710, -1115))	//basement
+			) {
+			zoomRange(200, vec2(), vec2(), true);
+		}
+	}
+	else if (currentWorldPos == 4) {	//win room
+		if (changeWorldPos) {
+			m_sceneReg->get<HorizontalScroll>(EntityIdentifier::MainCamera()).SetLimits(-2103, -900);
+			m_sceneReg->get<VerticalScroll>(EntityIdentifier::MainCamera()).SetLimits(-1530, -650);
+			changeWorldPos = false;
+		}
+		
+		if (deathCounter > 0) {
+			deathCounter -= Timer::deltaTime;
+			if (deathCounter < 0) {
+				deathCounter = 0;
+				exiting = true;
+			}
+		}
+		else {
+			deathCounter = 2.5f;
+			doors[2].SetSpeed(250);
+			doors[2].SetOpened(false);
+			m_soundEffects[7].play();
+			//play win sound
+		}
+
+		if (!zoomRange(250, vec2(-2100, -1485), vec2(65, -745))			//boss room
 			) {
 			zoomRange(200, vec2(), vec2(), true);
 		}

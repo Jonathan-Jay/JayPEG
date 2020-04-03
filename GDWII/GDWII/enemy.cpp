@@ -3,13 +3,10 @@
 std::vector<enemyList> Enemies::enemies = {};
 int Enemies::deactivationLength = 600;
 float Enemies::sightRefreshTime = 0.125f;
-float Enemies::shootDelayTime = 1.5f;
+float Enemies::attackDelayTime = 1.5f;
 b2World* Enemies::m_phyWorld = nullptr;
 
 void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
-	if (type == EnemyTypes::BOSS)
-		return;
-
 	if (health <= 0) {
 		enemyID.toDelete = true;
 		return;
@@ -19,7 +16,12 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 	vec2 playerPos{ m_reg->get<Transform>(EntityIdentifier::MainPlayer()).GetPosition() };
 	vec2 enemyPos{ m_reg->get<Transform>(enemyID.enemyID).GetPosition() };
 	b2Vec2 enemyb2Pos = phyBod->GetPosition();
+	b2Vec2 playerb2Pos = m_reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetPosition();
 	AnimationController& animCon = m_reg->get<AnimationController>(enemyID.enemyID);
+	b2AABB test1;
+	b2AABB test2 = m_reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetFixtureList()->GetAABB(0);
+	vec4 testPoints;
+	b2Vec2 jumpTestPoint;
 
 	//std::cout << animCon.GetAnimation(animCon.GetActiveAnim()).GetPerctentAnimation() << "\n";
 
@@ -32,16 +34,46 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 
 	prevVel = vel;
 	vel = phyBod->GetLinearVelocity();
-	vel.x = 0;
 
-	shootDelay += Timer::deltaTime;
+	if (state != EnemyState::LargeJumping)
+		vel.x = 0;
+
+	attackDelay += Timer::deltaTime;
 	//detect if player is within sight
 	refreshSightTime += Timer::deltaTime;
 	if (refreshSightTime >= Enemies::GetSightRefreshTime())
 		findPlayer(m_reg, enemyID);
 
 	float tempCalc{ 0 };
-	if (canSeePlayer && state != EnemyState::Flee) {
+	if (type == EnemyTypes::BOSS || type == EnemyTypes::MINIBOSS) {
+		if (state == EnemyState::Follow) {
+			canSeePlayer = true;
+			state = EnemyState::Follow;
+
+			targetPos.x = playerPos.x - enemyPos.x;
+			targetPos.x = playerPos.x - targetPos.x / abs(targetPos.x) * 150;
+			targetPos.y = playerPos.y;
+
+			targetPos2 = playerPos;
+
+			if (type == EnemyTypes::MINIBOSS) {
+				tempCalc = targetPos2.x - enemyPos.x;
+				tempCalc = tempCalc / abs(tempCalc);
+				if (attackDelay >= Enemies::GetattackDelayTime()) {
+					if (tempCalc == facingRight * 2 - 1 && rand() % 2 == 0)
+						jumpTestPoint.Set(tempCalc * 30, 0);
+					else
+						jumpTestPoint = Enemies::projectileMotion(enemyb2Pos, playerb2Pos, Enemies::GetPhysicsWorld()->GetGravity().y, 75);
+
+					if (jumpTestPoint != b2Vec2_zero) {
+						Bullets::CreateBullet(m_reg, Enemies::GetPhysicsWorld(), enemyb2Pos, jumpTestPoint, 10, CollisionIDs::Enemy);
+						attackDelay = 0.f;
+					}
+				}
+			}
+		}
+	}
+	else if (canSeePlayer && state != EnemyState::Flee) {
 		switch (type) {
 		case EnemyTypes::WALKER:	
 			targetPos = playerPos;
@@ -60,13 +92,28 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 
 				tempCalc = targetPos2.x - enemyPos.x;
 				tempCalc = tempCalc / abs(tempCalc);
-				if (tempCalc == animCon.GetActiveAnim() * 2 - 1 && shootDelay >= Enemies::GetShootDelayTime()) {
-					Bullets::CreateBullet(m_reg, Enemies::GetPhysicsWorld(), enemyb2Pos + b2Vec2((animCon.GetActiveAnim() ? 10 : -10), 0), b2Vec2((animCon.GetActiveAnim() * 2 - 1) * 30, 0), 5, CollisionIDs::Enemy);
-					shootDelay = 0.f;
+				if (tempCalc == facingRight * 2 - 1 && attackDelay >= Enemies::GetattackDelayTime()) {
+					Bullets::CreateBullet(m_reg, Enemies::GetPhysicsWorld(), enemyb2Pos + b2Vec2((facingRight ? 10 : -10), 0), b2Vec2((facingRight * 2 - 1) * 30, 0), 5, CollisionIDs::Enemy);
+					attackDelay = 0.f;
 				}
 			} else
 				targetPos = targetPos2;
 
+			break;
+		case EnemyTypes::LOB:
+			targetPos.x = playerPos.x - enemyPos.x;
+			targetPos.x = playerPos.x - targetPos.x / abs(targetPos.x) * 150;
+			targetPos.y = playerPos.y;
+			targetPos2 = playerPos;
+
+			if (attackDelay >= Enemies::GetattackDelayTime()) {
+				jumpTestPoint = Enemies::projectileMotion(enemyb2Pos, playerb2Pos, Enemies::GetPhysicsWorld()->GetGravity().y, 75);
+
+				if (jumpTestPoint != b2Vec2_zero) {
+					Bullets::CreateBullet(m_reg, Enemies::GetPhysicsWorld(), enemyb2Pos, jumpTestPoint, 5, CollisionIDs::Enemy);
+					attackDelay = 0.f;
+				}
+			}
 			break;
 		default:
 			break;
@@ -78,25 +125,37 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 		if (state != EnemyState::Flee)
 			state = EnemyState::Follow;
 	}
-
-	if (canSeePlayer && state == EnemyState::Flee) {
+	else if (canSeePlayer && state == EnemyState::Flee) {
 		targetPos.x = playerPos.x - enemyPos.x;
 		targetPos.x = playerPos.x - targetPos.x / abs(targetPos.x) * 150;
 		targetPos.y = playerPos.y;
 	}
 
-	vec4 testPoints;
-	b2Vec2 jumpTestPoint;
 	switch (state) {
 	case EnemyState::Follow:
 		tempCalc = targetPos.x - enemyPos.x;
 
 		//is close to targetPos
 		if (abs(tempCalc) < moveSpeed / 2) {
-			if (canSeePlayer)
-				animCon.SetActiveAnim(targetPos2.x - enemyPos.x < 0 ? 0 : 1);
+			if (type == EnemyTypes::BOSS) {
+				if (rand() % 2 == 0) {
+					jumpTestPoint = Enemies::projectileMotion(enemyb2Pos, playerb2Pos, Enemies::GetPhysicsWorld()->GetGravity().y, 75);
+
+					if (jumpTestPoint != b2Vec2_zero) {
+						state = EnemyState::LargeJumping;
+						vel += jumpTestPoint;
+						idleTime = 0.5f;
+					}
+				} 
+				else {
+					state = EnemyState::Punching;
+					facingRight = targetPos2.x - enemyPos.x > 0;
+				}
+			}
+			else if (canSeePlayer)
+				facingRight = targetPos2.x - enemyPos.x < 0;
 			else {
-				if (type == EnemyTypes::SHOOTER && targetPos != targetPos2) {
+				if ((type == EnemyTypes::SHOOTER || type == EnemyTypes::LOB) && targetPos != targetPos2) {
 					targetPos = targetPos2;
 				} else
 					state = EnemyState::Wander;
@@ -113,9 +172,6 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 				b2Manifold* man = edge->contact->GetManifold();
 				b2Vec2 locNorm = man->localNormal;
 
-				/*if (edge->contact->GetFixtureA()->GetType() == b2Shape::e_polygon)
-					locNorm = -locNorm;*/
-
 				//find ID of collider (edge) to make sure that the next collision isnt it
 				if (locNorm.y <= -0.9 && man->pointCount == 1) {
 					//animCon.SetActiveAnim(targetPos2.x - enemyPos.x < 0 ? 0 : 1);
@@ -131,9 +187,8 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 		vel.x = tempCalc;
 
 		canJump = false;
-		if (grounded)
-			if ( type == EnemyTypes::WALKER || type == EnemyTypes::SHOOTER && (vel.x / abs(vel.x) == (targetPos2.x - enemyPos.x) / abs(targetPos2.x - enemyPos.x) || !canSeePlayer ) )
-				canJump = true;
+		if (grounded && ( type == EnemyTypes::WALKER || type == EnemyTypes::LOB || type == EnemyTypes::SHOOTER && (vel.x / abs(vel.x) == (targetPos2.x - enemyPos.x) / abs(targetPos2.x - enemyPos.x) || !canSeePlayer) ) )
+			canJump = true;
 
 		jumpTestPoint.Set(vel.x * 3, enemyb2Pos.y);
 		if (canSeePlayer && (vel.x > 0 ? targetPos.x - enemyb2Pos.x < jumpTestPoint.x : targetPos.x - enemyb2Pos.x > jumpTestPoint.x))
@@ -170,42 +225,39 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 			b2Manifold* man = edge->contact->GetManifold();
 			b2Vec2 locNorm = man->localNormal;
 
-			/*if (edge->contact->GetFixtureA()->GetType() == b2Shape::e_polygon)
-				locNorm = -locNorm;*/
-
 			//find ID of collider (edge) to make sure that the next collision isnt it
 			if (locNorm.y <= -0.9 && man->pointCount == 1 && (previousFixture != edge->contact->GetFixtureA() || previousFixture == edge->contact->GetFixtureA() && previousChildEndex != edge->contact->GetChildIndexA() ) ) {
 				findPlayer(m_reg, enemyID);
 
-				animCon.SetActiveAnim(!animCon.GetActiveAnim());
+				facingRight = !facingRight;
 				previousFixture = edge->contact->GetFixtureA();
 				previousChildEndex = edge->contact->GetChildIndexA();
 				break;
 			}
 
 			if (locNorm.x < 0) {
-				animCon.SetActiveAnim(0);
+				facingRight = false;
 				previousFixture = edge->contact->GetFixtureA();
 				previousChildEndex = edge->contact->GetChildIndexA();
 				break;
 			}
 
 			if (locNorm.x > 0) {
-				animCon.SetActiveAnim(1);
+				facingRight = true;
 				previousFixture = edge->contact->GetFixtureA();
 				previousChildEndex = edge->contact->GetChildIndexA();
 				break;
 			}
 		}
 
-		vel.x += (animCon.GetActiveAnim() * 2 - 1) * moveSpeed;
+		vel.x += (facingRight * 2 - 1) * moveSpeed;
 		break;
 	case EnemyState::Flee:
 		tempCalc = targetPos.x - enemyPos.x;
 
 		//is close to targetPos
 		if (abs(tempCalc) < moveSpeed / 2) {
-			animCon.SetActiveAnim(targetPos2.x - enemyPos.x < 0 ? 0 : 1);
+			facingRight = targetPos2.x - enemyPos.x > 0;
 
 			if (canSeePlayer)
 				state = EnemyState::Follow;
@@ -258,20 +310,60 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 		}
 
 		break;
+	case EnemyState::LargeJumping:
+		idleTime -= Timer::deltaTime;
+		if (idleTime <= 0 && grounded) {
+			state = EnemyState::Follow;
+			m_reg->get<HorizontalScroll>(EntityIdentifier::MainCamera()).DoScreenShake(0.5f, 15, &m_reg->get<Transform>(EntityIdentifier::MainPlayer()).m_localPosition.x);
+			m_reg->get<VerticalScroll>(EntityIdentifier::MainCamera()).DoScreenShake(0.5f, 15, &m_reg->get<Transform>(EntityIdentifier::MainPlayer()).m_localPosition.y);
+		}
+
+		break;
+	case EnemyState::Punching:
+		if (animCon.GetActiveAnim() > 1 && animCon.GetAnimation(animCon.GetActiveAnim()).GetAnimationDone())
+			state = EnemyState::Follow;
+		else if (animCon.GetActiveAnim() > 1 && 4 <= animCon.GetAnimation(animCon.GetActiveAnim()).GetFrameIndex() && animCon.GetAnimation(animCon.GetActiveAnim()).GetFrameIndex() <= 5) {
+			test1.upperBound.Set(enemyb2Pos.x + (facingRight ? 110 : -110) + 50, enemyb2Pos.y + 9);
+			test1.lowerBound.Set(enemyb2Pos.x + (facingRight ? 110 : -110) - 50, enemyb2Pos.y - 47);
+
+			if (test1.lowerBound.x < test2.upperBound.x && test1.upperBound.x > test2.lowerBound.x&& test1.lowerBound.y < test2.upperBound.y && test1.upperBound.y > test2.lowerBound.y) {
+				m_reg->get<Player>(EntityIdentifier::MainPlayer()).takeDamage(attackDamage * 1.5f);
+			}
+		}
+
+		break;
 	default:
 		break;
 	}
 
-	if (vel.x < 0) {
-		animCon.SetActiveAnim(0);
-	} else if (vel.x > 0) {
-		animCon.SetActiveAnim(1);
+	if (vel.x != 0)
+		facingRight = vel.x > 0;
+	if (canSeePlayer && state == EnemyState::Follow && phyBod->GetLinearVelocity() == b2Vec2_zero && vel == prevVel)
+		facingRight = targetPos2.x - enemyPos.x > 0;
+
+	//determines anim index
+	if (state == EnemyState::LargeJumping)
+		tempCalc = 4 + facingRight;
+	else if (state == EnemyState::Punching)
+		tempCalc = 2 + facingRight;
+	else  
+		tempCalc = facingRight;
+
+	if (tempCalc != animCon.GetActiveAnim()) {
+		//if not walking anim then reset anim before switch
+		if (animCon.GetActiveAnim() > 1)
+			animCon.GetAnimation(animCon.GetActiveAnim()).Reset();
+
+		animCon.SetActiveAnim(tempCalc);
 	}
 
-	if (canSeePlayer && state == EnemyState::Follow && phyBod->GetLinearVelocity() == b2Vec2_zero && vel == prevVel)
-		animCon.SetActiveAnim(targetPos2.x - enemyPos.x < 0 ? 0 : 1);
-
-	facingRight = animCon.GetActiveAnim();
+	//player AABB
+	{
+		test1 = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetFixtureList()->GetAABB(0);
+		if (test1.lowerBound.x < test2.upperBound.x && test1.upperBound.x > test2.lowerBound.x&& test1.lowerBound.y < test2.upperBound.y && test1.upperBound.y > test2.lowerBound.y) {
+			m_reg->get<Player>(EntityIdentifier::MainPlayer()).takeDamage(attackDamage);
+		}
+	}
 
 	//test if in other enemy and try to push it back, only do one collision check per enemy per frame for overhead
 	if (Enemies::GetEnemies().size() > 1) {
@@ -289,8 +381,7 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 		}
 
 		if (m_reg->get<Enemy>(checkEnemyID).facingRight == facingRight) {
-			b2AABB test1 = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetFixtureList()->GetAABB(0);
-			b2AABB test2 = m_reg->get<PhysicsBody>(checkEnemyID).GetBody()->GetFixtureList()->GetAABB(0);
+			test2 = m_reg->get<PhysicsBody>(checkEnemyID).GetBody()->GetFixtureList()->GetAABB(0);
 	//		points in AABB
 	//		  x		-upperbound
 	//		x		-lowerbound
@@ -407,9 +498,19 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 		filename += "shoot.png";
 		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 8, 10, 50, 2);
 		break;
+	case EnemyTypes::LOB:
+		filename += "lob.png";
+		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 7, 8, 50, 3);
+		break;
+	case EnemyTypes::MINIBOSS:
+		filename += "mini-boss.png";
+		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 30, 10, 50, 2);
+		ECS::GetComponent<Enemy>(entity).state = EnemyState::Follow;
+		break;
 	case EnemyTypes::BOSS:
 		filename += "boss.png";
 		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 50, 13, 75, 3);
+		ECS::GetComponent<Enemy>(entity).state = EnemyState::Follow;
 		break;
 	default:
 		break;
@@ -421,12 +522,15 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 	animController.AddAnimation(Animation());
 	animController.AddAnimation(Animation());
 
+	vec2 bossFileSize(15000, 1129);
+
 	{	//aniamtion 0 is walking left
 		auto& anim = animController.GetAnimation(0);
 		
 		if (m_type == EnemyTypes::BOSS) {
 			for (int x(0); x < 22; x++)
-				anim.AddFrame(vec2(1450 * (x + 1), 800), vec2(1450 * x, 0));
+				anim.AddFrame(vec2(bossFileSize.x / 22 * (x + 1), bossFileSize.y / 3),
+								vec2(bossFileSize.x / 22 * x, 0));
 			anim.SetSecPerFrame(0.15f);
 		}
 		else {
@@ -443,7 +547,8 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 
 		if (m_type == EnemyTypes::BOSS) {
 			for (int x(0); x < 22; x++)
-				anim.AddFrame(vec2(1450 * x, 1600), vec2(1450 * (x + 1), 0));
+				anim.AddFrame(vec2(bossFileSize.x / 22 * x, bossFileSize.y / 3),
+					vec2(bossFileSize.x / 22 * (x + 1), 0));
 			anim.SetSecPerFrame(0.15f);
 		} else {
 			for (int x(0); x < 5; x++)
@@ -464,38 +569,40 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 		{		//punch left
 			auto& anim = animController.GetAnimation(2);
 			for (int x(0); x < 9; x++)
-				anim.AddFrame(vec2(1450 * (x + 1), 1600), vec2(1450 * x, 800));
+				anim.AddFrame(vec2(bossFileSize.x / 22 * (x + 1), bossFileSize.y / 3 * 2),
+					vec2(bossFileSize.x / 22 * x, bossFileSize.y / 3));
 			anim.SetSecPerFrame(0.15f);
-			anim.SetRepeating(true);
 		}
 
 		{		//punch right
 			auto& anim = animController.GetAnimation(3);
 			for (int x(0); x < 9; x++)
-				anim.AddFrame(vec2(1450 * x, 1600), vec2(1450 * (x + 1), 800));
+				anim.AddFrame(vec2(bossFileSize.x / 22 * x, bossFileSize.y / 3 * 2),
+					vec2(bossFileSize.x / 22 * (x + 1), bossFileSize.y / 3));
 			anim.SetSecPerFrame(0.15f);
-			anim.SetRepeating(true);
 		}
 
 		{		//jump left
 			auto& anim = animController.GetAnimation(4);
 			for (int x(0); x < 10; x++)
-				anim.AddFrame(vec2(1450 * (x + 1), 2400), vec2(1450 * x, 1600));
+				anim.AddFrame(vec2(bossFileSize.x / 22 * (x + 1), bossFileSize.y),
+					vec2(bossFileSize.x / 22 * x, bossFileSize.y / 3 * 2));
 			anim.SetSecPerFrame(0.15f);
-			anim.SetRepeating(true);
 		}
 
-		{		//punch right
+		{		//jump right
 			auto& anim = animController.GetAnimation(5);
 			for (int x(0); x < 10; x++)
-				anim.AddFrame(vec2(1450 * x, 2400), vec2(1450 * (x + 1), 1600));
+				anim.AddFrame(vec2(bossFileSize.x / 22 * x, bossFileSize.y),
+					vec2(bossFileSize.x / 22 * (x + 1), bossFileSize.y / 3 * 2));
 			anim.SetSecPerFrame(0.15f);
-			anim.SetRepeating(true);
 		}
 	}
 
 	if (m_type == EnemyTypes::BOSS)
 		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 363, 202, true, &animController);
+	else if (m_type == EnemyTypes::MINIBOSS)
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 40, 40, true, &animController);
 	else
 		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 20, 20, true, &animController);
 
@@ -515,7 +622,9 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 	tempBody->SetUserData((void*)entity);
 
 	if (m_type == EnemyTypes::BOSS)
-		tempPhsBody = PhysicsBody(tempBody, 120, 120, vec2(0, -10), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy);
+		tempPhsBody = PhysicsBody(tempBody, 80, 120, vec2(0, -10), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy ^ CollisionIDs::Player);
+	else if (m_type == EnemyTypes::MINIBOSS)
+		tempPhsBody = PhysicsBody(tempBody, 36, 40, vec2(0, 0), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy ^ CollisionIDs::Player);
 	else
 		tempPhsBody = PhysicsBody(tempBody, 18.f, 20.f, vec2(0, 0), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy ^ CollisionIDs::Player);
 
@@ -524,10 +633,16 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 	unsigned int bitHolder = EntityIdentifier::AnimationBit() | EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit() | EntityIdentifier::PhysicsBit() | EntityIdentifier::EnemyBit();
 	if (m_type == EnemyTypes::BOSS)
 		ECS::SetUpIdentifier(entity, bitHolder, "boss");
+	else if (m_type == EnemyTypes::MINIBOSS)
+		ECS::SetUpIdentifier(entity, bitHolder, "mini boss");
 	else
 		ECS::SetUpIdentifier(entity, bitHolder, "enemy");
 
 	enemies.push_back(enemyList{ entity });
+
+	if (m_type == EnemyTypes::BOSS || m_type == EnemyTypes::MINIBOSS)
+		enemies[enemies.size() - 1].enabled = false;
+
 	return entity;
 }
 
@@ -537,6 +652,9 @@ void Enemies::UpdateEnemies(entt::registry* m_reg) {
 
 	for (int i = 0; i < enemies.size(); i++) {
 		enemyList& curList = enemies[i];
+		if (!curList.enabled)
+			continue;
+
 		curList.wasActive = curList.isActive;
 		curList.isActive = false;
 
@@ -559,7 +677,7 @@ void Enemies::UpdateEnemies(entt::registry* m_reg) {
 	}
 }
 
-b2Vec2 Enemies::projectileMotion(vec3 initial, vec3 target, int gravity, int velo)
+b2Vec2 Enemies::projectileMotion(b2Vec2 initial, b2Vec2 target, int gravity, int velo)
 {
 	int distance = abs(initial.x - target.x);
 	int height = target.y - initial.y;
@@ -569,7 +687,7 @@ b2Vec2 Enemies::projectileMotion(vec3 initial, vec3 target, int gravity, int vel
 		float test = -gravity * distance / float(velo * velo);
 
 		if (test < -1 || test > 1)
-			return b2Vec2(0, 0);
+			return b2Vec2_zero;
 
 		angle = asinf(test) / 2;
 	}
@@ -587,7 +705,7 @@ b2Vec2 Enemies::projectileMotion(vec3 initial, vec3 target, int gravity, int vel
 			);
 
 		if (test < -1 || test > 1)
-			return b2Vec2(0, 0);
+			return b2Vec2_zero;
 
 		angle = ( acosf(test) + atanf(distance / -height) ) / 2;		//	( cos^-1(test) + tan^-1(x/-h) ) / 2
 		if (angle < 0)
@@ -603,5 +721,14 @@ b2Vec2 Enemies::projectileMotion(vec3 initial, vec3 target, int gravity, int vel
 	}
 	else {
 		return b2Vec2( -velo * cosf(angle), velo * sinf(angle));
+	}
+}
+
+void Enemies::SetEnemyActive(unsigned int entity) {
+	for (enemyList& curList : enemies) {
+		if (entity == curList.enemyID) {
+			curList.enabled = true;
+			break;
+		}
 	}
 }

@@ -15,7 +15,10 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 
 	std::string filename = "Bullet.png";
 	if (shooter == CollisionIDs::Enemy) {
-		filename = "Enemies/shootShot.png";
+		if (vel.y == 0)
+			filename = "Enemies/shootShot.png";
+		else
+			filename = "Enemies/lobShot.png";
 	}
 
 	auto& animController = ECS::GetComponent<AnimationController>(entity);
@@ -41,8 +44,15 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 		}
 	}
 	else {
-		anim.AddFrame(vec2(0, 50), vec2(100, 0));
-		anim.AddFrame(vec2(100, 50), vec2(200, 0));
+		if (vel.y == 0) {
+			anim.AddFrame(vec2(0, 50), vec2(100, 0));
+			anim.AddFrame(vec2(100, 50), vec2(200, 0));
+								}
+		else {
+			anim.AddFrame(vec2(0, 50), vec2(50, 0));
+			anim.AddFrame(vec2(50, 50), vec2(100, 0));
+			anim.AddFrame(vec2(100, 50), vec2(150, 0));
+		}
 		animController.SetActiveAnim(0);
 	}
 
@@ -50,10 +60,13 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 2.f, bulletRadius * 2.f, true, &animController);
 	}
 	else {
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 4.f, bulletRadius * 2.f, true, &animController);
+		if (vel.y == 0)
+			ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 4.f, bulletRadius * 2.f, true, &animController);
+		else
+			ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 2.f, bulletRadius * 2.f, true, &animController);
 	}
 
-	ECS::GetComponent<Transform>(entity).SetPosition(vec3(pos.x, pos.y, 29.f));
+	ECS::GetComponent<Transform>(entity).SetPosition(vec3(pos.x, pos.y, 28.5f));
 
 	auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
@@ -65,7 +78,7 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 	tempDef.linearVelocity = vel;
 
 	tempBody = m_physicsWorld->CreateBody(&tempDef);
-	tempBody->SetGravityScale(0);
+	tempBody->SetGravityScale( (shooter == CollisionIDs::Enemy && vel.y != 0) ? 1 : 0 );
 	tempBody->SetFixedRotation(true);
 	tempBody->SetUserData((void*)entity);
 

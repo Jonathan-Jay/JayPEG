@@ -3,7 +3,7 @@
 std::vector<unsigned int> Missiles::missiles = {};
 int Missiles::maxMissiles = 2;
 int Missiles::explosionRadius = 25;
-int Missiles::damage = 10;
+int Missiles::damage = 5;
 float Missiles::screenShake = 15;
 
 void Missiles::CreateMissile(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float missileRadius)
@@ -53,7 +53,7 @@ void Missiles::CreateMissile(entt::registry* m_sceneReg, b2World* m_physicsWorld
 
 	ECS::GetComponent<Sprite>(entity).LoadSprite(filename, missileRadius * 2.f, missileRadius * 2.f, true, &animController);
 
-	ECS::GetComponent<Transform>(entity).SetPosition(vec3(pos.x, pos.y, 29.f));
+	ECS::GetComponent<Transform>(entity).SetPosition(vec3(pos.x, pos.y, 28.5f));
 
 	auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
