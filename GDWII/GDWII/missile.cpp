@@ -206,6 +206,7 @@ void Missiles::updateAllMissiles(entt::registry* m_register)
 						break;
 					case CollisionIDs::Enemy:
 						entity = (unsigned int)bod->GetUserData();
+						m_register->get<Enemy>(entity).TakeDamage(damage, b2Vec2_zero);
 						break;
 					case CollisionIDs::Bombable:
 					case CollisionIDs::Breakable:

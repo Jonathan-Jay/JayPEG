@@ -12,8 +12,8 @@ public:
 	//subtract 12 from width and 30 from height for filesize, leave filename blank if no texture
 	static unsigned int CreateWall(b2World* m_physicsWorld, vec3 pos, float width, float height, std::string filename = "");
 
-	static void setDamage(int newDamage);
-	static int getDamage();
+	static void setDamage(size_t iterator, int newDamage);
+	static int getDamage(size_t iterator);
 
 	//update all existing bullets
 	static void updateAllBullets(entt::registry* m_register);
@@ -23,7 +23,7 @@ public:
 private:
 	static std::vector<unsigned int> bullets;
 	static int maxBullets;
-	static int damage;
+	static std::vector<int> damage;
 };
 
 #endif // !__BULLET__

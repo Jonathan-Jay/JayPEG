@@ -10,6 +10,11 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 	if (type == EnemyTypes::BOSS)
 		return;
 
+	if (health <= 0) {
+		enemyID.toDelete = true;
+		return;
+	}
+
 	b2Body* phyBod = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody();
 	vec2 playerPos{ m_reg->get<Transform>(EntityIdentifier::MainPlayer()).GetPosition() };
 	vec2 enemyPos{ m_reg->get<Transform>(enemyID.enemyID).GetPosition() };
@@ -318,6 +323,11 @@ void Enemy::Sleep(entt::registry* m_reg, enemyList& enemyID) {
 	canSeePlayer = false;
 }
 
+void Enemy::TakeDamage(int damage, b2Vec2 _knockback) {
+	health -= damage;
+	knockback = _knockback;
+}
+
 void Enemy::findPlayer(entt::registry* m_reg, enemyList& enemyID) {	
 	refreshSightTime = 0;
 
@@ -471,9 +481,9 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 	tempBody->SetUserData((void*)entity);
 
 	if (m_type == EnemyTypes::BOSS)
-		tempPhsBody = PhysicsBody(tempBody, 40.f, 40.f, vec2(0, 0), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy);
+		tempPhsBody = PhysicsBody(tempBody, 40.f, 40.f, vec2(0, 0), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy ^ CollisionIDs::Player);
 	else
-		tempPhsBody = PhysicsBody(tempBody, 18.f, 20.f, vec2(0, 0), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy);
+		tempPhsBody = PhysicsBody(tempBody, 18.f, 20.f, vec2(0, 0), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy ^ CollisionIDs::Player);
 
 	tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
 
@@ -488,7 +498,9 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 void Enemies::UpdateEnemies(entt::registry* m_reg) {
 	vec2 playerPos{ m_reg->get<Transform>(EntityIdentifier::MainPlayer()).GetPosition() };
 	vec2 enemyPos;
-	for (enemyList& curList : enemies) {
+
+	for (int i = 0; i < enemies.size(); i++) {
+		enemyList& curList = enemies[i];
 		curList.wasActive = curList.isActive;
 		curList.isActive = false;
 
@@ -502,6 +514,12 @@ void Enemies::UpdateEnemies(entt::registry* m_reg) {
 			m_reg->get<Enemy>(curList.enemyID).Awake(m_reg, curList);
 		else if (!curList.isActive && curList.wasActive)
 			m_reg->get<Enemy>(curList.enemyID).Sleep(m_reg, curList);
+
+		if (curList.toDelete) {
+			ECS::DestroyEntity(curList.enemyID);
+			enemies.erase(enemies.begin() + i);
+			i--;
+		}
 	}
 }
 

@@ -4,6 +4,7 @@
 #include "bullet.h"
 #include "JSON.h"
 #include "PhysicsSystem.h"
+#include <algorithm>
 #include <entt/entity/registry.hpp>
 
 enum class EnemyTypes {
@@ -24,6 +25,7 @@ struct enemyList {
 	unsigned int enemyID{ 0 };
 	bool isActive{ false };
 	bool wasActive{ false };
+	bool toDelete{ false };
 };
 
 class Enemy {
@@ -50,6 +52,7 @@ public:
 	vec2 targetPos2;
 	b2Vec2 vel;
 	b2Vec2 prevVel;
+	b2Vec2 knockback;
 	b2Vec3 jumpInfo;	//times jumped, x pos at jump, y pos at jump
 	b2Fixture* previousFixture{ nullptr };
 	int32 previousChildEndex{ 0 };
@@ -58,6 +61,7 @@ public:
 	void Update(entt::registry* m_reg, enemyList& enemyID);
 	void Awake(entt::registry* m_reg, enemyList& enemyID);
 	void Sleep(entt::registry* m_reg, enemyList& enemyID);
+	void TakeDamage(int damage, b2Vec2 knockback);
 
 private:
 	void findPlayer(entt::registry* m_reg, enemyList& enemyID);

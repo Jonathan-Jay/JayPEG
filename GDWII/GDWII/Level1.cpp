@@ -174,7 +174,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 		tempBody = m_physicsWorld->CreateBody(&tempDef);
 		tempBody->SetFixedRotation(true);
 
-		tempPhsBody = PhysicsBody(tempBody, playerWidth, playerHeight, vec2(0, 0), true, CollisionIDs::Player, 0x999999);
+		tempPhsBody = PhysicsBody(tempBody, playerWidth, playerHeight, vec2(0, 0), true, CollisionIDs::Player, CollisionIDs::Max);
 
 		tempPhsBody.GetBody()->GetFixtureList()->SetFriction(0);
 		tempPhsBody.GetBody()->SetUserData((void*)entity);
@@ -347,7 +347,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Enemies::reset(m_physicsWorld);
 	Missiles::reset();
 	Bullets::reset();
-	Bullets::setDamage(bulletDamage);
+	Bullets::setDamage(0, bulletDamage);
 	Missiles::setDamage(missileDamage);
 
 	currentWorldPos = 0;
