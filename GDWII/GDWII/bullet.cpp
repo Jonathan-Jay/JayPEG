@@ -1,8 +1,9 @@
 #include "bullet.h"
 
 std::vector<unsigned int> Bullets::bullets = {};
-int Bullets::maxBullets = 15;
-int Bullets::damage = 5;
+int Bullets::maxBullets = 25;
+std::vector<int> Bullets::damage = { 2, 3, 4 };
+//playerDamage, straightShotDamage, lobShotDamage
 
 void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float bulletRadius, uint16 shooter) {
 	auto entity = ECS::CreateEntity();
@@ -14,7 +15,10 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 
 	std::string filename = "Bullet.png";
 	if (shooter == CollisionIDs::Enemy) {
-		filename = "Enemies/shootShot.png";
+		if (vel.y == 0)
+			filename = "Enemies/shootShot.png";
+		else
+			filename = "Enemies/lobShot.png";
 	}
 
 	auto& animController = ECS::GetComponent<AnimationController>(entity);
@@ -40,8 +44,15 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 		}
 	}
 	else {
-		anim.AddFrame(vec2(0, 50), vec2(100, 0));
-		anim.AddFrame(vec2(100, 50), vec2(200, 0));
+		if (vel.y == 0) {
+			anim.AddFrame(vec2(0, 50), vec2(100, 0));
+			anim.AddFrame(vec2(100, 50), vec2(200, 0));
+								}
+		else {
+			anim.AddFrame(vec2(0, 50), vec2(50, 0));
+			anim.AddFrame(vec2(50, 50), vec2(100, 0));
+			anim.AddFrame(vec2(100, 50), vec2(150, 0));
+		}
 		animController.SetActiveAnim(0);
 	}
 
@@ -49,10 +60,13 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 2.f, bulletRadius * 2.f, true, &animController);
 	}
 	else {
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 4.f, bulletRadius * 2.f, true, &animController);
+		if (vel.y == 0)
+			ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 4.f, bulletRadius * 2.f, true, &animController);
+		else
+			ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 2.f, bulletRadius * 2.f, true, &animController);
 	}
 
-	ECS::GetComponent<Transform>(entity).SetPosition(vec3(pos.x, pos.y, 29.f));
+	ECS::GetComponent<Transform>(entity).SetPosition(vec3(pos.x, pos.y, 28.5f));
 
 	auto& tempPhsBody = ECS::GetComponent<PhysicsBody>(entity);
 
@@ -64,7 +78,7 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 	tempDef.linearVelocity = vel;
 
 	tempBody = m_physicsWorld->CreateBody(&tempDef);
-	tempBody->SetGravityScale(0);
+	tempBody->SetGravityScale( (shooter == CollisionIDs::Enemy && vel.y != 0) ? 1 : 0 );
 	tempBody->SetFixedRotation(true);
 	tempBody->SetUserData((void*)entity);
 
@@ -125,16 +139,16 @@ unsigned int Bullets::CreateWall(b2World* m_physicsWorld, vec3 pos, float width,
 	return entity;
 }
 
-void Bullets::setDamage(int newDamage)
+void Bullets::setDamage(size_t iterator, int newDamage)
 {
 	if (newDamage >= 0) {
-		damage = newDamage;
+		damage[iterator] = newDamage;
 	}
 }
 
-int Bullets::getDamage()
+int Bullets::getDamage(size_t iterator)
 {
-	return damage;
+	return damage[iterator];
 }
 
 void Bullets::updateAllBullets(entt::registry* m_register)
@@ -143,10 +157,9 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 	float playerPosX = m_register->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
 	for (int x(0); x < bullets.size();) {
 		//returning the animation (since it appears behind the hand)
-		if (m_register->get<AnimationController>(bullets[x]).GetAnimation(
-			m_register->get<AnimationController>(bullets[x]).GetActiveAnim()
-		).GetAnimationDone()) {
-			m_register->get<AnimationController>(bullets[x]).SetActiveAnim(0);
+		AnimationController& animCon = m_register->get<AnimationController>(bullets[x]);
+		if (animCon.GetAnimation(animCon.GetActiveAnim()).GetAnimationDone()) {
+			animCon.SetActiveAnim(0);
 		}		//player range check
 		else if (abs(m_register->get<Transform>(bullets[x]).GetPositionX() - playerPosX) > 500.f) {
 			ECS::DestroyEntity(bullets[x]);
@@ -154,14 +167,31 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 			continue;
 		}
 
+		b2Body* bulBod = m_register->get<PhysicsBody>(bullets[x]).GetBody();
 		bool contacted{ false };
 		//contact check (touching any physics body)
-		for (b2ContactEdge* contact = m_register->get<PhysicsBody>(bullets[x]).GetBody()->GetContactList(); contact; contact = contact->next) {
-			//testing if destructibe wall
-			switch (contact->contact->GetFixtureA()->GetFilterData().categoryBits) {
-			case CollisionIDs::Breakable:
-				Sound2D("nep.wav", "sounds").play();
-				ECS::DestroyEntity((unsigned int)contact->contact->GetFixtureA()->GetBody()->GetUserData());
+		for (b2ContactEdge* contact = bulBod->GetContactList(); contact; contact = contact->next) {
+			//check for what the bullet should detect (depends on whether enemy or player shot bullet)
+			switch (bulBod->GetFixtureList()->GetFilterData().maskBits ^ CollisionIDs::Bullet ^ CollisionIDs::Max) {
+			case CollisionIDs::Player:
+				switch (contact->contact->GetFixtureA()->GetFilterData().categoryBits) {
+				case CollisionIDs::Breakable:
+					Sound2D("nep.wav", "sounds").play();
+					ECS::DestroyEntity((unsigned int)contact->contact->GetFixtureA()->GetBody()->GetUserData());
+					break;
+				case CollisionIDs::Enemy:
+					m_register->get<Enemy>((unsigned int)contact->contact->GetFixtureA()->GetBody()->GetUserData()).TakeDamage(damage[0], b2Vec2_zero);
+					break;
+				default:
+					break;
+				}
+				
+				break;
+			case CollisionIDs::Enemy:
+				if (contact->contact->GetFixtureA()->GetFilterData().categoryBits == CollisionIDs::Player) {
+					m_register->get<Player>(EntityIdentifier::MainPlayer()).takeDamage(damage[1]);
+				}
+
 				break;
 			default:
 				break;

@@ -28,8 +28,8 @@ public:
 	2, entity, switches when an entity disappears (otherData)
 	3, AABB, opens when player is in AABB, closes when not
 	*/
-	void isNormal() { m_list[m_index].type = 0; }
-	void isBouncy() { m_list[m_index].type = 1; }
+	void isNormal() { m_list[m_index].otherData.resize(0); m_list[m_index].type = 0; }
+	void isBouncy() { m_list[m_index].otherData.resize(0); m_list[m_index].type = 1; }
 	//send entity it needs to check. don't do a second time
 	void isEntityTrigger(int entity) {
 		m_list[m_index].type = 2;
@@ -46,6 +46,7 @@ public:
 
 	void SetOpened(bool isOpen) { m_list[m_index].opened = isOpen; }
 	void changeState() { m_list[m_index].opened = !m_list[m_index].opened; }
+	void SetSpeed(float speed) { m_list[m_index].speed = speed; }
 
 	unsigned int getEntity() { return m_list[m_index].entity; }
 	bool getState() { return m_list[m_index].opened; }

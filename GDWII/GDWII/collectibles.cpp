@@ -146,7 +146,7 @@ int Collectibles::testAllCollectibles(entt::registry* reg, int halfOfPlayerWidth
 					pickUp = 1;
 					break;
 				case CollectiblesType::BulletStrengthUp:
-					Bullets::setDamage(Bullets::getDamage() + 1);
+					Bullets::setDamage(0, Bullets::getDamage(0) + 1);
 					playerData.getUpgrade(true);
 					pickUp = 2;
 					break;

@@ -70,6 +70,8 @@ public:
 	//gets percentage of where the animation is
 	float GetPerctentAnimation();
 
+	size_t GetFrameIndex() { return m_currentFrame; }
+
 	//Setters
 	//Set if the animation repeats
 	void SetRepeating(bool repeating);
