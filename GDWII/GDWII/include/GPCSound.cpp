@@ -154,6 +154,12 @@ void SoundManager::setGroupVolume(unsigned index, float percent)
 	checkFmodErrors(_result, "setting volume");
 }
 
+void SoundManager::setGroupPitch(unsigned index, float percent)
+{
+	_result = _channelGroups[index]->setPitch(percent);
+	checkFmodErrors(_result, "setting volume");
+}
+
 void SoundManager::limitGroups(unsigned limit)
 {
 	for (int x(0); x < _channelGroups.size(); x++) {
@@ -232,6 +238,11 @@ void Sound2D::setVolume(float percent)
 void Sound2D::setGroupVolume(float percent)
 {
 	SoundManager::setGroupVolume(_group, percent);
+}
+
+void Sound2D::setGroupPitch(float percent)
+{
+	SoundManager::setGroupPitch(_group, percent);
 }
 
 bool Sound2D::isPlaying()

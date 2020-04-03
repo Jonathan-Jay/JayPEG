@@ -11,10 +11,12 @@ Level1::Level1(std::string name) : Scene(name)
 	m_soundEffects.push_back({ "Step/3StepNoise.mp3", "walk" });	// 3
 	m_soundEffects.push_back({ "Step/4StepNoise.mp3", "walk" });	// 4
 	m_soundEffects.push_back({ "Step/5StepNoise.mp3", "walk" });	// 5
-	m_soundEffects.push_back({ "nep.wav", "sounds" });				// 6		gun
-	m_soundEffects.push_back({ "snake.mp3", "sounds" });			// 7		missile
+	m_soundEffects.push_back({ "snake.mp3", "sounds" });			// 6 win sound
+	m_soundEffects.push_back({ "nep.wav", "sounds" });				// 7 death sound
 
 	Sound2D("CollectionItemNoise.mp3", "collectibles").setGroupVolume(2);
+	Sound2D("Step/1StepNoise.mp3", "bossLanding").setGroupVolume(1.5f);
+	Sound2D("Step/1StepNoise.mp3", "bossLanding").setGroupPitch(0.5f);
 }
 
 void Level1::InitScene(float windowWidth, float windowHeight)
@@ -27,8 +29,11 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	float aspectRatio = windowWidth / windowHeight;
 
 #pragma region entities
-	vec3 playerPos = { -1247, -200, 30.f };
 	//vec3 playerPos = { -886, -925, 30.f };
+	vec3 playerPos = { -1247, -200, 30.f };
+	currentWorldPos = 0;
+	changeWorldPos = false;
+	onGround = true;
 
 	//main camera
 	{
@@ -41,12 +46,10 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 		ECS::GetComponent<HorizontalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<HorizontalScroll>(entity).SetOffset(15.f);
-		//ECS::GetComponent<HorizontalScroll>(entity).SetLimits(-1466, 790);
 		ECS::GetComponent<HorizontalScroll>(entity).SetLimits(-1466, 1796);
 
 		ECS::GetComponent<VerticalScroll>(entity).SetCam(&ECS::GetComponent<Camera>(entity));
 		ECS::GetComponent<VerticalScroll>(entity).SetOffset(15.f);
-		//ECS::GetComponent<VerticalScroll>(entity).SetLimits(-575, 1279);
 		ECS::GetComponent<VerticalScroll>(entity).SetLimits(-1530, 1410);
 
 		vec4 temp = ECS::GetComponent<Camera>(entity).GetOrthoSize();
@@ -357,10 +360,6 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Bullets::setDamage(0, bulletDamage);
 	Missiles::setDamage(missileDamage);
 
-	currentWorldPos = 2;
-	changeWorldPos = false;
-	onGround = true;
-
 #pragma region object summons
 	/*
 	//debugging stuff
@@ -377,18 +376,6 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	platforms[1].isBouncy();
 	platforms[2].isBouncy();
 
-	//doors init, two open when an entity dies, the other when the player enters the boss room
-	doors[0].Init(m_physicsWorld, vec3(1473, 181, 26), vec3(1473, 281, 26), 20, 134, "Objects/miniBossDoor.png", 50);	//missile
-	doors[1].Init(m_physicsWorld, vec3(-986, -702, 26), vec3(-986, -865, 26), 26, 240, "Objects/bossDoor.png", 275);	//boss room
-	doors[2].Init(m_physicsWorld, vec3(-1865, -1255, 26), vec3(-1865, -1135, 26), 26, 151, "Objects/winDoor.png", 50);	//win
-	doors[0].isEntityTrigger(	//opens when mini-boss is killed
-		Collectibles::CreateCollectible(vec3(1473 - 50, 181, 26), 25, 25, CollectiblesType::BulletStrengthUp)
-	);
-	doors[1].isAABB(vec2(-2140, -1480), vec2(-986, -750));
-	doors[2].isEntityTrigger(	//opens when boss is killed
-		Enemies::CreateEnemy(EnemyTypes::BOSS, -1688, -1240)
-	);
-	/*
 	//hidden stuff
 	Missiles::CreateWall(m_physicsWorld, vec3(-1020, -388.5, 27), 147, 264, "Objects/RegenUpHidden.png");
 	Bullets::CreateWall(m_physicsWorld, vec3(-1189.5, 1218, 27), 335, 224, "Objects/HPUpHidden.png");
@@ -419,10 +406,45 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Collectibles::CreateCollectible(vec3(-1330, 139, 26), 100, 25, CollectiblesType::RegenStation);
 	Collectibles::CreateCollectible(vec3(1696, 1106, 26), 100, 25, CollectiblesType::RegenStation);
 	Collectibles::CreateCollectible(vec3(-77, -934, 26), 100, 25, CollectiblesType::RegenStation);
-	*/
 
-	//Enemies::SetEnemyActive(Enemies::CreateEnemy(EnemyTypes::MINIBOSS, 600, -420));
-	Enemies::CreateEnemy(EnemyTypes::LOB, 600, -420);
+	//Enemies
+	Enemies::CreateEnemy(EnemyTypes::WALKER, -114, -415);
+	Enemies::CreateEnemy(EnemyTypes::WALKER, -941, 173);
+	Enemies::CreateEnemy(EnemyTypes::WALKER, -342, 1000);
+	Enemies::CreateEnemy(EnemyTypes::WALKER, 92, 1000);
+	
+	Enemies::CreateEnemy(EnemyTypes::SHOOTER, -426, 170);
+	Enemies::CreateEnemy(EnemyTypes::SHOOTER, -1138, 170);
+	Enemies::CreateEnemy(EnemyTypes::SHOOTER, -676, 1000);
+	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 165, 1000);
+	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 1070, 1000);
+	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 1462, -260);
+	Enemies::CreateEnemy(EnemyTypes::SHOOTER, -132, -1240);
+	Enemies::CreateEnemy(EnemyTypes::SHOOTER, -903, -935);
+	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 880, -1420);
+	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 650, -1420);
+
+	Enemies::CreateEnemy(EnemyTypes::LOB, -635, -1245);
+	Enemies::CreateEnemy(EnemyTypes::LOB, -505, -1245);
+	Enemies::CreateEnemy(EnemyTypes::LOB, -6345, 1000);
+	Enemies::CreateEnemy(EnemyTypes::LOB, 438, 1000);
+	Enemies::CreateEnemy(EnemyTypes::LOB, 1101, 1000);
+	Enemies::CreateEnemy(EnemyTypes::LOB, 460, -1420);
+	Enemies::CreateEnemy(EnemyTypes::LOB, 950, -1420);
+
+	enemiesThatMatter[0] = Enemies::CreateEnemy(EnemyTypes::MINIBOSS, 934, 190);
+	enemiesThatMatter[1] = Enemies::CreateEnemy(EnemyTypes::MINIBOSS, 545, -1373);
+	enemiesThatMatter[2] = Enemies::CreateEnemy(EnemyTypes::BOSS, -1550, -1222);
+
+	//doors init, two open when an entity dies, the other when the player enters the boss room
+	doors[0].Init(m_physicsWorld, vec3(1473, 181, 26), vec3(1473, 281, 26), 20, 134, "Objects/miniBossDoor.png", 50);	//missile
+	doors[1].Init(m_physicsWorld, vec3(-986, -702, 26), vec3(-986, -865, 26), 26, 240, "Objects/bossDoor.png", 275);	//boss room
+	doors[2].Init(m_physicsWorld, vec3(-1865, -1255, 26), vec3(-1865, -1135, 26), 26, 151, "Objects/winDoor.png", 50);	//win
+	doors[0].isEntityTrigger(	//opens when mini-boss is killed
+		enemiesThatMatter[0]);
+	doors[1].isAABB(vec2(-2140, -1480), vec2(-986, -750));
+	doors[2].isEntityTrigger(	//opens when boss is killed
+		enemiesThatMatter[2]);
 
 #pragma endregion object summons
 	
@@ -685,17 +707,17 @@ void Level1::KeyboardDown()
 		}
 	}
 	
+	/*
 	//gravity cancelling tool
 	if (Input::GetKeyDown(Key::Q)) {
 		b2Body* tempBod = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody();
 		tempBod->SetGravityScale(!tempBod->GetGravityScale());
 		tempBod->SetLinearVelocity(b2Vec2(0, 0));
 	}
-	if (Input::GetKeyDown(Key::E)) {
-		m_sceneReg->get<Player>(EntityIdentifier::MainPlayer()).takeDamage(1);
+	if (Input::GetKey(Key::E)) {
+		m_sceneReg->get<Player>(EntityIdentifier::MainPlayer()).addCurrentHealth(1);
 	}
 
-	/*
 	//Debugging tool, lets you move entities from a list
 	if (Input::GetKeyDown(Key::E)) {
 		tempEntIndex++;
@@ -769,7 +791,7 @@ void Level1::KeyboardDown()
 
 void Level1::Update()
 {
-	//m_soundEffects[0].loop();	//music
+	m_soundEffects[0].loop();	//music
 	b2Vec2 velo = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
 
 	//update scene Data
@@ -817,10 +839,8 @@ void Level1::Update()
 		crouching = false;
 	}
 
-	//only shoot when both weapons are ready
 	if (gunActive) {
 		if (gunDelay == 0) {
-			m_soundEffects[6].play();
 			if (crouching) {
 				//remove tag to make force horizontal
 				facingUp = false;
@@ -861,11 +881,11 @@ void Level1::Update()
 		gunActive = false;
 	}
 
+	//only shoot when both weapons are ready
 	if (missileActive) {
 		//missiles only spawn when delay is 1 (ready to use) and you have enough NRG
 		if (gunDelay == 0.f && missileDelay == 0.f && m_sceneReg->get<Player>(EntityIdentifier::MainPlayer()).getMissile()) {
 			if (m_sceneReg->get<Player>(EntityIdentifier::MainPlayer()).subCurrentEnergy(missileCost)) {
-				m_soundEffects[7].play();
 				if (crouching) {
 					//remove tag to make force horizontal
 					facingUp = false;
@@ -942,6 +962,9 @@ void Level1::Update()
 			changeWorldPos = false;
 		}
 		if (AABBtest(vec2(0, -1530), vec2(1746, -1010))) {	//basement check
+			//mini-boss 2 activation
+			if (m_sceneReg->valid(enemiesThatMatter[1]))
+				Enemies::SetEnemyActive(enemiesThatMatter[1]);
 			currentWorldPos = 2;
 			changeWorldPos = true;
 		}
@@ -966,6 +989,11 @@ void Level1::Update()
 			changeWorldPos = true;
 		}
 
+		if (AABBtest(vec2(1000, 500), vec2(1470, 600))) {	//mini-boss 1 activation
+			if (m_sceneReg->valid(enemiesThatMatter[0]))
+				Enemies::SetEnemyActive(enemiesThatMatter[0]);
+		}
+
 		if (!zoomRange(240, vec2(795, 95), vec2(1470, 530)) &&			//mini-boss room
 			!zoomRange(175, vec2(1470, 95), vec2(2031, 345)) &&			//missile pick-up room
 			!zoomRange(175, vec2(-1440, 90), vec2(-840, 960))			//staircase up
@@ -980,6 +1008,9 @@ void Level1::Update()
 			changeWorldPos = false;
 		}
 		if (AABBtest(vec2(-1466, -1530), vec2(-1000, -1000))) {	//boss room check
+			if (m_sceneReg->valid(enemiesThatMatter[2]))
+				Enemies::SetEnemyActive(enemiesThatMatter[2]);
+			Enemies::SetActivationLength(1000);
 			currentWorldPos = 3;
 			changeWorldPos = true;
 		}
@@ -997,14 +1028,12 @@ void Level1::Update()
 			changeWorldPos = false;
 		}
 
-		/*
-		if (AABBtest(vec3(), vec3()) {
-			win
+		if (AABBtest(vec2(-2050, -1350), vec2(-1950, -1250))) {
+			currentWorldPos = 4;
+			changeWorldPos = true;
 		}
-		*/
 
-		if (!zoomRange(250, vec2(-2100, -1485), vec2(65, -745)) &&		//boss room
-			!zoomRange(225, vec2(-745, -1500), vec2(1710, -1115))	//basement
+		if (!zoomRange(250, vec2(-2100, -1485), vec2(65, -745))			//boss room
 			) {
 			zoomRange(200, vec2(), vec2(), true);
 		}
@@ -1016,19 +1045,19 @@ void Level1::Update()
 			changeWorldPos = false;
 		}
 		
-		if (deathCounter > 0) {
-			deathCounter -= Timer::deltaTime;
-			if (deathCounter < 0) {
-				deathCounter = 0;
+		if (winCounter > 0) {
+			winCounter -= Timer::deltaTime;
+			if (winCounter < 0) {
+				winCounter = 0;
 				exiting = true;
 			}
 		}
 		else {
-			deathCounter = 2.5f;
-			doors[2].SetSpeed(250);
+			winCounter = 2.5f;
+			doors[2].SetSpeed(150);
 			doors[2].SetOpened(false);
-			m_soundEffects[7].play();
 			//play win sound
+			m_soundEffects[6].play();
 		}
 
 		if (!zoomRange(250, vec2(-2100, -1485), vec2(65, -745))			//boss room
@@ -1182,16 +1211,22 @@ void Level1::UpdateUI()
 					gameOver = true;
 				}
 			}
-			else
+			else {
 				deathCounter = 2.5f;
+				//play death sound
+				m_soundEffects[7].play();
+			}
 		}
 	}
-
-	if (!playerData.getMissile())
-		playerData.getMissile(true);
-
-	if (stunned = playerData.getStunned())
+	
+	if (stunned = playerData.getStunned()) {
 		canJump = false;
+			m_sceneReg->get<Sprite>(EntityIdentifier::MainPlayer()).SetTransparency(
+				deathCounter == 0 ? 0.75f : (deathCounter < 0.5f ? deathCounter + 0.5f : 1));
+	}
+	else {
+		m_sceneReg->get<Sprite>(EntityIdentifier::MainPlayer()).SetTransparency(1);
+	}
 
 	/*
 	//Debugging tools

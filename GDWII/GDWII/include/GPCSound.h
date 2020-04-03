@@ -59,6 +59,8 @@ public:
 	static void setVolume(unsigned index, float percent);
 	//sets channel group volume level
 	static void setGroupVolume(unsigned index, float percent);
+	//sets channel pitch volume level
+	static void setGroupPitch(unsigned index, float percent);
 	//limit how many sounds playing in a group
 	static void limitGroups(unsigned limit);
 
@@ -99,6 +101,7 @@ public:
 	void stopGroup();
 	void setVolume(float percent);
 	void setGroupVolume(float percent);
+	void setGroupPitch(float percent);
 
 	void setSoundHandle(unsigned soundHandle) { _sound = soundHandle; }
 	void setGroupHandle(unsigned groupHandle) { _group = groupHandle; }

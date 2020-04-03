@@ -61,17 +61,18 @@ private:
 	float recoilDelay = 0;
 	float counter = 0;
 	float deathCounter = 0;
+	float winCounter = 0;
 
 	//bullet variables
 	int bulletDamage = 2;
 	float bulletRadius = 5.f;
-	float gunCooldown = 0.25f;
+	float gunCooldown = 0.3f;
 
 	//missile variables
 	int missileCost = 5;
 	int missileDamage = 5;
 	float missileRadius = 5.f;
-	float missileCooldown = 1.0f;
+	float missileCooldown = 1.5f;
 
 	//general projectile variables
 	float projectileSpeed = 50.f;
@@ -93,6 +94,7 @@ private:
 	Door platforms[3] = {};
 	Door doors[3] = {};
 
+	unsigned int enemiesThatMatter[3] = {};
 	/*
 	//debbugging stuff
 	std::vector<unsigned int> tempEnt = {};

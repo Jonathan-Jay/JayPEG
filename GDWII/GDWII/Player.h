@@ -24,7 +24,7 @@ public:
 	void setStunned(float length);
 	bool getStunned();
 
-	void takeDamage(int amt);
+	bool takeDamage(int amt);
 
 	void setEnergyRegen(float energyRegen);
 	float getEnergyRegen();

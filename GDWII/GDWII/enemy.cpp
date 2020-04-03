@@ -8,6 +8,7 @@ b2World* Enemies::m_phyWorld = nullptr;
 
 void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 	if (health <= 0) {
+		Sound2D("snake.mp3", "sounds").play();
 		enemyID.toDelete = true;
 		return;
 	}
@@ -63,7 +64,7 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 					if (tempCalc == facingRight * 2 - 1 && rand() % 2 == 0)
 						jumpTestPoint.Set(tempCalc * 30, 0);
 					else
-						jumpTestPoint = Enemies::projectileMotion(enemyb2Pos, playerb2Pos, Enemies::GetPhysicsWorld()->GetGravity().y, 75);
+						jumpTestPoint = Enemies::projectileMotion(enemyb2Pos, playerb2Pos, Enemies::GetPhysicsWorld()->GetGravity().y, 100);
 
 					if (jumpTestPoint != b2Vec2_zero) {
 						Bullets::CreateBullet(m_reg, Enemies::GetPhysicsWorld(), enemyb2Pos, jumpTestPoint, 10, CollisionIDs::Enemy);
@@ -139,14 +140,16 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 		if (abs(tempCalc) < moveSpeed / 2) {
 			if (type == EnemyTypes::BOSS) {
 				if (rand() % 2 == 0) {
-					jumpTestPoint = Enemies::projectileMotion(enemyb2Pos, playerb2Pos, Enemies::GetPhysicsWorld()->GetGravity().y, 75);
+					jumpTestPoint = Enemies::projectileMotion(enemyb2Pos, playerb2Pos,
+						Enemies::GetPhysicsWorld()->GetGravity().y, jumpHeight);
 
 					if (jumpTestPoint != b2Vec2_zero) {
 						state = EnemyState::LargeJumping;
 						vel += jumpTestPoint;
 						idleTime = 0.5f;
+						tempCalc = 0;
 					}
-				} 
+				}
 				else {
 					state = EnemyState::Punching;
 					facingRight = targetPos2.x - enemyPos.x > 0;
@@ -157,11 +160,31 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 			else {
 				if ((type == EnemyTypes::SHOOTER || type == EnemyTypes::LOB) && targetPos != targetPos2) {
 					targetPos = targetPos2;
-				} else
+				}
+				else
 					state = EnemyState::Wander;
 			}
 
 			break;
+		}		//for boss catch-up
+		else if (type == EnemyTypes::BOSS) {
+			//check far, chance of happening is 120 * framerate (if 1/60, 2%) per frame
+			if (abs(tempCalc) > moveSpeed * 17 && rand() % int(120 * Timer::deltaTime) == 0) {
+				jumpTestPoint = Enemies::projectileMotion(enemyb2Pos, playerb2Pos,
+					Enemies::GetPhysicsWorld()->GetGravity().y, jumpHeight + moveSpeed);
+
+				if (jumpTestPoint != b2Vec2_zero) {
+					state = EnemyState::LargeJumping;
+					vel += jumpTestPoint;
+					idleTime = 0.5f;
+					tempCalc = 0;
+				}
+			}
+
+			int index = animCon.GetAnimation(animCon.GetActiveAnim()).GetFrameIndex();
+			if ((index >= 6 && index <= 9) || (index >= 17 && index <= 20)) {
+				tempCalc = 0;
+			}
 		}
 
 		if (type == EnemyTypes::SHOOTER && canSeePlayer && tempCalc / abs(tempCalc) != (targetPos2.x - enemyPos.x) / abs(targetPos2.x - enemyPos.x))
@@ -314,6 +337,8 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 		idleTime -= Timer::deltaTime;
 		if (idleTime <= 0 && grounded) {
 			state = EnemyState::Follow;
+			Sound2D("Step/" + std::to_string(rand() % 5 + 1) + "StepNoise.mp3", "bossLanding").play();
+
 			m_reg->get<HorizontalScroll>(EntityIdentifier::MainCamera()).DoScreenShake(0.5f, 15, &m_reg->get<Transform>(EntityIdentifier::MainPlayer()).m_localPosition.x);
 			m_reg->get<VerticalScroll>(EntityIdentifier::MainCamera()).DoScreenShake(0.5f, 15, &m_reg->get<Transform>(EntityIdentifier::MainPlayer()).m_localPosition.y);
 		}
@@ -360,8 +385,13 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 	//player AABB
 	{
 		test1 = m_reg->get<PhysicsBody>(enemyID.enemyID).GetBody()->GetFixtureList()->GetAABB(0);
-		if (test1.lowerBound.x < test2.upperBound.x && test1.upperBound.x > test2.lowerBound.x&& test1.lowerBound.y < test2.upperBound.y && test1.upperBound.y > test2.lowerBound.y) {
-			m_reg->get<Player>(EntityIdentifier::MainPlayer()).takeDamage(attackDamage);
+		if (test1.lowerBound.x < test2.upperBound.x && test1.upperBound.x > test2.lowerBound.x&&
+			test1.lowerBound.y < test2.upperBound.y && test1.upperBound.y > test2.lowerBound.y) {
+			if (m_reg->get<Player>(EntityIdentifier::MainPlayer()).takeDamage(attackDamage)) {
+				//if successful, knockback
+				jumpTestPoint.Set((test1.GetCenter().x < test2.GetCenter().x ? 25 : -25), 25);
+				m_reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(jumpTestPoint);
+			}
 		}
 	}
 
@@ -415,8 +445,10 @@ void Enemy::Sleep(entt::registry* m_reg, enemyList& enemyID) {
 }
 
 void Enemy::TakeDamage(int damage, b2Vec2 _knockback) {
+	Sound2D("nep.wav", "sounds");
 	health -= damage;
 	knockback = _knockback;
+	canSeePlayer = true;
 }
 
 void Enemy::findPlayer(entt::registry* m_reg, enemyList& enemyID) {	
@@ -492,24 +524,24 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 	switch (m_type) {
 	case EnemyTypes::WALKER:
 		filename += "walk.png";
-		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 10, 10, 50, 3);
+		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 10, 12, 60, 3);
 		break;
 	case EnemyTypes::SHOOTER:
 		filename += "shoot.png";
-		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 8, 10, 50, 2);
+		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 8, 10, 60, 2);
 		break;
 	case EnemyTypes::LOB:
 		filename += "lob.png";
-		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 7, 8, 50, 3);
+		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 7, 8, 60, 3);
 		break;
 	case EnemyTypes::MINIBOSS:
 		filename += "mini-boss.png";
-		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 30, 10, 50, 2);
+		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 30, 10, 60, 2);
 		ECS::GetComponent<Enemy>(entity).state = EnemyState::Follow;
 		break;
 	case EnemyTypes::BOSS:
 		filename += "boss.png";
-		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 50, 13, 75, 3);
+		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 100, 13, 100, 3);
 		ECS::GetComponent<Enemy>(entity).state = EnemyState::Follow;
 		break;
 	default:
@@ -531,7 +563,7 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 			for (int x(0); x < 22; x++)
 				anim.AddFrame(vec2(bossFileSize.x / 22 * (x + 1), bossFileSize.y / 3),
 								vec2(bossFileSize.x / 22 * x, 0));
-			anim.SetSecPerFrame(0.15f);
+			anim.SetSecPerFrame(0.09f);
 		}
 		else {
 			for (int x(0); x < 5; x++)
@@ -549,7 +581,7 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 			for (int x(0); x < 22; x++)
 				anim.AddFrame(vec2(bossFileSize.x / 22 * x, bossFileSize.y / 3),
 					vec2(bossFileSize.x / 22 * (x + 1), 0));
-			anim.SetSecPerFrame(0.15f);
+			anim.SetSecPerFrame(0.09f);
 		} else {
 			for (int x(0); x < 5; x++)
 				anim.AddFrame(vec2(150 * (x + 1), 150), vec2(150 * x, 0));
@@ -559,7 +591,7 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 		anim.SetRepeating(true);
 	}
 
-	animController.SetActiveAnim(0);
+	animController.SetActiveAnim(1);
 
 	if (m_type == EnemyTypes::BOSS) {
 		animController.AddAnimation(Animation());
@@ -587,7 +619,7 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 			for (int x(0); x < 10; x++)
 				anim.AddFrame(vec2(bossFileSize.x / 22 * (x + 1), bossFileSize.y),
 					vec2(bossFileSize.x / 22 * x, bossFileSize.y / 3 * 2));
-			anim.SetSecPerFrame(0.15f);
+			anim.SetSecPerFrame(0.11f);
 		}
 
 		{		//jump right
@@ -595,14 +627,15 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 			for (int x(0); x < 10; x++)
 				anim.AddFrame(vec2(bossFileSize.x / 22 * x, bossFileSize.y),
 					vec2(bossFileSize.x / 22 * (x + 1), bossFileSize.y / 3 * 2));
-			anim.SetSecPerFrame(0.15f);
+			anim.SetSecPerFrame(0.11f);
 		}
+		animController.SetActiveAnim(5);
 	}
 
 	if (m_type == EnemyTypes::BOSS)
 		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 363, 202, true, &animController);
 	else if (m_type == EnemyTypes::MINIBOSS)
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 40, 40, true, &animController);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 60, 60, true, &animController);
 	else
 		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 20, 20, true, &animController);
 
@@ -624,7 +657,7 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 	if (m_type == EnemyTypes::BOSS)
 		tempPhsBody = PhysicsBody(tempBody, 80, 120, vec2(0, -10), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy ^ CollisionIDs::Player);
 	else if (m_type == EnemyTypes::MINIBOSS)
-		tempPhsBody = PhysicsBody(tempBody, 36, 40, vec2(0, 0), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy ^ CollisionIDs::Player);
+		tempPhsBody = PhysicsBody(tempBody, 54, 60, vec2(0, 0), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy ^ CollisionIDs::Player);
 	else
 		tempPhsBody = PhysicsBody(tempBody, 18.f, 20.f, vec2(0, 0), true, CollisionIDs::Enemy, CollisionIDs::Max ^ CollisionIDs::Enemy ^ CollisionIDs::Player);
 

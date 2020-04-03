@@ -13,12 +13,17 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 	ECS::AttachComponent<PhysicsBody>(entity);
 	ECS::AttachComponent<AnimationController>(entity);
 
-	std::string filename = "Bullet.png";
-	if (shooter == CollisionIDs::Enemy) {
+	std::string filename = "Enemies/";
+	if (shooter == CollisionIDs::Player) {
+		filename = "Bullet.png";
+		Sound2D("nep.wav", "sounds").play();
+	}
+	else {
 		if (vel.y == 0)
-			filename = "Enemies/shootShot.png";
+			filename += "shootShot.png";
 		else
-			filename = "Enemies/lobShot.png";
+			filename += "lobShot.png";
+		Sound2D("nep.wav", "sounds").play();
 	}
 
 	auto& animController = ECS::GetComponent<AnimationController>(entity);
@@ -42,28 +47,21 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 			anim2.SetSecPerFrame(0.01f);
 			animController.SetActiveAnim(1);
 		}
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 2.f, bulletRadius * 2.f, true, &animController);
 	}
 	else {
+		animController.SetActiveAnim(0);
 		if (vel.y == 0) {
 			anim.AddFrame(vec2(0, 50), vec2(100, 0));
 			anim.AddFrame(vec2(100, 50), vec2(200, 0));
-								}
+			ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 4.f, bulletRadius * 2.f, true, &animController);
+		}
 		else {
 			anim.AddFrame(vec2(0, 50), vec2(50, 0));
 			anim.AddFrame(vec2(50, 50), vec2(100, 0));
 			anim.AddFrame(vec2(100, 50), vec2(150, 0));
-		}
-		animController.SetActiveAnim(0);
-	}
-
-	if (shooter == CollisionIDs::Player) {
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 2.f, bulletRadius * 2.f, true, &animController);
-	}
-	else {
-		if (vel.y == 0)
-			ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 4.f, bulletRadius * 2.f, true, &animController);
-		else
 			ECS::GetComponent<Sprite>(entity).LoadSprite(filename, bulletRadius * 2.f, bulletRadius * 2.f, true, &animController);
+		}
 	}
 
 	ECS::GetComponent<Transform>(entity).SetPosition(vec3(pos.x, pos.y, 28.5f));
@@ -161,7 +159,7 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 		if (animCon.GetAnimation(animCon.GetActiveAnim()).GetAnimationDone()) {
 			animCon.SetActiveAnim(0);
 		}		//player range check
-		else if (abs(m_register->get<Transform>(bullets[x]).GetPositionX() - playerPosX) > 500.f) {
+		else if (abs(m_register->get<Transform>(bullets[x]).GetPositionX() - playerPosX) > 450.f) {
 			ECS::DestroyEntity(bullets[x]);
 			bullets.erase(bullets.begin() + x, bullets.begin() + x + 1);
 			continue;

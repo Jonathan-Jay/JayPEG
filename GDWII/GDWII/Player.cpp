@@ -94,17 +94,19 @@ void Player::setStunned(float length)
 
 bool Player::getStunned()
 {
-	return (stunned > 0.25f ? true : false);
+	return (stunned > 0.5f ? true : false);
 }
 
-void Player::takeDamage(int amt)
+bool Player::takeDamage(int amt)
 {
 	if (stunned == 0) {
 		if (subCurrentHealth(amt))
 			Sound2D("nep.wav", "sounds").play();
 
-		stunned = 0.5f;
+		stunned = 0.75f;
+		return true;
 	}
+	return false;
 }
 
 //set the Energy regen speed

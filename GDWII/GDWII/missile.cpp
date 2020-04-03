@@ -16,6 +16,7 @@ void Missiles::CreateMissile(entt::registry* m_sceneReg, b2World* m_physicsWorld
 	ECS::AttachComponent<AnimationController>(entity);
 
 	std::string filename = "Missile.png";
+	Sound2D("nep.wav", "sounds").play();
 
 	auto& animController = ECS::GetComponent<AnimationController>(entity);
 	animController.InitUVs(filename);
@@ -156,7 +157,7 @@ void Missiles::updateAllMissiles(entt::registry* m_register)
 	float playerPosX = m_register->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
 	for (int x(0); x < missiles.size();) {
 		AnimationController& animCon = m_register->get<AnimationController>(missiles[x]);
-		if (abs(m_register->get<Transform>(missiles[x]).GetPositionX() - playerPosX) > 500.f) {
+		if (abs(m_register->get<Transform>(missiles[x]).GetPositionX() - playerPosX) > 450.f) {
 			ECS::DestroyEntity(missiles[x]);
 			missiles.erase(missiles.begin() + x, missiles.begin() + x + 1);
 			continue;

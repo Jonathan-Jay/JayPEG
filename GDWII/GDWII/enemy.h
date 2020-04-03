@@ -99,6 +99,7 @@ public:
 	static b2Vec2 projectileMotion(b2Vec2 initial, b2Vec2 target, int gravity, int velo);
 	static void reset(b2World* physWorld) { m_phyWorld = physWorld;	enemies.resize(0); }
 	static void SetEnemyActive(unsigned int entity);
+	static void SetActivationLength(int length) { deactivationLength = length; }
 	
 private:
 	static std::vector<enemyList> enemies;
