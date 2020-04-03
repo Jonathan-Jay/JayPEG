@@ -27,7 +27,8 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	float aspectRatio = windowWidth / windowHeight;
 
 #pragma region entities
-	vec3 playerPos = { -1247, -200, 30.f };
+	//vec3 playerPos = { -1247, -200, 30.f };
+	vec3 playerPos = { -886, -925, 30.f };
 
 	//main camera
 	{
@@ -356,7 +357,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Bullets::setDamage(bulletDamage);
 	Missiles::setDamage(missileDamage);
 
-	currentWorldPos = 0;
+	currentWorldPos = 2;
 	changeWorldPos = false;
 	onGround = true;
 
@@ -385,9 +386,9 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	);
 	doors[1].isAABB(vec2(-2140, -1480), vec2(-986, -750));
 	doors[2].isEntityTrigger(	//opens when boss is killed
-		Collectibles::CreateCollectible(vec3(-1865 + 50, -1255, 26), 25, 25, CollectiblesType::BulletStrengthUp)
+		Enemies::CreateEnemy(EnemyTypes::BOSS, -1688, -1240)
 	);
-
+	/*
 	//hidden stuff
 	Missiles::CreateWall(m_physicsWorld, vec3(-1020, -388.5, 27), 147, 264, "Objects/RegenUpHidden.png");
 	Bullets::CreateWall(m_physicsWorld, vec3(-1189.5, 1218, 27), 335, 224, "Objects/HPUpHidden.png");
@@ -418,8 +419,10 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Collectibles::CreateCollectible(vec3(-1330, 139, 26), 100, 25, CollectiblesType::RegenStation);
 	Collectibles::CreateCollectible(vec3(1696, 1106, 26), 100, 25, CollectiblesType::RegenStation);
 	Collectibles::CreateCollectible(vec3(-77, -934, 26), 100, 25, CollectiblesType::RegenStation);
+	*/
 
 	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 600, -420);
+
 #pragma endregion object summons
 	
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
