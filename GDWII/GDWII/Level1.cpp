@@ -5,7 +5,7 @@ Level1::Level1(std::string name) : Scene(name)
 	m_gravity = b2Vec2(float32(0.f), float32(-20.f));
 
 	//sounds
-	m_soundEffects.push_back({ "MenuBackground.mp3", "music" });	// 0
+	m_soundEffects.push_back({ "Level1BackMusic.mp3", "music" });	// 0
 	m_soundEffects.push_back({ "Step/1StepNoise.mp3", "walk" });	// 1
 	m_soundEffects.push_back({ "Step/2StepNoise.mp3", "walk" });	// 4
 	m_soundEffects.push_back({ "Step/3StepNoise.mp3", "walk" });	// 3
@@ -15,6 +15,7 @@ Level1::Level1(std::string name) : Scene(name)
 	m_soundEffects.push_back({ "snake.mp3", "sounds" });			// 7		missile
 
 	Sound2D("CollectionItemNoise.mp3", "collectibles").setGroupVolume(2);
+	m_soundEffects[0].setGroupVolume(0.75f);
 }
 
 void Level1::InitScene(float windowWidth, float windowHeight)
@@ -764,7 +765,7 @@ void Level1::KeyboardDown()
 
 void Level1::Update()
 {
-	//m_soundEffects[0].loop();	//music
+	m_soundEffects[0].loop();	//music
 	b2Vec2 velo = m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->GetLinearVelocity();
 
 	//update scene Data
