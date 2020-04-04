@@ -3,7 +3,7 @@
 std::vector<std::vector<CollectiblesData>> Collectibles::list = { };
 float Collectibles::regenStationCounter = 0;
 float Collectibles::regenDelay = 0.25f;
-Sound2D Collectibles::regenSound = { "FillingHealthRegen.mp3", "HPRegen" };
+Sound2D Collectibles::regenSound = {};
 
 unsigned int Collectibles::CreateCollectible(vec3 position, int width, int height, CollectiblesType type)
 {

@@ -93,6 +93,7 @@ private:
 
 class Sound2D {
 public:
+	Sound2D() {}
 	Sound2D(const std::string& path, const std::string& groupName);
 
 	void play();

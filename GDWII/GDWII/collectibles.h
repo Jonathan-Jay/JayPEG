@@ -29,7 +29,7 @@ public:
 	//update function
 	static int testAllCollectibles(entt::registry* reg, int halfOfPlayerWidth, int halfOfPlayerHeight);
 
-	static void reset() { list.resize(0); }
+	static void reset() { regenSound = { "FillingHealthRegen.mp3", "HPRegen" }; list.resize(0); }
 
 
 private:
