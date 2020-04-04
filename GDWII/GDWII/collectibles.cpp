@@ -155,7 +155,7 @@ int Collectibles::testAllCollectibles(entt::registry* reg, int halfOfPlayerWidth
 					pickUp = 3;
 					break;
 				case CollectiblesType::HPUp:
-					playerData.setMaxHealth(playerData.getMaxHealth() + 2);
+					playerData.setMaxHealth(playerData.getMaxHealth() + 3);
 					pickUp = 4;
 					break;
 				}
@@ -171,7 +171,7 @@ int Collectibles::testAllCollectibles(entt::registry* reg, int halfOfPlayerWidth
 
 	if (regenStationCounter > 0) {
 		regenStationCounter -= Timer::deltaTime;
-		if (regenStationCounter < 0) {
+		if (regenStationCounter <= 0) {
 			regenStationCounter = 0;
 		}
 	}

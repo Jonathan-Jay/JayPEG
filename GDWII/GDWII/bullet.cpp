@@ -2,7 +2,7 @@
 
 std::vector<unsigned int> Bullets::bullets = {};
 int Bullets::maxBullets = 25;
-std::vector<int> Bullets::damage = { 2, 3, 4 };
+std::vector<int> Bullets::damage = { 2, 2, 3 };
 //playerDamage, straightShotDamage, lobShotDamage
 
 void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, b2Vec2 pos, b2Vec2 vel, float bulletRadius, uint16 shooter) {

@@ -524,7 +524,7 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 	switch (m_type) {
 	case EnemyTypes::WALKER:
 		filename += "walk.png";
-		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 10, 12, 60, 3);
+		ECS::GetComponent<Enemy>(entity).SetStats(m_type, 6, 12, 60, 3);
 		break;
 	case EnemyTypes::SHOOTER:
 		filename += "shoot.png";
@@ -629,7 +629,7 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 					vec2(bossFileSize.x / 22 * (x + 1), bossFileSize.y / 3 * 2));
 			anim.SetSecPerFrame(0.11f);
 		}
-		animController.SetActiveAnim(5);
+		animController.SetActiveAnim(3);
 	}
 
 	if (m_type == EnemyTypes::BOSS)

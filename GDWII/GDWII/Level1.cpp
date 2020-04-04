@@ -418,7 +418,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Enemies::CreateEnemy(EnemyTypes::SHOOTER, -676, 1000);
 	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 165, 1000);
 	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 1070, 1000);
-	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 1462, -260);
+	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 1600, -260);
 	Enemies::CreateEnemy(EnemyTypes::SHOOTER, -132, -1240);
 	Enemies::CreateEnemy(EnemyTypes::SHOOTER, -903, -935);
 	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 880, -1420);
@@ -434,7 +434,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 	enemiesThatMatter[0] = Enemies::CreateEnemy(EnemyTypes::MINIBOSS, 934, 190);
 	enemiesThatMatter[1] = Enemies::CreateEnemy(EnemyTypes::MINIBOSS, 545, -1373);
-	enemiesThatMatter[2] = Enemies::CreateEnemy(EnemyTypes::BOSS, -1550, -1222);
+	enemiesThatMatter[2] = Enemies::CreateEnemy(EnemyTypes::BOSS, -1750, -1222);
 
 	//doors init, two open when an entity dies, the other when the player enters the boss room
 	doors[0].Init(m_physicsWorld, vec3(1473, 181, 26), vec3(1473, 281, 26), 20, 134, "Objects/miniBossDoor.png", 50);	//missile
@@ -839,6 +839,133 @@ void Level1::Update()
 		crouching = false;
 	}
 
+	//zoom ranges they return true when they succeed, so none should be active for the global zoom to be on
+	if (currentWorldPos == 0) {			//main area
+		if (changeWorldPos) {
+			m_sceneReg->get<HorizontalScroll>(EntityIdentifier::MainCamera()).SetLimits(-1466, 1796);
+			m_sceneReg->get<VerticalScroll>(EntityIdentifier::MainCamera()).SetLimits(-1530, 1410);
+			changeWorldPos = false;
+		}
+		if (AABBtest(vec2(0, -1530), vec2(1746, -1010))) {	//basement check
+			//mini-boss 2 activation
+			if (m_sceneReg->valid(enemiesThatMatter[1]))
+				Enemies::SetEnemyActive(enemiesThatMatter[1]);
+			currentWorldPos = 2;
+			changeWorldPos = true;
+		}
+		else if (AABBtest(vec2(-1466, 122), vec2(2080, 1410))) {	//upper check
+			currentWorldPos = 1;
+			changeWorldPos = true;
+		}
+
+		if (!zoomRange(175, vec2(-1370, -560), vec2(-150, -80))		//intro area
+			) {
+			zoomRange(200, vec2(), vec2(), true);
+		}
+	}
+	else if (currentWorldPos == 1) {	//upper area
+		if (changeWorldPos) {
+			m_sceneReg->get<HorizontalScroll>(EntityIdentifier::MainCamera()).SetLimits(-1466, 2080);
+			m_sceneReg->get<VerticalScroll>(EntityIdentifier::MainCamera()).SetLimits(-90, 1410);
+			changeWorldPos = false;
+		}
+		if (AABBtest(vec2(-1466, -575), vec2(1796, 122))) {	//main area check
+			currentWorldPos = 0;
+			changeWorldPos = true;
+		}
+
+		if (AABBtest(vec2(1000, 500), vec2(1470, 600))) {	//mini-boss 1 activation
+			if (m_sceneReg->valid(enemiesThatMatter[0]))
+				Enemies::SetEnemyActive(enemiesThatMatter[0]);
+		}
+
+		if (!zoomRange(240, vec2(795, 95), vec2(1470, 530)) &&			//mini-boss room
+			!zoomRange(175, vec2(1470, 95), vec2(2031, 345)) &&			//missile pick-up room
+			!zoomRange(175, vec2(-1440, 90), vec2(-840, 960))			//staircase up
+			) {
+			zoomRange(200, vec2(), vec2(), true);
+		}
+	}
+	else if (currentWorldPos == 2) {	//basement
+		if (changeWorldPos) {
+			m_sceneReg->get<HorizontalScroll>(EntityIdentifier::MainCamera()).SetLimits(-2103, 1796);
+			m_sceneReg->get<VerticalScroll>(EntityIdentifier::MainCamera()).SetLimits(-1530, -650);
+			changeWorldPos = false;
+		}
+		if (AABBtest(vec2(-1466, -1530), vec2(-1000, -1000))) {	//boss room check
+			Enemies::SetActivationLength(1000);
+			currentWorldPos = 3;
+			changeWorldPos = true;
+		}
+
+		if (!zoomRange(250, vec2(-2100, -1485), vec2(65, -745)) &&		//boss room
+			!zoomRange(225, vec2(-745, -1500), vec2(1710, -1115))		//basement
+			) {
+			zoomRange(200, vec2(), vec2(), true);
+		}
+	}
+	else if (currentWorldPos == 3) {	//boss room
+		if (changeWorldPos) {
+			m_sceneReg->get<HorizontalScroll>(EntityIdentifier::MainCamera()).SetLimits(-2103, -900);
+			m_sceneReg->get<VerticalScroll>(EntityIdentifier::MainCamera()).SetLimits(-1530, -650);
+			changeWorldPos = false;
+
+			winCounter = 1;
+			gunActive = false;
+			missileActive = false;
+		}
+
+		if (winCounter > 0) {
+			winCounter -= Timer::deltaTime;
+			if (winCounter <= 0) {
+				winCounter = 0;
+				if (m_sceneReg->valid(enemiesThatMatter[2]))
+					Enemies::SetEnemyActive(enemiesThatMatter[2]);
+			}
+			else {
+				gunActive = false;
+				missileActive = false;
+			}
+		}
+
+		if (AABBtest(vec2(-2050, -1350), vec2(-1950, -1250))) {
+			currentWorldPos = 4;
+			changeWorldPos = true;
+		}
+
+		if (!zoomRange(250, vec2(-2100, -1485), vec2(65, -745))			//boss room
+			) {
+			zoomRange(200, vec2(), vec2(), true);
+		}
+	}
+	else if (currentWorldPos == 4) {	//win room
+		if (changeWorldPos) {
+			m_sceneReg->get<HorizontalScroll>(EntityIdentifier::MainCamera()).SetLimits(-2103, -900);
+			m_sceneReg->get<VerticalScroll>(EntityIdentifier::MainCamera()).SetLimits(-1530, -650);
+			changeWorldPos = false;
+		}
+
+		if (winCounter > 0) {
+			winCounter -= Timer::deltaTime;
+			if (winCounter <= 0) {
+				winCounter = 0;
+				exiting = true;
+			}
+		}
+		else {
+			winCounter = 2.5f;
+			doors[2].SetSpeed(150);
+			doors[2].SetOpened(false);
+			//play win sound
+			m_soundEffects[6].play();
+		}
+
+		if (!zoomRange(250, vec2(-2100, -1485), vec2(65, -745))			//boss room
+			) {
+			zoomRange(200, vec2(), vec2(), true);
+		}
+	}
+
 	if (gunActive) {
 		if (gunDelay == 0) {
 			if (crouching) {
@@ -954,118 +1081,6 @@ void Level1::Update()
 		counter = (item == 1 ? 7.5f : 5);
 	}
 
-	//zoom ranges they return true when they succeed, so none should be active for the global zoom to be on
-	if (currentWorldPos == 0) {			//main area
-		if (changeWorldPos) {
-			m_sceneReg->get<HorizontalScroll>(EntityIdentifier::MainCamera()).SetLimits(-1466, 1796);
-			m_sceneReg->get<VerticalScroll>(EntityIdentifier::MainCamera()).SetLimits(-1530, 1410);
-			changeWorldPos = false;
-		}
-		if (AABBtest(vec2(0, -1530), vec2(1746, -1010))) {	//basement check
-			//mini-boss 2 activation
-			if (m_sceneReg->valid(enemiesThatMatter[1]))
-				Enemies::SetEnemyActive(enemiesThatMatter[1]);
-			currentWorldPos = 2;
-			changeWorldPos = true;
-		}
-		else if (AABBtest(vec2(-1466, 122), vec2(2080, 1410))) {	//upper check
-			currentWorldPos = 1;
-			changeWorldPos = true;
-		}
-
-		if (!zoomRange(175, vec2(-1370, -560), vec2(-150, -80))		//intro area
-			) {
-			zoomRange(200, vec2(), vec2(), true);
-		}
-	}
-	else if (currentWorldPos == 1) {	//upper area
-		if (changeWorldPos) {
-			m_sceneReg->get<HorizontalScroll>(EntityIdentifier::MainCamera()).SetLimits(-1466, 2080);
-			m_sceneReg->get<VerticalScroll>(EntityIdentifier::MainCamera()).SetLimits(-90, 1410);
-			changeWorldPos = false;
-		}
-		if (AABBtest(vec2(-1466, -575), vec2(1796, 122))) {	//main area check
-			currentWorldPos = 0;
-			changeWorldPos = true;
-		}
-
-		if (AABBtest(vec2(1000, 500), vec2(1470, 600))) {	//mini-boss 1 activation
-			if (m_sceneReg->valid(enemiesThatMatter[0]))
-				Enemies::SetEnemyActive(enemiesThatMatter[0]);
-		}
-
-		if (!zoomRange(240, vec2(795, 95), vec2(1470, 530)) &&			//mini-boss room
-			!zoomRange(175, vec2(1470, 95), vec2(2031, 345)) &&			//missile pick-up room
-			!zoomRange(175, vec2(-1440, 90), vec2(-840, 960))			//staircase up
-			) {
-			zoomRange(200, vec2(), vec2(), true);
-		}
-	}
-	else if (currentWorldPos == 2) {	//basement
-		if (changeWorldPos) {
-			m_sceneReg->get<HorizontalScroll>(EntityIdentifier::MainCamera()).SetLimits(-2103, 1796);
-			m_sceneReg->get<VerticalScroll>(EntityIdentifier::MainCamera()).SetLimits(-1530, -650);
-			changeWorldPos = false;
-		}
-		if (AABBtest(vec2(-1466, -1530), vec2(-1000, -1000))) {	//boss room check
-			if (m_sceneReg->valid(enemiesThatMatter[2]))
-				Enemies::SetEnemyActive(enemiesThatMatter[2]);
-			Enemies::SetActivationLength(1000);
-			currentWorldPos = 3;
-			changeWorldPos = true;
-		}
-
-		if (!zoomRange(250, vec2(-2100, -1485), vec2(65, -745)) &&		//boss room
-			!zoomRange(225, vec2(-745, -1500), vec2(1710, -1115))		//basement
-			) {
-			zoomRange(200, vec2(), vec2(), true);
-		}
-	}
-	else if (currentWorldPos == 3) {	//boss room
-		if (changeWorldPos) {
-			m_sceneReg->get<HorizontalScroll>(EntityIdentifier::MainCamera()).SetLimits(-2103, -900);
-			m_sceneReg->get<VerticalScroll>(EntityIdentifier::MainCamera()).SetLimits(-1530, -650);
-			changeWorldPos = false;
-		}
-
-		if (AABBtest(vec2(-2050, -1350), vec2(-1950, -1250))) {
-			currentWorldPos = 4;
-			changeWorldPos = true;
-		}
-
-		if (!zoomRange(250, vec2(-2100, -1485), vec2(65, -745))			//boss room
-			) {
-			zoomRange(200, vec2(), vec2(), true);
-		}
-	}
-	else if (currentWorldPos == 4) {	//win room
-		if (changeWorldPos) {
-			m_sceneReg->get<HorizontalScroll>(EntityIdentifier::MainCamera()).SetLimits(-2103, -900);
-			m_sceneReg->get<VerticalScroll>(EntityIdentifier::MainCamera()).SetLimits(-1530, -650);
-			changeWorldPos = false;
-		}
-		
-		if (winCounter > 0) {
-			winCounter -= Timer::deltaTime;
-			if (winCounter < 0) {
-				winCounter = 0;
-				exiting = true;
-			}
-		}
-		else {
-			winCounter = 2.5f;
-			doors[2].SetSpeed(150);
-			doors[2].SetOpened(false);
-			//play win sound
-			m_soundEffects[6].play();
-		}
-
-		if (!zoomRange(250, vec2(-2100, -1485), vec2(65, -745))			//boss room
-			) {
-			zoomRange(200, vec2(), vec2(), true);
-		}
-	}
-
 	//has to run after everything since camera can move in other updates
 	UpdateUI();
 
@@ -1132,14 +1147,23 @@ int Level1::ChangeScene()
 	if (exiting) {
 		exiting = false;
 		gameOver = false;	//just in case
+		gameWin = false;	//just in case
 		return 0;		//main menu
 	}
-	if (gameOver) {
+	else if (gameOver) {
 		//death text
 		std::cout << "you died -Dark souls\n";
 		gameOver = false;
 		exiting = false;	//just in case
+		gameWin = false;	//just in case
 		return 0;		//mainmenu
+	}
+	else if (gameWin) {
+		std::cout << "winner is you\n";
+		gameWin = false;
+		gameOver = false;	//just in case
+		exiting = false;	//just in case
+		return 0;		//win screen
 	}
 	return -1;
 }
@@ -1168,27 +1192,27 @@ void Level1::UpdateCounters()
 {
 	if (gunDelay > 0) {
 		gunDelay -= Timer::deltaTime;
-		if (gunDelay < 0)
+		if (gunDelay <= 0)
 			gunDelay = 0;
 	}
 
 	if (missileDelay > 0) {
 		missileDelay -= Timer::deltaTime;
-		if (missileDelay < 0)
+		if (missileDelay <= 0)
 			missileDelay = 0;
 	}
 
 	//for movement stun
 	if (recoilDelay > 0) {
 		recoilDelay -= (onGround ? 3 : 1) * Timer::deltaTime;
-		if (recoilDelay < 0)
+		if (recoilDelay <= 0)
 			recoilDelay = 0;
 	}
 
 	//for text boxes
 	if (counter > 0) {
 		counter -= Timer::deltaTime;
-		if (counter < 0)
+		if (counter <= 0)
 			counter = 0;
 		m_sceneReg->get<Sprite>(uiElements[15]).SetTransparency((counter > 1 ? 1 : counter));
 	}
@@ -1206,7 +1230,7 @@ void Level1::UpdateUI()
 			playerData.setStunned(10.f);
 			if (deathCounter > 0) {
 				deathCounter -= Timer::deltaTime;
-				if (deathCounter < 0) {
+				if (deathCounter <= 0) {
 					deathCounter = 0;
 					gameOver = true;
 				}

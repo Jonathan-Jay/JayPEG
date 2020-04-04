@@ -51,6 +51,7 @@ private:
 	bool crouching = false;
 	bool exiting = false;
 	bool gameOver = false;
+	bool gameWin = false;
 	bool stunned = false;
 	bool changeWorldPos = false;
 	short int currentWorldPos = 0;
