@@ -102,6 +102,7 @@ public:
 	void setVolume(float percent);
 	void setGroupVolume(float percent);
 	void setGroupPitch(float percent);
+	float getGroupPitch();
 
 	void setSoundHandle(unsigned soundHandle) { _sound = soundHandle; }
 	void setGroupHandle(unsigned groupHandle) { _group = groupHandle; }

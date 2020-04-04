@@ -19,6 +19,9 @@ Player::Player(int maxHealth, int maxEnergy, float energyRegen)
 	this->hasMissile = 0;
 	this->hasBulletUpgrade = 0;
 	this->stunned = 0;
+	this->lowHealth = 0;
+
+	regenSound.setGroupPitch(5);
 }
 
 Player::~Player()
@@ -39,6 +42,9 @@ void Player::reset(int maxHealth, int maxEnergy, float energyRegen)
 	this->hasMissile = 0;
 	this->hasBulletUpgrade = 0;
 	this->stunned = 0;
+	this->lowHealth = 0;
+
+	regenSound.setGroupPitch(5);
 }
 
 int Player::getMaxHealth() const
@@ -100,8 +106,10 @@ bool Player::getStunned()
 bool Player::takeDamage(int amt)
 {
 	if (stunned == 0) {
-		if (subCurrentHealth(amt))
-			Sound2D("nep.wav", "sounds").play();
+		if (subCurrentHealth(amt)) {
+			Sound2D("nep.wav", "Damage").setGroupVolume(amt / 2.f);
+			Sound2D("nep.wav", "Damage").play();
+		}
 
 		stunned = 1;
 		return true;
@@ -185,9 +193,32 @@ bool Player::updatePlayer()
 
 	if (currentEnergy != maxEnergy) {
 		addCurrentEnergy(Timer::deltaTime * energyRegen);
-		if (currentEnergy == maxEnergy)
-			Sound2D("nep.wav", "sounds").play();
+		if (floor(currentEnergy) == maxEnergy - 2 && regenSound.getGroupPitch() != 3) {
+			regenSound.setGroupPitch(3);
+			regenSound.play();
+		}
+		else if (floor(currentEnergy) == maxEnergy - 1 && regenSound.getGroupPitch() != 4) {
+			regenSound.setGroupPitch(4);
+			regenSound.play();
+		}
+		else if (currentEnergy == maxEnergy) {
+			regenSound.setGroupPitch(5);
+			regenSound.play();
+		}
 	}
+
+	if (currentHealth < maxHealth / 4.f) {
+		if (!lowHealth) {
+			lowhealthSound.play();
+			lowhealthSound.setGroupVolume(0.25f);
+			lowhealthSound.setGroupPitch(0.5f);
+			lowHealth = true;
+		}
+		else {
+			lowhealthSound.loop();
+		}
+	}
+	else lowHealth = false;
 
 	if (stunned > 0) {
 		stunned -= Timer::deltaTime;

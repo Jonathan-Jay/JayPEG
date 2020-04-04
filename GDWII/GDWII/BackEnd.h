@@ -13,6 +13,7 @@
 #include "ActualMainMenu.h"
 #include "Level1.h"
 #include "LoadingScreen.h"
+#include "winScreen.h"
 
 //Mouse Motion event
 typedef SDL_MouseMotionEvent MotionEvent;

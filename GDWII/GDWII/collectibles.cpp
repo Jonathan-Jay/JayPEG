@@ -123,10 +123,12 @@ int Collectibles::testAllCollectibles(entt::registry* reg, int halfOfPlayerWidth
 						auto& playerData = reg->get<Player>(EntityIdentifier::MainPlayer());
 						//regen health and reset timer
 						if (playerData.addCurrentHealth(1)) {
+							Sound2D("FillingHealthRegen.mp3", "HPRegen").setGroupPitch(
+								playerData.getCurrentHealth() / float(playerData.getMaxHealth()) * 2.f + 0.5f);
 							if (playerData.getCurrentHealth() != playerData.getMaxHealth())
-								Sound2D("FillingHealthRegen.mp3", "sounds").play();
+								Sound2D("FillingHealthRegen.mp3", "HPRegen").play();
 							else
-								Sound2D("FullHealthRegen.mp3", "sounds").play();
+								Sound2D("FullHealthRegen.mp3", "HPRegen").play();
 							regenStationCounter = regenDelay;
 						}
 					}

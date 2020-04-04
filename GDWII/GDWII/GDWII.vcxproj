@@ -216,6 +216,7 @@
     <ClInclude Include="VerticalScroll.h" />
     <ClInclude Include="VignetteEffect.h" />
     <ClInclude Include="Window.h" />
+    <ClInclude Include="winScreen.h" />
     <ClInclude Include="Xinput.h" />
   </ItemGroup>
   <ItemGroup>
@@ -276,6 +277,7 @@
     <ClCompile Include="VerticalScroll.cpp" />
     <ClCompile Include="VignetteEffect.cpp" />
     <ClCompile Include="Window.cpp" />
+    <ClCompile Include="winScreen.cpp" />
     <ClCompile Include="XInput.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

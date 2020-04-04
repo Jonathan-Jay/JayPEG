@@ -444,6 +444,7 @@ int ActualMainMenu::ChangeScene()
 			onCredits = false;
 			index = 0;
 			m_soundEffects[0].setLoopCount(1);
+			playHoverSound = true;
 			return 1;
 		}
 		if (wait < 0.1) {

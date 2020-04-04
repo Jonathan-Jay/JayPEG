@@ -245,6 +245,13 @@ void Sound2D::setGroupPitch(float percent)
 	SoundManager::setGroupPitch(_group, percent);
 }
 
+float Sound2D::getGroupPitch()
+{
+	float temp = 0;
+	SoundManager::_channelGroups[_group]->getPitch(&temp);
+	return temp;
+}
+
 bool Sound2D::isPlaying()
 {
 	return SoundManager::isChannelPlaying(_channel);

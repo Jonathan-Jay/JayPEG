@@ -53,7 +53,11 @@ private:
 
 	bool hasMissile = false;
 	bool hasBulletUpgrade = false;
+	bool lowHealth = false;
 	float stunned = 0;
+
+	Sound2D lowhealthSound{ "FullHealthRegen.mp3", "lowhealth" };
+	Sound2D regenSound{ "FillingHealthRegen.mp3", "energyFull" };
 };
 
 inline void to_json(nlohmann::json& j, const Player& player) 

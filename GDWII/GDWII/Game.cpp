@@ -45,12 +45,13 @@ void Game::InitGame()
 	SoundManager::init("./assets/sounds/", 100);
 	//Creates a new scene.
 	//Replace this with your own scene.
-	m_scenes.push_back(new ActualMainMenu("Main Menu")); //actual Main Menu
-	m_scenes.push_back(new Level1("BaroTrauma")); //Main Scene
-	m_scenes.push_back(new LoadingScreen("Loading")); //loading
+	m_scenes.push_back(new ActualMainMenu("Main Menu"));	//actual Main Menu
+	m_scenes.push_back(new Level1("BaroTrauma"));			//Main Scene
+	m_scenes.push_back(new WinScrene("winner is you"));		//Win Screen
+	m_scenes.push_back(new LoadingScreen("Loading"));		//loading
 
 	//Sets active scene reference to our scene
-	m_activeScene = m_scenes[2];
+	m_activeScene = m_scenes[3];
 
 	m_activeScene->InitScene(float(BackEnd::GetWindowWidth()), float(BackEnd::GetWindowHeight()));
 

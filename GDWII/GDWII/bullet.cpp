@@ -187,7 +187,9 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 				break;
 			case CollisionIDs::Enemy:
 				if (contact->contact->GetFixtureA()->GetFilterData().categoryBits == CollisionIDs::Player) {
-					m_register->get<Player>(EntityIdentifier::MainPlayer()).takeDamage(damage[1]);
+					if (m_register->get<Player>(EntityIdentifier::MainPlayer()).takeDamage(damage[1]))
+						m_register->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(
+							b2Vec2((playerPosX < bulBod->GetPosition().x ? -40 : 40), 40));
 				}
 
 				break;

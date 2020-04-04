@@ -3,7 +3,7 @@
 std::vector<enemyList> Enemies::enemies = {};
 int Enemies::deactivationLength = 600;
 float Enemies::sightRefreshTime = 0.125f;
-float Enemies::attackDelayTime = 1.5f;
+float Enemies::attackDelayTime = 2.5f;
 b2World* Enemies::m_phyWorld = nullptr;
 
 void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
@@ -151,6 +151,7 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 					}
 				}
 				else {
+					Sound2D("snake.mp3", "punch").play();
 					state = EnemyState::Punching;
 					facingRight = targetPos2.x - enemyPos.x > 0;
 				}
@@ -389,7 +390,7 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 			test1.lowerBound.y < test2.upperBound.y && test1.upperBound.y > test2.lowerBound.y) {
 			if (m_reg->get<Player>(EntityIdentifier::MainPlayer()).takeDamage(attackDamage)) {
 				//if successful, knockback
-				jumpTestPoint.Set((test1.GetCenter().x < test2.GetCenter().x ? 25 : -25), 25);
+				jumpTestPoint.Set((test1.GetCenter().x < test2.GetCenter().x ? 40 : -40), 40);
 				m_reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(jumpTestPoint);
 			}
 		}

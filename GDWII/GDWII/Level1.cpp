@@ -345,7 +345,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	*/
 
 #pragma endregion entities
-	
+
 	//for a single platform that is textureless
 	Missiles::CreateWall(m_physicsWorld, vec3(325, 715, 0), 275, 25, "", false);
 
@@ -418,7 +418,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Enemies::CreateEnemy(EnemyTypes::SHOOTER, -676, 1000);
 	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 165, 1000);
 	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 1070, 1000);
-	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 1600, -260);
+	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 1670, -260);
 	Enemies::CreateEnemy(EnemyTypes::SHOOTER, -132, -1240);
 	Enemies::CreateEnemy(EnemyTypes::SHOOTER, -903, -935);
 	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 880, -1420);
@@ -706,7 +706,7 @@ void Level1::KeyboardDown()
 			exiting = true;
 		}
 	}
-	
+
 	/*
 	//gravity cancelling tool
 	if (Input::GetKeyDown(Key::Q)) {
@@ -949,7 +949,7 @@ void Level1::Update()
 			winCounter -= Timer::deltaTime;
 			if (winCounter <= 0) {
 				winCounter = 0;
-				exiting = true;
+				gameWin = true;
 			}
 		}
 		else {
@@ -1163,7 +1163,7 @@ int Level1::ChangeScene()
 		gameWin = false;
 		gameOver = false;	//just in case
 		exiting = false;	//just in case
-		return 0;		//win screen
+		return 2;		//win screen
 	}
 	return -1;
 }
