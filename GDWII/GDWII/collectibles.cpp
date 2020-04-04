@@ -3,6 +3,7 @@
 std::vector<std::vector<CollectiblesData>> Collectibles::list = { };
 float Collectibles::regenStationCounter = 0;
 float Collectibles::regenDelay = 0.25f;
+Sound2D Collectibles::regenSound = { "FillingHealthRegen.mp3", "HPRegen" };
 
 unsigned int Collectibles::CreateCollectible(vec3 position, int width, int height, CollectiblesType type)
 {
@@ -123,10 +124,10 @@ int Collectibles::testAllCollectibles(entt::registry* reg, int halfOfPlayerWidth
 						auto& playerData = reg->get<Player>(EntityIdentifier::MainPlayer());
 						//regen health and reset timer
 						if (playerData.addCurrentHealth(1)) {
-							Sound2D("FillingHealthRegen.mp3", "HPRegen").setGroupPitch(
+							regenSound.setGroupPitch(
 								playerData.getCurrentHealth() / float(playerData.getMaxHealth()) * 2.f + 0.5f);
 							if (playerData.getCurrentHealth() != playerData.getMaxHealth())
-								Sound2D("FillingHealthRegen.mp3", "HPRegen").play();
+								regenSound.play();
 							else
 								Sound2D("FullHealthRegen.mp3", "HPRegen").play();
 							regenStationCounter = regenDelay;

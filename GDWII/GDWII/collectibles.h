@@ -20,7 +20,7 @@ struct CollectiblesData
 	float halfOfHeight;
 };
 
-class Collectibles
+class Collectibles abstract
 {
 public:
 	//creates a collectible, type defines the file used
@@ -37,6 +37,7 @@ private:
 	static float regenStationCounter;
 	static float regenDelay;
 
+	static Sound2D regenSound;
 };
 
 #endif // !__COLLECT__

@@ -22,6 +22,8 @@ Player::Player(int maxHealth, int maxEnergy, float energyRegen)
 	this->lowHealth = 0;
 
 	regenSound.setGroupPitch(5);
+	lowhealthSound.setGroupVolume(0.25f);
+	lowhealthSound.setGroupPitch(0.5f);
 }
 
 Player::~Player()
@@ -45,6 +47,8 @@ void Player::reset(int maxHealth, int maxEnergy, float energyRegen)
 	this->lowHealth = 0;
 
 	regenSound.setGroupPitch(5);
+	lowhealthSound.setGroupVolume(0.25f);
+	lowhealthSound.setGroupPitch(0.5f);
 }
 
 int Player::getMaxHealth() const
@@ -191,13 +195,13 @@ bool Player::updatePlayer()
 	if (currentHealth == 0)
 		return true;
 
-	if (currentEnergy != maxEnergy) {
-		addCurrentEnergy(Timer::deltaTime * energyRegen);
-		if (floor(currentEnergy) == maxEnergy - 2 && regenSound.getGroupPitch() != 3) {
+	if (addCurrentEnergy(Timer::deltaTime * energyRegen)) {
+		float pitch = regenSound.getGroupPitch();
+		if (floor(currentEnergy) == maxEnergy - 2 && pitch != 3) {
 			regenSound.setGroupPitch(3);
 			regenSound.play();
 		}
-		else if (floor(currentEnergy) == maxEnergy - 1 && regenSound.getGroupPitch() != 4) {
+		else if (floor(currentEnergy) == maxEnergy - 1 && pitch != 4) {
 			regenSound.setGroupPitch(4);
 			regenSound.play();
 		}
@@ -207,11 +211,9 @@ bool Player::updatePlayer()
 		}
 	}
 
-	if (currentHealth < maxHealth / 4.f) {
+	if (currentHealth < maxHealth / 3.f) {
 		if (!lowHealth) {
 			lowhealthSound.play();
-			lowhealthSound.setGroupVolume(0.25f);
-			lowhealthSound.setGroupPitch(0.5f);
 			lowHealth = true;
 		}
 		else {
