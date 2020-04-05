@@ -413,7 +413,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	Enemies::CreateEnemy(EnemyTypes::WALKER, -342, 1000);
 	Enemies::CreateEnemy(EnemyTypes::WALKER, 92, 1000);
 	
-	Enemies::CreateEnemy(EnemyTypes::SHOOTER, -426, 170);
+	Enemies::CreateEnemy(EnemyTypes::SHOOTER, -550, 200);
 	Enemies::CreateEnemy(EnemyTypes::SHOOTER, -1138, 170);
 	Enemies::CreateEnemy(EnemyTypes::SHOOTER, -676, 1000);
 	Enemies::CreateEnemy(EnemyTypes::SHOOTER, 165, 1000);
@@ -1223,7 +1223,6 @@ void Level1::UpdateCounters()
 void Level1::UpdateUI()
 {
 	vec3 uiOffset = { 53, -22, 50 };	// from top left corner
-	vec3 popUpOffset = vec3(0, -50, 0);	// from center of camera
 
 	auto& playerData = m_sceneReg->get<Player>(EntityIdentifier::MainPlayer());
 	if (playerData.updatePlayer()) {
@@ -1283,7 +1282,9 @@ void Level1::UpdateUI()
 	14: max NRG 2
 
 	others
-	15: text boxes	*/
+	15: text boxes
+	16: Boss HP bar back
+	17: Boss HP bar outline		*/
 
 	unsigned int playerHealth = playerData.getCurrentHealth();
 	unsigned int playerMaxHealth = playerData.getMaxHealth();
@@ -1298,8 +1299,28 @@ void Level1::UpdateUI()
 
 	//TextBox updates if visible
 	if (m_sceneReg->get<Sprite>(uiElements[15]).GetTransparency() != 0) {
-		m_sceneReg->get<Transform>(uiElements[15]).SetPosition(camPos + popUpOffset * scale + vec3(0, 0, 80));
+		m_sceneReg->get<Transform>(uiElements[15]).SetPosition(camPos + vec3(0, -50, 0) * scale + vec3(0, 0, 80));
 		m_sceneReg->get<Sprite>(uiElements[15]).SetSizeScale(scale);
+	}
+	//only do bass health bar in the boss room
+	if (currentWorldPos == 3) {
+		//position
+		float percent = 0;
+		if (m_sceneReg->valid(enemiesThatMatter[2])) {
+			percent = m_sceneReg->get<Enemy>(enemiesThatMatter[2]).health;
+		}
+		percent *= (1 - winCounter);	//to get a scrolling in
+		m_sceneReg->get<Transform>(uiElements[16]).SetPosition(camPos + vec3(percent - 100, -80, 0) * scale + vec3(0, 0, 81));
+		m_sceneReg->get<Sprite>(uiElements[16]).SetWidth((percent * 2 - 1) * scale);
+		m_sceneReg->get<Transform>(uiElements[17]).SetPosition(camPos + vec3(0, -80, 0) * scale + vec3(0, 0, 82));
+		m_sceneReg->get<Sprite>(uiElements[16]).SetSizeScale(scale);
+		m_sceneReg->get<Sprite>(uiElements[17]).SetSizeScale(scale);
+		m_sceneReg->get<Sprite>(uiElements[16]).SetTransparency(1);
+		m_sceneReg->get<Sprite>(uiElements[17]).SetTransparency(1);
+	}
+	else {
+		m_sceneReg->get<Sprite>(uiElements[16]).SetTransparency(0);
+		m_sceneReg->get<Sprite>(uiElements[17]).SetTransparency(0);
 	}
 
 	//All basic stuff
@@ -1405,7 +1426,9 @@ void Level1::CreateUI()
 	14: max NRG 2
 
 	others
-	15: text boxes	*/
+	15: text boxes
+	16: Boss HP bar back
+	17: Boss HP bar outline		*/
 
 	float width = 100;
 	float height = 37;
@@ -1482,7 +1505,7 @@ void Level1::CreateUI()
 		uiElements.push_back(entity);
 	}
 
-	//text boxes are very different
+	//text boxes and boss bar are very different
 	{
 		auto entity = ECS::CreateEntity();
 
@@ -1510,6 +1533,40 @@ void Level1::CreateUI()
 
 		unsigned int bitHolder = EntityIdentifier::AnimationBit() | EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
 		ECS::SetUpIdentifier(entity, bitHolder, "dialogue boxes");
+		uiElements.push_back(entity);
+	}
+	{
+		auto entity = ECS::CreateEntity();
+
+		ECS::AttachComponent<Sprite>(entity);
+		ECS::AttachComponent<Transform>(entity);
+
+		std::string filename = "UI/red.png";
+
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 199, 19, false);
+		//ECS::GetComponent<Sprite>(entity).SetTransparency(0);
+
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 250.f, 80.f));
+
+		unsigned int bitHolder = EntityIdentifier::AnimationBit() | EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
+		ECS::SetUpIdentifier(entity, bitHolder, "boss bar inner");
+		uiElements.push_back(entity);
+	}
+	{
+		auto entity = ECS::CreateEntity();
+
+		ECS::AttachComponent<Sprite>(entity);
+		ECS::AttachComponent<Transform>(entity);
+
+		std::string filename = "UI/bossBar.png";
+
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 200, 20, false);
+		//ECS::GetComponent<Sprite>(entity).SetTransparency(0);
+
+		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 250.f, 80.f));
+
+		unsigned int bitHolder = EntityIdentifier::AnimationBit() | EntityIdentifier::SpriteBit() | EntityIdentifier::TransformBit();
+		ECS::SetUpIdentifier(entity, bitHolder, "boss bar outline");
 		uiElements.push_back(entity);
 	}
 

@@ -139,7 +139,7 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 		//is close to targetPos
 		if (abs(tempCalc) < moveSpeed / 2) {
 			if (type == EnemyTypes::BOSS) {
-				if (rand() % 2 == 0) {
+				if (rand() % 5 < 2) {
 					jumpTestPoint = Enemies::projectileMotion(enemyb2Pos, playerb2Pos,
 						Enemies::GetPhysicsWorld()->GetGravity().y, jumpHeight);
 
