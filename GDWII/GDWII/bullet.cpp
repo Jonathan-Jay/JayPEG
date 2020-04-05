@@ -174,7 +174,7 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 			case CollisionIDs::Player:
 				switch (contact->contact->GetFixtureA()->GetFilterData().categoryBits) {
 				case CollisionIDs::Breakable:
-					Sound2D("nep.wav", "sounds").play();
+					Sound2D("BoxVanish.mp3", "sounds").play();
 					ECS::DestroyEntity((unsigned int)contact->contact->GetFixtureA()->GetBody()->GetUserData());
 					break;
 				case CollisionIDs::Enemy:
