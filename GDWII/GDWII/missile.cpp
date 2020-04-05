@@ -16,7 +16,7 @@ void Missiles::CreateMissile(entt::registry* m_sceneReg, b2World* m_physicsWorld
 	ECS::AttachComponent<AnimationController>(entity);
 
 	std::string filename = "Missile.png";
-	Sound2D("nep.wav", "sounds").play();
+	Sound2D("Fire_Rocket.mp3", "missle").play();
 
 	auto& animController = ECS::GetComponent<AnimationController>(entity);
 	animController.InitUVs(filename);
@@ -219,7 +219,7 @@ void Missiles::updateAllMissiles(entt::registry* m_register)
 					}
 				}
 
-				Sound2D("snake.mp3", "sounds").play();
+				Sound2D("Contact_Missle.mp3", "missle").play();
 				m_register->get<HorizontalScroll>(EntityIdentifier::MainCamera()).DoScreenShake(
 					animCon.GetAnimation(1).GetFrames().size() * animCon.GetAnimation(1).GetSecPerFrame(),
 					screenShake, &m_register->get<Transform>(EntityIdentifier::MainPlayer()).m_localPosition.x);
