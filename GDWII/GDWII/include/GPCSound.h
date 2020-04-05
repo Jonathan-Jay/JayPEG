@@ -59,7 +59,7 @@ public:
 	static void setVolume(unsigned index, float percent);
 	//sets channel group volume level
 	static void setGroupVolume(unsigned index, float percent);
-	//sets channel pitch volume level
+	//sets channel pitch pitch level
 	static void setGroupPitch(unsigned index, float percent);
 	//limit how many sounds playing in a group
 	static void limitGroups(unsigned limit);

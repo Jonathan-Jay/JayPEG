@@ -11,12 +11,20 @@ Level1::Level1(std::string name) : Scene(name)
 	m_soundEffects.push_back({ "Step/3StepNoise.mp3", "walk" });	// 3
 	m_soundEffects.push_back({ "Step/4StepNoise.mp3", "walk" });	// 4
 	m_soundEffects.push_back({ "Step/5StepNoise.mp3", "walk" });	// 5
-	m_soundEffects.push_back({ "snake.mp3", "sounds" });			// 6 win sound
-	m_soundEffects.push_back({ "nep.wav", "sounds" });				// 7 death sound
+	m_soundEffects.push_back({ "win.mp3", "sounds" });				// 6 win sound
+	m_soundEffects.push_back({ "playerDeath.mp3", "death" });		// 7 death sound
+
+	m_soundEffects[1].setGroupVolume(0.75f);
 
 	Sound2D("CollectionItemNoise.mp3", "collectibles").setGroupVolume(2);
-	Sound2D("Step/1StepNoise.mp3", "bossLanding").setGroupVolume(1.5f);
 	Sound2D("Step/1StepNoise.mp3", "bossLanding").setGroupPitch(0.5f);
+	Sound2D("Step/1StepNoise.mp3", "bossLanding").setGroupVolume(1.5f);
+	Sound2D("PlayerShoot.mp3", "bullets").setGroupVolume(0.4f);
+	Sound2D("Fire_Rocket.mp3", "missle").setGroupVolume(3);
+	Sound2D("Contact_Missle.mp3", "explosion").setGroupVolume(4);
+	Sound2D("Fire_Rocket.mp3", "enemyBullets").setGroupPitch(2);
+	Sound2D("Fire_Rocket.mp3", "enemyBullets").setGroupVolume(3);
+	Sound2D("EnemyShoot.mp3", "enemyLob").setGroupVolume(1.5f);
 }
 
 void Level1::InitScene(float windowWidth, float windowHeight)
@@ -565,6 +573,8 @@ void Level1::GamepadStick(XInputController* con)
 	}
 }
 
+//debugging mouse stuff
+/*
 void Level1::MouseClick(SDL_MouseButtonEvent evnt)
 {
 	if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)) {
@@ -619,7 +629,7 @@ void Level1::MouseWheel(SDL_MouseWheelEvent evnt)
 {
 	auto& cam = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera());
 	if (evnt.y < 0) {
-		//if (cam.GetOrthoSize().w < 400)
+		if (cam.GetOrthoSize().w < 400)
 			cam.Zoom(evnt.y * 10.f);
 	}
 	else {
@@ -627,6 +637,7 @@ void Level1::MouseWheel(SDL_MouseWheelEvent evnt)
 			cam.Zoom(evnt.y * 10.f);
 	}
 }
+*/
 
 void Level1::KeyboardDown()
 {
@@ -947,15 +958,15 @@ void Level1::Update()
 			changeWorldPos = false;
 		}
 
-		if (winCounter > 0) {
+		if (winCounter > 0 && !m_soundEffects[6].isGroupPlaying()) {
 			winCounter -= Timer::deltaTime;
 			if (winCounter <= 0) {
 				winCounter = 0;
 				gameWin = true;
 			}
 		}
-		else {
-			winCounter = 2.5f;
+		else if (winCounter == 0) {
+			winCounter = 1;
 			doors[2].SetSpeed(150);
 			doors[2].SetOpened(false);
 			//play win sound
@@ -1235,6 +1246,7 @@ void Level1::UpdateUI()
 					deathCounter = 0;
 					gameOver = true;
 				}
+				m_soundEffects[7].setGroupPitch(deathCounter / 2.5f);
 			}
 			else {
 				deathCounter = 2.5f;
@@ -1303,13 +1315,9 @@ void Level1::UpdateUI()
 		m_sceneReg->get<Sprite>(uiElements[15]).SetSizeScale(scale);
 	}
 	//only do bass health bar in the boss room
-	if (currentWorldPos == 3) {
+	if (currentWorldPos == 3 && m_sceneReg->valid(enemiesThatMatter[2])) {
 		//position
-		float percent = 0;
-		if (m_sceneReg->valid(enemiesThatMatter[2])) {
-			percent = m_sceneReg->get<Enemy>(enemiesThatMatter[2]).health;
-		}
-		percent *= (1 - winCounter);	//to get a scrolling in
+		float percent = m_sceneReg->get<Enemy>(enemiesThatMatter[2]).health * (1 - winCounter);	//to get a scrolling in
 		m_sceneReg->get<Transform>(uiElements[16]).SetPosition(camPos + vec3(percent - 100, -80, 0) * scale + vec3(0, 0, 81));
 		m_sceneReg->get<Sprite>(uiElements[16]).SetWidth((percent * 2 - 1) * scale);
 		m_sceneReg->get<Transform>(uiElements[17]).SetPosition(camPos + vec3(0, -80, 0) * scale + vec3(0, 0, 82));
@@ -1372,24 +1380,34 @@ bool Level1::zoomRange(int wantedOrtho, vec2 BL, vec2 TR, bool everything)
 	float yOrtho = m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).GetOrthoSize().y;
 	if (everything) {
 		if (yOrtho > wantedOrtho) {
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(floor(Timer::deltaTime * 100));
+			if (yOrtho < wantedOrtho + 2) {
+				m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetOrthoSize(vec4(-wantedOrtho, wantedOrtho, -wantedOrtho, wantedOrtho));
+			}
+			else m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(Timer::deltaTime * 60);
 		}
 		else if (yOrtho < wantedOrtho) {
-			m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-floor(Timer::deltaTime * 100));
+			if (yOrtho > wantedOrtho + 2) {
+				m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetOrthoSize(vec4(-wantedOrtho, wantedOrtho, -wantedOrtho, wantedOrtho));
+			}
+			else m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-Timer::deltaTime * 60);
 		}
 		else return false;
 	}
-	else {		//check the AABB
-		if (AABBtest(BL, TR)) {
-			if (yOrtho > wantedOrtho) {
-				m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(floor(Timer::deltaTime * 100));
+	else if (AABBtest(BL, TR)) {
+		if (yOrtho > wantedOrtho) {
+			if (yOrtho < wantedOrtho + 2) {
+				m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetOrthoSize(vec4(-wantedOrtho, wantedOrtho, -wantedOrtho, wantedOrtho));
 			}
-			else if (yOrtho < wantedOrtho) {
-				m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-floor(Timer::deltaTime * 100));
-			}
+			else m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(Timer::deltaTime * 60);
 		}
-		else return false;
+		else if (yOrtho < wantedOrtho) {
+			if (yOrtho > wantedOrtho + 2) {
+				m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).SetOrthoSize(vec4(-wantedOrtho, wantedOrtho, -wantedOrtho, wantedOrtho));
+			}
+			else m_sceneReg->get<Camera>(EntityIdentifier::MainCamera()).Zoom(-Timer::deltaTime * 60);
+		}
 	}
+	else return false;
 	
 	//returns true if everything and success, or if AABB succeeded
 	return true;

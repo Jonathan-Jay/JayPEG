@@ -16,14 +16,17 @@ void Bullets::CreateBullet(entt::registry* m_sceneReg, b2World* m_physicsWorld, 
 	std::string filename = "Enemies/";
 	if (shooter == CollisionIDs::Player) {
 		filename = "Bullet.png";
-		Sound2D("nep.wav", "sounds").play();
+		Sound2D("PlayerShoot.mp3", "bullets").play();
 	}
 	else {
-		if (vel.y == 0)
+		if (vel.y == 0) {
 			filename += "shootShot.png";
-		else
+			Sound2D("Fire_Rocket.mp3", "enemyBullets").play();
+		}
+		else {
 			filename += "lobShot.png";
-		Sound2D("nep.wav", "sounds").play();
+			Sound2D("EnemyShoot.mp3", "enemyLob").play();
+		}
 	}
 
 	auto& animController = ECS::GetComponent<AnimationController>(entity);
@@ -159,7 +162,7 @@ void Bullets::updateAllBullets(entt::registry* m_register)
 		if (animCon.GetAnimation(animCon.GetActiveAnim()).GetAnimationDone()) {
 			animCon.SetActiveAnim(0);
 		}		//player range check
-		else if (abs(m_register->get<Transform>(bullets[x]).GetPositionX() - playerPosX) > 450.f) {
+		else if (abs(m_register->get<Transform>(bullets[x]).GetPositionX() - playerPosX) > 550.f) {
 			ECS::DestroyEntity(bullets[x]);
 			bullets.erase(bullets.begin() + x, bullets.begin() + x + 1);
 			continue;

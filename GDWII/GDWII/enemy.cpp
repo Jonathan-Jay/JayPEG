@@ -1,15 +1,32 @@
 #include "enemy.h"
 
 std::vector<enemyList> Enemies::enemies = {};
-int Enemies::deactivationLength = 600;
+int Enemies::deactivationLength = 550;
 float Enemies::sightRefreshTime = 0.125f;
 float Enemies::attackDelayTime = 2.5f;
+float Enemy::bossDeathCounter = 1;
+int Enemy::bossPunchCounter = 2;
+Sound2D Enemy::damageSound = {};
 b2World* Enemies::m_phyWorld = nullptr;
 
 void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 	if (health <= 0) {
-		Sound2D("snake.mp3", "sounds").play();
-		enemyID.toDelete = true;
+		if (type == EnemyTypes::BOSS) {
+			if (bossDeathCounter == 1) {
+				Sound2D("EnemyDeath.mp3", "sounds").play();
+				Sound2D("Contact_Missle.mp3", "bossLanding").play();
+			}
+			bossDeathCounter -= Timer::deltaTime;
+			if (bossDeathCounter <= 0) {
+				bossDeathCounter = 1;
+				enemyID.toDelete = true;
+			}
+			m_reg->get<Sprite>(enemyID.enemyID).SetTransparency(bossDeathCounter);
+		}
+		else {
+			Sound2D("EnemyDeath.mp3", "sounds").play();
+			enemyID.toDelete = true;
+		}
 		return;
 	}
 
@@ -139,7 +156,7 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 		//is close to targetPos
 		if (abs(tempCalc) < moveSpeed / 2) {
 			if (type == EnemyTypes::BOSS) {
-				if (rand() % 5 < 2) {
+				if (rand() % 5 < 2 || bossPunchCounter == 0) {
 					jumpTestPoint = Enemies::projectileMotion(enemyb2Pos, playerb2Pos,
 						Enemies::GetPhysicsWorld()->GetGravity().y, jumpHeight);
 
@@ -148,12 +165,13 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 						vel += jumpTestPoint;
 						idleTime = 0.5f;
 						tempCalc = 0;
+						bossPunchCounter = rand() % 2 + 1;
 					}
 				}
 				else {
-					Sound2D("snake.mp3", "punch").play();
 					state = EnemyState::Punching;
 					facingRight = targetPos2.x - enemyPos.x > 0;
+					bossPunchCounter--;
 				}
 			}
 			else if (canSeePlayer)
@@ -179,12 +197,14 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 					vel += jumpTestPoint;
 					idleTime = 0.5f;
 					tempCalc = 0;
+					bossPunchCounter = rand() % 2 + 1;
 				}
 			}
-
-			int index = animCon.GetAnimation(animCon.GetActiveAnim()).GetFrameIndex();
-			if ((index >= 6 && index <= 9) || (index >= 17 && index <= 20)) {
-				tempCalc = 0;
+			else {
+				int index = animCon.GetAnimation(animCon.GetActiveAnim()).GetFrameIndex();
+				if ((index >= 6 && index <= 9) || (index >= 17 && index <= 20)) {
+					tempCalc = 0;
+				}
 			}
 		}
 
@@ -349,11 +369,18 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 		if (animCon.GetActiveAnim() > 1 && animCon.GetAnimation(animCon.GetActiveAnim()).GetAnimationDone())
 			state = EnemyState::Follow;
 		else if (animCon.GetActiveAnim() > 1 && 4 <= animCon.GetAnimation(animCon.GetActiveAnim()).GetFrameIndex() && animCon.GetAnimation(animCon.GetActiveAnim()).GetFrameIndex() <= 5) {
+			Sound2D tempSound("punch.mp3", "punch");
+			if (!tempSound.isGroupPlaying()) {
+				tempSound.play();
+			}
 			test1.upperBound.Set(enemyb2Pos.x + (facingRight ? 110 : -110) + 50, enemyb2Pos.y + 9);
 			test1.lowerBound.Set(enemyb2Pos.x + (facingRight ? 110 : -110) - 50, enemyb2Pos.y - 47);
 
 			if (test1.lowerBound.x < test2.upperBound.x && test1.upperBound.x > test2.lowerBound.x&& test1.lowerBound.y < test2.upperBound.y && test1.upperBound.y > test2.lowerBound.y) {
-				m_reg->get<Player>(EntityIdentifier::MainPlayer()).takeDamage(attackDamage * 1.5f);
+				if (m_reg->get<Player>(EntityIdentifier::MainPlayer()).takeDamage(attackDamage * 1.5f)) {
+					jumpTestPoint.Set((enemyb2Pos.x < test2.GetCenter().x ? 80 : -80), 40);
+					m_reg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(jumpTestPoint);
+				}
 			}
 		}
 
@@ -446,7 +473,9 @@ void Enemy::Sleep(entt::registry* m_reg, enemyList& enemyID) {
 }
 
 void Enemy::TakeDamage(int damage, b2Vec2 _knockback) {
-	Sound2D("nep.wav", "sounds").play();
+	damageSound.setGroupVolume(damage / 3.f);
+	if (!damageSound.isGroupPlaying())
+		damageSound.play();
 	health -= damage;
 	knockback = _knockback;
 	canSeePlayer = true;

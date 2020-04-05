@@ -4,8 +4,8 @@
 #include "bullet.h"
 #include "JSON.h"
 #include "PhysicsSystem.h"
+#include "GPCSound.h"
 #include <algorithm>
-#include <entt/entity/registry.hpp>
 
 enum class EnemyTypes {
 	WALKER,
@@ -33,6 +33,7 @@ struct enemyList {
 };
 
 class Enemy {
+	friend class Enemies;
 public:
 	Enemy() {}
 	~Enemy() {}
@@ -67,7 +68,11 @@ public:
 	void Sleep(entt::registry* m_reg, enemyList& enemyID);
 	void TakeDamage(int damage, b2Vec2 knockback);
 
-private:
+protected:
+	static float bossDeathCounter;
+	static int bossPunchCounter;
+	static Sound2D damageSound;
+
 	void findPlayer(entt::registry* m_reg, enemyList& enemyID);
 	b2Vec2 EnemyRaycast(b2Vec2 p1, b2Vec2 p2, bool onlyStatic = false);
 };
@@ -97,7 +102,12 @@ public:
 	static float GetattackDelayTime() { return attackDelayTime; }
 	static b2World* GetPhysicsWorld() { return m_phyWorld; }
 	static b2Vec2 projectileMotion(b2Vec2 initial, b2Vec2 target, int gravity, int velo);
-	static void reset(b2World* physWorld) { m_phyWorld = physWorld;	enemies.resize(0); }
+	static void reset(b2World* physWorld) {
+		Enemy::damageSound = { "EnemyDamage.mp3", "enemyDamage" };
+		Enemy::bossPunchCounter = 0;
+		m_phyWorld = physWorld;
+		enemies.resize(0);
+	}
 	static void SetEnemyActive(unsigned int entity);
 	static void SetActivationLength(int length) { deactivationLength = length; }
 	

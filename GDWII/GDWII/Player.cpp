@@ -112,8 +112,8 @@ bool Player::takeDamage(int amt)
 {
 	if (stunned == 0) {
 		if (subCurrentHealth(amt)) {
-			Sound2D("nep.wav", "Damage").setGroupVolume(amt / 2.f);
-			Sound2D("nep.wav", "Damage").play();
+			Sound2D("PlayerHitNoise.mp3", "playerDamage").setGroupVolume(amt / 2.f);
+			Sound2D("PlayerHitNoise.mp3", "playerDamage").play();
 		}
 
 		stunned = 1;

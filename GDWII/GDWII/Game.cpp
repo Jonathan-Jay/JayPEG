@@ -54,15 +54,17 @@ void Game::InitGame()
 	m_activeScene = m_scenes[3];
 
 	m_activeScene->InitScene(float(BackEnd::GetWindowWidth()), float(BackEnd::GetWindowHeight()));
-
-	//PhysicsBody::SetDraw(true);
-
+	
 	//Sets m_register to point to the register in the active scene
 	m_register = m_activeScene->GetScene();
 
 	BackEnd::SetWindowName(m_activeScene->GetName());
 
 	PhysicsSystem::Init();
+
+	std::cout << "\nSome buttons you can use to improve your game experience:\n"
+		<< "-F11, switches between fullscreen to windowed\n"
+		<< "-In game, pressing Esc on the keyboard or Select on the controller will exit to main menu\n\n";
 }
 
 bool Game::Run()
@@ -259,9 +261,11 @@ void Game::KeyboardDown()
 		}
 	}
 
+	/*
 	if (Input::GetKeyDown(Key::P)) {
 		PhysicsBody::SetDraw(!PhysicsBody::GetDraw());
 	}
+	*/
 }
 
 void Game::KeyboardUp()
@@ -270,6 +274,7 @@ void Game::KeyboardUp()
 	//Look at base Scene class for more info.
 	m_activeScene->KeyboardUp();
 
+	/*
 	if (Input::GetKeyUp(Key::F1))
 	{
 		if (!UI::m_isInit)
@@ -278,6 +283,7 @@ void Game::KeyboardUp()
 		}
 		m_guiActive = !m_guiActive;
 	}
+	*/
 }
 
 void Game::MouseMotion(SDL_MouseMotionEvent evnt)

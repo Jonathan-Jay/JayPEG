@@ -157,7 +157,7 @@ void Missiles::updateAllMissiles(entt::registry* m_register)
 	float playerPosX = m_register->get<Transform>(EntityIdentifier::MainPlayer()).GetPositionX();
 	for (int x(0); x < missiles.size();) {
 		AnimationController& animCon = m_register->get<AnimationController>(missiles[x]);
-		if (abs(m_register->get<Transform>(missiles[x]).GetPositionX() - playerPosX) > 450.f) {
+		if (abs(m_register->get<Transform>(missiles[x]).GetPositionX() - playerPosX) > 550.f) {
 			ECS::DestroyEntity(missiles[x]);
 			missiles.erase(missiles.begin() + x, missiles.begin() + x + 1);
 			continue;
@@ -219,7 +219,7 @@ void Missiles::updateAllMissiles(entt::registry* m_register)
 					}
 				}
 
-				Sound2D("Contact_Missle.mp3", "missle").play();
+				Sound2D("Contact_Missle.mp3", "explosion").play();
 				m_register->get<HorizontalScroll>(EntityIdentifier::MainCamera()).DoScreenShake(
 					animCon.GetAnimation(1).GetFrames().size() * animCon.GetAnimation(1).GetSecPerFrame(),
 					screenShake, &m_register->get<Transform>(EntityIdentifier::MainPlayer()).m_localPosition.x);
