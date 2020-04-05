@@ -446,7 +446,7 @@ void Enemy::Sleep(entt::registry* m_reg, enemyList& enemyID) {
 }
 
 void Enemy::TakeDamage(int damage, b2Vec2 _knockback) {
-	Sound2D("nep.wav", "sounds");
+	Sound2D("nep.wav", "sounds").play();
 	health -= damage;
 	knockback = _knockback;
 	canSeePlayer = true;

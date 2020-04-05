@@ -450,7 +450,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 	
 	ECS::GetComponent<HorizontalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
 	ECS::GetComponent<VerticalScroll>(EntityIdentifier::MainCamera()).SetFocus(&ECS::GetComponent<Transform>(EntityIdentifier::MainPlayer()));
-	m_soundEffects[0].setGroupVolume(0.75f);
+	m_soundEffects[0].setGroupVolume(0.5f);
 	m_soundEffects[0].play();
 }
 
@@ -552,15 +552,15 @@ void Level1::GamepadStick(XInputController* con)
 			if (con->IsButtonReleased(Buttons::B))
 				missileShot = false;
 		}
+	}
 
-		if (con->IsButtonPressed(Buttons::SELECT)) {
-			exiting = true;
-		}
+	if (con->IsButtonPressed(Buttons::SELECT)) {
+		exiting = true;
+	}
 
-		if (counter > 1) {
-			if (con->IsButtonPressed(Buttons::START)) {
-				counter = 1;
-			}
+	if (counter > 0.25f) {
+		if (con->IsButtonPressed(Buttons::START)) {
+			counter = 0.25f;
 		}
 	}
 }
@@ -696,12 +696,14 @@ void Level1::KeyboardDown()
 		}
 		m_sceneReg->get<PhysicsBody>(EntityIdentifier::MainPlayer()).GetBody()->SetLinearVelocity(temp);
 
-		if (counter > 1) {
+	}
+	
+	if (!controllerInput) {
+		if (counter > 0.25f) {
 			if (Input::GetKeyDown(Key::D)) {
-				counter = 1;
+				counter = 0.25f;
 			}
 		}
-
 		if (Input::GetKeyDown(Key::Escape)) {
 			exiting = true;
 		}

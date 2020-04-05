@@ -21,6 +21,7 @@ Player::Player(int maxHealth, int maxEnergy, float energyRegen)
 	this->stunned = 0;
 	this->lowHealth = 0;
 
+	regenSound.setGroupVolume(0.5f);
 	regenSound.setGroupPitch(5);
 	lowhealthSound.setGroupVolume(0.25f);
 	lowhealthSound.setGroupPitch(0.5f);
