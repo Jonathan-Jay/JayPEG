@@ -208,7 +208,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 		std::string filename = "background.png";
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 5600, 3373);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 6746, 3373);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 20.f));
 
@@ -263,7 +263,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 		std::string filename = "walls.png";
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 5600, 3373);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 6746, 3373);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 25.f));
 
@@ -302,7 +302,7 @@ void Level1::InitScene(float windowWidth, float windowHeight)
 
 		std::string filename = "wallsCover.png";
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 5600, 3373);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 6746, 3373);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(0.f, 0.f, 28.f));
 
