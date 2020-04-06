@@ -157,7 +157,7 @@ void ActualMainMenu::InitScene(float windowWidth, float windowHeight)
 
 		std::string filename = "Credits.png";
 
-		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 2520 / 5, 2050 / 5, false);
+		ECS::GetComponent<Sprite>(entity).LoadSprite(filename, 2520 / 5, 2520 / 5, false);
 
 		ECS::GetComponent<Transform>(entity).SetPosition(vec3(1250.f, 25.f, 50.f));
 
