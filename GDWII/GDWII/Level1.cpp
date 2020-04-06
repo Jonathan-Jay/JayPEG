@@ -971,6 +971,7 @@ void Level1::Update()
 			doors[2].SetOpened(false);
 			//play win sound
 			m_soundEffects[6].play();
+			m_soundEffects[0].setGroupVolume(0);
 		}
 
 		if (!zoomRange(250, vec2(-2100, -1485), vec2(65, -745))			//boss room
