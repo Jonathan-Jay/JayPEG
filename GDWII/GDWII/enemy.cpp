@@ -590,9 +590,10 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 		auto& anim = animController.GetAnimation(0);
 		
 		if (m_type == EnemyTypes::BOSS) {
-			for (int x(0); x < 22; x++)
-				anim.AddFrame(vec2(bossFileSize.x / 22 * (x + 1), bossFileSize.y / 3),
-								vec2(bossFileSize.x / 22 * x, 0));
+			for (int y(0); y < 2; y++)
+				for (int x(0); x < 11; x++)
+					anim.AddFrame(vec2(bossFileSize.x / 22 * (x + 1), (bossFileSize.y * (y + 1) ) / 3),
+								vec2(bossFileSize.x / 22 * x, (bossFileSize.y * y) / 3));
 			anim.SetSecPerFrame(0.09f);
 		}
 		else {
@@ -608,9 +609,10 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 		auto& anim = animController.GetAnimation(1);
 
 		if (m_type == EnemyTypes::BOSS) {
-			for (int x(0); x < 22; x++)
-				anim.AddFrame(vec2(bossFileSize.x / 22 * x, bossFileSize.y / 3),
-					vec2(bossFileSize.x / 22 * (x + 1), 0));
+			for (int y(0); y < 2; y++)
+				for (int x(0); x < 11; x++)
+					anim.AddFrame(vec2(bossFileSize.x / 22 * x, (bossFileSize.y * (y + 1)) / 3),
+						vec2(bossFileSize.x / 22 * (x + 1), (bossFileSize.y * y) / 3));
 			anim.SetSecPerFrame(0.09f);
 		} else {
 			for (int x(0); x < 5; x++)
@@ -631,32 +633,32 @@ unsigned int Enemies::CreateEnemy(EnemyTypes m_type, float x, float y) {
 		{		//punch left
 			auto& anim = animController.GetAnimation(2);
 			for (int x(0); x < 9; x++)
-				anim.AddFrame(vec2(bossFileSize.x / 22 * (x + 1), bossFileSize.y / 3 * 2),
-					vec2(bossFileSize.x / 22 * x, bossFileSize.y / 3));
+				anim.AddFrame(vec2(bossFileSize.x / 22 * (x + 1), bossFileSize.y),
+					vec2(bossFileSize.x / 22 * x, bossFileSize.y / 3 * 2));
 			anim.SetSecPerFrame(0.15f);
 		}
 
 		{		//punch right
 			auto& anim = animController.GetAnimation(3);
 			for (int x(0); x < 9; x++)
-				anim.AddFrame(vec2(bossFileSize.x / 22 * x, bossFileSize.y / 3 * 2),
-					vec2(bossFileSize.x / 22 * (x + 1), bossFileSize.y / 3));
+				anim.AddFrame(vec2(bossFileSize.x / 22 * x, bossFileSize.y),
+					vec2(bossFileSize.x / 22 * (x + 1), bossFileSize.y / 3 * 2));
 			anim.SetSecPerFrame(0.15f);
 		}
 
 		{		//jump left
 			auto& anim = animController.GetAnimation(4);
 			for (int x(0); x < 10; x++)
-				anim.AddFrame(vec2(bossFileSize.x / 22 * (x + 1), bossFileSize.y),
-					vec2(bossFileSize.x / 22 * x, bossFileSize.y / 3 * 2));
+				anim.AddFrame(vec2(bossFileSize.x / 22 * (x + 1), bossFileSize.y / 3 * 4),
+					vec2(bossFileSize.x / 22 * x, bossFileSize.y));
 			anim.SetSecPerFrame(0.11f);
 		}
 
 		{		//jump right
 			auto& anim = animController.GetAnimation(5);
 			for (int x(0); x < 10; x++)
-				anim.AddFrame(vec2(bossFileSize.x / 22 * x, bossFileSize.y),
-					vec2(bossFileSize.x / 22 * (x + 1), bossFileSize.y / 3 * 2));
+				anim.AddFrame(vec2(bossFileSize.x / 22 * x, bossFileSize.y / 3 * 4),
+					vec2(bossFileSize.x / 22 * (x + 1), bossFileSize.y));
 			anim.SetSecPerFrame(0.11f);
 		}
 		animController.SetActiveAnim(3);
