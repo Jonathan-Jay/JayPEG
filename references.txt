@@ -1,0 +1,32 @@
+Code:
+//Used for raycasting
+https://www.iforce2d.net/b2dtut/raycasting
+
+//Used for projectile motion equation
+https://www.youtube.com/watch?v=bqYtNrhdDAY
+
+
+Sounds (some modifications by us):
+//Used for door (hydraulic press clip)
+https://www.youtube.com/watch?v=4f7-5H3xDlE
+
+//Used for Death of small monster dudes
+https://www.fesliyanstudios.com/royalty-free-sound-effects-download/vacuum-226
+
+//Used for punch sound effect
+https://www.youtube.com/watch?v=Jt25rGRlST0
+
+//Used for shooting of monster dude
+https://www.youtube.com/watch?v=b4B6CHjhNXk
+
+//Used for shooting of regular gun
+https://www.soundfishing.eu/sound/laser-gun
+
+//Used for shooting of rocket gun, used for rocket contact, and vanish of shootable boxes
+https://www.youtube.com/watch?v=lWEFv8g3fQo
+
+//Used in the vanish of shootable boxes
+https://www.freesfx.co.uk/sfx/poof
+
+//Used for footsteps and for player getting shot
+https://www.fesliyanstudios.com/royalty-free-sound-effects-download/footsteps-on-metal-stairs-88
