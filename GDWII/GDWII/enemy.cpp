@@ -445,7 +445,8 @@ void Enemy::Update(entt::registry* m_reg, enemyList& enemyID) {
 	//		x		-lowerbound
 
 			//(ax < bx+bw && ax+aw > bx) && (ay < by+bh && ay+ah > by)
-			if (test1.lowerBound.x < test2.upperBound.x && test1.upperBound.x > test2.lowerBound.x&& test1.lowerBound.y < test2.upperBound.y && test1.upperBound.y > test2.lowerBound.y) {
+			if (test1.lowerBound.x < test2.upperBound.x && test1.upperBound.x > test2.lowerBound.x
+				&& test1.lowerBound.y < test2.upperBound.y && test1.upperBound.y > test2.lowerBound.y) {
 				b2Vec2 test3 = test1.GetCenter() - test2.GetCenter();
 
 				if (test3.x == 0)
